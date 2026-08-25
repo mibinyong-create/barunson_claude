@@ -1,0 +1,1880 @@
+<!doctype html><html><head><!-- frame-runtime --><base href="/_f/1787594657-df86/"><script>window.__FRAME_PREAMBLE={"capabilities":{"artifact":"artifact.oqIe8shs.js","assets":"assets.DBUJcvq_.js","comments":"comments.GLuHR3zP.js","db":"db.CRhVHzSt.js","downloads":"downloads.C3GSvEDP.js","embed":"embed.CZsbekoQ.js","mcp":"mcp.D3B2EyQu.js","network":"network.B5UA9Su4.js","permissions":"permissions.BNySkLV5.js","room":"room.DE7EMui-.js","sample":"sample.BW2Uysoh.js","self":"artifact.oqIe8shs.js","user":"user.BpKav-Rf.js"},"transforms":"_transforms.h3_8GSUa.js","comments":"_comments.BOgkE6qU.js","translate":"_translate.5HCW4BJh.js"}</script><script>(function(){"use strict";var Y=["light","dark","system"],X=/^[A-Za-z0-9_-]{1,64}$/,D=/^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/,G=new Set(["class","hidden","value","checked"]);function V(e){const t=e.toLowerCase();return t.startsWith("data-")||t.startsWith("aria-")||G.has(t)}var be="http://www.w3.org/1999/xhtml",Z="http://www.w3.org/2000/svg",J=new Set(["script","style","iframe","noscript","noframes","noembed","xmp","plaintext","template","title","textarea","object","embed"]),Q=new Set(["script","style"]);function ee(e){const t=e.localName.toLowerCase();return e.namespaceURI==="http://www.w3.org/1999/xhtml"?!J.has(t):e.namespaceURI===Z?!Q.has(t):!1}var te=new Set(["html","head","body","frameset"]);function re(e){return e.namespaceURI==="http://www.w3.org/1999/xhtml"&&te.has(e.localName)}function ne(e){if(e===null||typeof e!="object")return!1;const t=e;if(typeof t.target!="string"||!X.test(t.target)||t.text!==void 0&&typeof t.text!="string")return!1;if(t.attrsSet!==void 0){if(t.attrsSet===null||typeof t.attrsSet!="object")return!1;for(const[n,s]of Object.entries(t.attrsSet))if(!D.test(n)||typeof s!="string")return!1}if(t.attrsRemoved!==void 0){if(!Array.isArray(t.attrsRemoved))return!1;for(const n of t.attrsRemoved)if(typeof n!="string"||!D.test(n))return!1}return!0}function se(e,t){if(e===null||typeof e!="object")return!1;const{seq:n,elements:s}=e;if(typeof n!="number"||!Number.isSafeInteger(n)||!Array.isArray(s)||s.length===0||s.length>64)return!1;for(let o=0;o<s.length;o++)if(!t(s[o]))return!1;return!0}function ae(e){return e===null||typeof e!="object"?!1:se(e.__frame_patch,ne)}function oe(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_init;return t!==null&&typeof t=="object"}function ie(e){return e!==null&&typeof e=="object"&&e.__frame_size_poke===!0}function le(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_theme;if(t===null||typeof t!="object")return!1;const n=t.theme;return typeof n=="string"&&Y.includes(n)}var O="__frame_scroll",ce=150,ue=310,fe=160,pe=3e4;function de(){let e=0,t=!1,n=!1,s=!1,o=0,l=null;const c=i=>{try{sessionStorage.setItem(O,JSON.stringify({y:i}))}catch{}},f=()=>{if(clearTimeout(e),l===null)return;const i=l;l=null,c(i)},S=()=>{if(t){t=!1;return}n=!0,l=scrollY,clearTimeout(e),e=setTimeout(f,ce)};try{addEventListener("scroll",S,{passive:!0}),addEventListener("pagehide",f)}catch{}const v=()=>{let i;try{i=sessionStorage.getItem(O)}catch{return null}if(i===null)return null;let d;try{d=JSON.parse(i)}catch{d=null}const u=d?.y;if(!(typeof u=="number"&&Number.isFinite(u)&&u>=0)){try{sessionStorage.removeItem(O)}catch{}return null}return u};let b=!1;const m=i=>{try{const d=scrollY;scrollTo({top:i,left:0,behavior:"instant"}),o=i,s=!0,clearTimeout(e),l=null,c(i);const u=scrollY;u!==d&&(t=!0),u!==i&&!b&&(b=!0,addEventListener("load",()=>{try{if(scrollY===u){const h=v();m(h!==null?h:o)}}catch{}},{once:!0}))}catch{}},y=()=>{try{return!!location.hash}catch{return!0}};let g=!1;const E=()=>{try{if(g||innerWidth>ue||innerHeight>fe)return;g=!0;const i=Date.now(),d=()=>{try{removeEventListener("resize",d)}catch{}if(Date.now()-i>pe||n||y())return;const u=v();m(u!==null?u:o)};addEventListener("resize",d)}catch{}};let r=!1,p=!1;return{restore(){if(r||(r=!0,y()))return;const i=v();i!==null&&(m(i),E())},promoted(){if(p||(p=!0,y()))return;const i=v();i!==null?(m(i),E()):s&&m(o)}}}var Ee="modulepreload",Ae=function(e){return"/"+e},Re={},me=function(t,n,s){let o=Promise.resolve();function l(c){const f=new Event("vite:preloadError",{cancelable:!0});if(f.payload=c,window.dispatchEvent(f),!f.defaultPrevented)throw c}return o.then(c=>{for(const f of c||[])f.status==="rejected"&&l(f.reason);return t().catch(l)})};(function(){const e=Object.defineProperty,t=globalThis,n=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let s=0;for(let o=0;o<n.length;o++){const l=n[o];try{e(t,l,{value:void 0,writable:!1,configurable:!1})}catch{try{delete t[l]}catch{}try{e(t,l,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof t[l]=="function"&&s++}if(s&&window!==top)try{parent.postMessage({__frame_rtc_lockdown_failed:s},"*")}catch{}})();var he=1e4,_e=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function F(e){for(const t of _e)if(t.endsWith(":*"))try{const n=new URL(e);if(`${n.protocol}//${n.hostname}:*`===t)return!0}catch{}else if(e===t)return!0;return!1}var M=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities}),j=window.__FRAME_PREAMBLE?.transforms,N=window.__FRAME_PREAMBLE?.comments,I=window.__FRAME_PREAMBLE?.translate,L=/^[\w.-]+\.js$/;function T(e){return me(()=>import("/_runtime/"+e),void 0)}function z(e,t){return{contract:e.contract,changes:new Set(e.changes??[]),flags:new Set(e.flags??[]),capabilities:e.capabilities??{},capBudgets:e.capBudgets??{},transforms:new Map,shellOrigin:t,mount:W,pipe:()=>({wrap:(n,s)=>(...o)=>{try{return s(...o)}catch(l){return Promise.reject(l)}}})}}var P=null,w=null;function q(e,t,n){try{Object.defineProperty(e,t,{value:n,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(e,t,{value:n,writable:!1,configurable:!0,enumerable:!0})}catch{}}}var B=!1;function ve(e,t){const n=[];for(const s of e.elements){const o=document.querySelector(`[data-id="${s.target}"]`);if(!o){parent.postMessage({__frame_patch_miss:{seq:e.seq}},t);return}if([...Object.keys(s.attrsSet??{}),...s.attrsRemoved??[]].some(l=>!V(l))){parent.postMessage({__frame_patch_miss:{seq:e.seq}},t);return}if(s.text!==void 0&&(!ee(o)||re(o))){parent.postMessage({__frame_patch_miss:{seq:e.seq}},t);return}for(const[l,c]of Object.entries(s.attrsSet??{}))if(!$(o,l)){try{o.setAttribute(l,c)}catch{}H(o,l,c)}for(const l of s.attrsRemoved??[])$(o,l)||(o.removeAttribute(l),H(o,l,null));typeof s.text=="string"&&(o.textContent=s.text),n.push(s.target)}try{document.dispatchEvent(new CustomEvent("claude:edit",{detail:{seq:e.seq,targets:n}}))}catch{}}function H(e,t,n){if(!(e instanceof HTMLInputElement))return;const s=t.toLowerCase();s==="checked"?e.checked=n!==null:s==="value"&&e.type!=="file"&&(e.value=n??"")}function $(e,t){const n=t.toLowerCase(),s=e;return n==="data-id"||(n==="value"||n==="checked")&&(s.__artifactSecret===!0||/^(password|hidden|file)$/.test(s.type??"")||/(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${e.getAttribute("autocomplete")??""} ${s.autocomplete??""}`))}function K(e){const t=document.documentElement;e==="light"||e==="dark"?(t.dataset.theme=e,t.style.colorScheme=e,B=!0):B&&(delete t.dataset.theme,t.style.colorScheme="",B=!1)}var R=new Map;function ye(){let e;const t={u:new Promise(n=>{e=n}),r:n=>{t.done=!0,e(n)},done:!1,nulled:!1};return t}var ge=Object.freeze(Object.assign(Object.create(null),{call:Function.prototype.call,apply:Function.prototype.apply,bind:Function.prototype.bind})),W=(e,t)=>{const n=R.get(e);if(!n||n.done){n?.nulled&&w&&parent.postMessage({__frame_cap_telemetry:{kind:"cap-load-error",cap:e}},w);return}const s=typeof t=="function"?Object.setPrototypeOf(t,ge):Object.assign(Object.create(null),t);typeof s.then=="function"&&delete s.then,n.r(Object.freeze(s))},U=Object.getOwnPropertyDescriptor(window,"claude");if(window!==top&&!(U&&U.writable===!1)){const e=j&&L.test(j)?T(j).catch(()=>{}):Promise.resolve(void 0),t=r=>{if(r.type==="auxclick"&&r.button!==1)return;const p=r.target,i=p&&p.closest?p.closest("a[href],area[href]"):null;if(!i)return;const d=i.getAttribute("href");if(!d)return;let u,h;try{u=new URL(d,document.baseURI),h=new URL(document.baseURI).origin}catch{return}if((u.protocol==="http:"||u.protocol==="https:")&&u.origin!==h){r.preventDefault();const _=(i.getAttribute("target")??"").toLowerCase(),C=r.type==="auxclick"||r.metaKey||r.ctrlKey||r.shiftKey||r.altKey||!["","_self","_top","_parent"].includes(_);parent.postMessage({__frame_nav:!0,url:u.href,newTab:C},"*")}};addEventListener("click",t,!0),addEventListener("auxclick",t,!0);const n={},s=r=>{r.isTrusted&&(n.pointer=!0)},o=r=>{r.isTrusted&&(n.click=!0)};addEventListener("pointermove",s,{capture:!0,passive:!0}),addEventListener("click",o,{capture:!0,passive:!0}),e.then(r=>{r?.wireNav&&(r.wireNav(),removeEventListener("click",t,!0),removeEventListener("auxclick",t,!0),removeEventListener("pointermove",s,!0),removeEventListener("click",o,!0),r.wireEngagement?.(n))});let l=null;try{l=de()}catch{}const c=U?.value??{};q(window,"claude",c);for(const r of Object.keys(M)){if(c[r]!==void 0){q(c,r,c[r]);continue}R.set(r,ye())}if(c.use===void 0){const r=p=>{if(typeof p!="string"||!Object.hasOwn(M,p))return Promise.resolve(null);const i=R.get(p);return i?i.u:Promise.resolve(c[p]??null)};try{Object.defineProperty(c,"use",{value:r,writable:!0,configurable:!0,enumerable:!1})}catch{}}let f=null,S=null,v=0;const b=r=>{r.source!==parent||!F(r.origin)||oe(r.data)&&(f=r.data.__frame_init,w=r.origin,removeEventListener("message",b),clearTimeout(v),S?.())};addEventListener("message",b),parent.postMessage({__frame_connect:!0},"*");const m=new Promise(r=>{S=r,v=setTimeout(()=>{removeEventListener("message",b),r()},he)}),y=document.readyState==="loading"?new Promise(r=>document.addEventListener("DOMContentLoaded",()=>r(),{once:!0})):Promise.resolve();y.then(()=>{try{l?.restore()}catch{}});const g={cb:null},E=r=>{if(!(r.source!==parent||!F(r.origin))&&ie(r.data)){try{l?.promoted()}catch{}g.cb?.()}};addEventListener("message",E),m.then(async()=>{if(!f||!w){for(const a of R.values())a.nulled=!0,a.r(null);return}K(f.theme);const r=w;let p=!1,i=!1;addEventListener("message",a=>{if(a.source!==parent||a.origin!==r)return;le(a.data)&&K(a.data.__frame_theme.theme),ae(a.data)&&ve(a.data.__frame_patch,r);const k=a.data?.__fc_mode;k&&typeof k=="object"&&!p&&N&&L.test(N)&&(p=!0,T(N).then(x=>x.install?.(r,k.on===!0)).catch(()=>{}));const A=a.data?.__ft_cmd;A&&typeof A=="object"&&!i&&I&&L.test(I)&&(i=!0,T(I).then(x=>x.install?.(r,A)).catch(()=>{}))});const d=Object.keys(f.capabilities??{}).filter(a=>Object.hasOwn(M,a)).map(a=>[a,M[a]]).filter(a=>typeof a[1]=="string"&&L.test(a[1])),u=await Promise.allSettled(d.map(([,a])=>T(a))),h=await e,_=w;if(h?.buildBoot||parent.postMessage({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},_),h?.buildBoot)try{P=h.buildBoot(f,h.TRANSFORMS??{},{shellOrigin:_,mount:W},a=>parent.postMessage({__frame_cap_telemetry:a},_))}catch{parent.postMessage({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},_),P=z(f,_)}else P=z(f,_);const C=a=>parent.postMessage({__frame_cap_telemetry:{kind:"cap-load-error",cap:a}},_),we=P;u.forEach((a,k)=>{const A=d[k][0];if(a.status!=="fulfilled"){C(A);return}try{a.value?.install?.(we)}catch{C(A)}});for(const a of R.values())a.done||(a.nulled=!0,a.r(null));await y,parent.postMessage({__frame_ready:!0},w),e.then(a=>a?.installSizeReporter?.(_,g))})}})();</script><!-- /frame-runtime --><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>커스텀 주문관리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-sunken:#F5F5F3;
+    --ink:#232022;
+    --ink-muted:#736C68;
+    --ink-faint:#A39C97;
+    --line:#EAE8E5;
+    --line-strong:#DAD7D2;
+    --accent:#1FB6AC;
+    --accent-hover:#189E96;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#E0F7F4;
+    --accent-soft-ink:#0F766E;
+    --focus:#1FB6AC;
+    --urgent:#C42B2B;
+
+    --st-received-ink:#3E5D78; --st-received-bg:#E6EDF3;
+    --st-draft-ink:#5B6472; --st-draft-bg:#E9ECEF;
+    --st-production-ink:#93691F; --st-production-bg:#F4EAD3;
+    --st-ready-ink:#5B4C96; --st-ready-bg:#EAE5F5;
+    --st-outsource-ink:#B4551E; --st-outsource-bg:#F7E3CE;
+    --st-printed-ink:#9C4B6B; --st-printed-bg:#F6E3EC;
+    --st-shipping-ink:#256F5D; --st-shipping-bg:#DFEEE9;
+    --st-done-ink:#3B7A45; --st-done-bg:#E1F0E3;
+    --st-cancelled-ink:#8C4A4A; --st-cancelled-bg:#F3E3E3;
+
+    --pay-wait-ink:#93691F; --pay-wait-bg:#F4EAD3;
+    --pay-done-ink:#3B7A45; --pay-done-bg:#E1F0E3;
+
+    --selected-bg:#EAF7EA; --selected-ink:#2E7D32; --selected-check:#43A047;
+
+    --sidebar-bg:#1E2A3D;
+    --sidebar-bg-active:#243349;
+    --sidebar-ink:#8E9BB3;
+    --sidebar-ink-active:#FFFFFF;
+    --sidebar-brand:#2FD1C5;
+    --table-head-bg:#28364B;
+    --table-head-ink:#EAF0F7;
+
+    --shadow:0 1px 2px rgba(42,35,48,0.06),0 8px 24px -12px rgba(42,35,48,0.18);
+    --shadow-lg:0 4px 8px rgba(42,35,48,0.08),0 24px 48px -16px rgba(42,35,48,0.28);
+    --radius:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Gothic A1",-apple-system,"Malgun Gothic",sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent-soft);color:var(--accent-soft-ink);}
+  *:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  button{font-family:inherit;}
+
+  /* shell + sidebar */
+  .shell{display:flex;min-height:100vh;}
+  .sidebar{
+    width:220px;flex:none;background:var(--sidebar-bg);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  }
+  .sidebar-brand{
+    display:flex;align-items:center;gap:9px;padding:22px 20px;
+    font-family:"Gothic A1",sans-serif;font-weight:900;font-size:17px;
+    color:var(--sidebar-brand);letter-spacing:-0.01em;
+  }
+  .sidebar-brand .dot{width:9px;height:9px;border-radius:3px;background:var(--sidebar-brand);flex:none;}
+  .sidebar-nav{display:flex;flex-direction:column;padding:10px 12px;gap:2px;}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;
+    color:var(--sidebar-ink);text-decoration:none;font-size:13.5px;font-weight:600;
+    cursor:pointer;transition:background .12s,color .12s;
+  }
+  .nav-item svg{flex:none;opacity:.85;}
+  .nav-item:hover{background:var(--sidebar-bg-active);color:var(--sidebar-ink-active);}
+  .nav-item.active{background:var(--accent);color:var(--accent-ink);}
+  .nav-item.active svg{opacity:1;}
+
+  .main{flex:1;min-width:0;background:var(--paper);}
+
+  /* top bar */
+  .topbar-new{
+    display:flex;align-items:center;justify-content:flex-end;gap:16px;
+    padding:14px 28px;border-bottom:1px solid var(--line);background:var(--surface);
+  }
+  .toolbar-search{
+    position:relative;flex:1 1 240px;max-width:320px;
+  }
+  .toolbar-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-faint);}
+  .toolbar-search input{
+    width:100%;padding:9px 12px 9px 36px;border-radius:8px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink);font-size:13.5px;
+  }
+  .topbar-right{display:flex;align-items:center;gap:16px;flex:none;}
+  .bell-btn{
+    position:relative;width:34px;height:34px;border-radius:8px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink-muted);cursor:default;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .bell-btn .badge{
+    position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 3px;
+    border-radius:999px;background:var(--accent);color:var(--accent-ink);
+    font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    font-family:"IBM Plex Mono",monospace;
+  }
+  .user-chip{display:flex;align-items:center;gap:8px;}
+  .user-chip .avatar{
+    width:30px;height:30px;border-radius:50%;background:var(--accent-soft);
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+  }
+  .user-chip .uname{font-size:13px;font-weight:700;color:var(--ink);}
+
+  /* page head */
+  .page-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    padding:22px 28px 4px;flex-wrap:wrap;gap:6px;
+  }
+  .page-head h1{
+    font-family:"Gothic A1",sans-serif;font-weight:800;
+    font-size:22px;margin:0;letter-spacing:-0.02em;color:var(--ink);
+  }
+  .breadcrumb{font-size:12px;color:var(--ink-faint);margin-top:4px;}
+  .breadcrumb .sep{margin:0 6px;color:var(--ink-faint);}
+  .breadcrumb .current{color:var(--ink-muted);font-weight:600;}
+  .today{
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-faint);
+    font-variant-numeric:tabular-nums;
+  }
+
+  .app{max-width:1180px;padding:16px 28px 64px;}
+
+  /* view tabs */
+  .view-tabs{display:flex;align-items:center;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px;}
+  .view-tab{
+    display:flex;align-items:center;gap:7px;padding:10px 2px;background:none;border:none;
+    border-bottom:2px solid transparent;transform:translateY(1px);
+    font-family:"Gothic A1",sans-serif;font-size:14.5px;font-weight:700;color:var(--ink-muted);cursor:pointer;
+    transition:color .12s,border-color .12s;
+  }
+  .view-tab:hover{color:var(--ink);}
+  .view-tab.active{color:var(--ink);border-bottom-color:var(--accent);}
+  .view-tab .view-tab-badge{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:700;
+    background:var(--surface-sunken);color:var(--ink-muted);padding:2px 8px;border-radius:999px;
+    font-variant-numeric:tabular-nums;
+  }
+  .view-tab.active .view-tab-badge{background:var(--accent-soft);color:var(--accent-soft-ink);}
+  #summaryView[hidden], #listView[hidden]{display:none;}
+
+  /* toast */
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%);
+    background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;
+    padding:10px 18px;border-radius:8px;box-shadow:var(--shadow-lg);z-index:80;
+    opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  /* stat tiles */
+  .stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px;
+  }
+  .stat{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;box-shadow:var(--shadow);
+  }
+  .stat .label{
+    font-size:11.5px;color:var(--ink-muted);letter-spacing:0.03em;
+    display:flex;align-items:center;gap:6px;margin-bottom:8px;
+  }
+  .stat .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;}
+  .stat .value{
+    font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:24px;
+    font-variant-numeric:tabular-nums;color:var(--ink);
+  }
+  .stat .value small{font-family:"Gothic A1",sans-serif;font-size:13px;font-weight:500;color:var(--ink-muted);margin-left:2px;}
+
+  /* trend card */
+  .trend-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 20px 12px;margin-bottom:20px;
+  }
+  .trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .trend-head h3{
+    font-family:"Gothic A1",sans-serif;font-size:14.5px;font-weight:800;margin:0;color:var(--ink);
+  }
+  .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
+  .seg-btn{
+    padding:6px 14px;font-size:12.5px;font-weight:700;color:var(--ink-muted);
+    background:var(--surface);border:none;cursor:pointer;
+  }
+  .seg-btn+.seg-btn{border-left:1px solid var(--line-strong);}
+  .seg-btn.active{background:var(--ink);color:var(--paper);}
+
+  .quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .quick-stat{
+    background:var(--surface);border:1px solid var(--line);border-radius:9px;
+    padding:13px 15px;cursor:pointer;text-align:left;
+    display:flex;flex-direction:column;gap:6px;
+    transition:border-color .12s,transform .12s,box-shadow .12s;
+  }
+  .quick-stat:hover{border-color:var(--accent-soft);box-shadow:var(--shadow);transform:translateY(-1px);}
+  .quick-stat .label{font-size:12px;color:var(--ink-muted);font-weight:700;}
+  .quick-stat .value{
+    font-family:"IBM Plex Mono",monospace;font-size:25px;font-weight:700;
+    color:var(--ink);font-variant-numeric:tabular-nums;
+  }
+  .quick-stat .value small{font-family:"Gothic A1",sans-serif;font-size:12px;font-weight:500;color:var(--ink-muted);margin-left:2px;}
+
+  .date-picker{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--line-strong);border-radius:8px;
+    padding:6px 10px;background:var(--surface);cursor:pointer;color:var(--ink-faint);
+  }
+  .date-picker:hover{border-color:var(--accent-soft);}
+  .date-picker input[type="date"]{
+    border:none;background:transparent;font-family:"IBM Plex Mono",monospace;
+    font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;padding:0;
+  }
+  .date-picker input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:0.55;}
+  .date-picker.disabled{opacity:0.45;pointer-events:none;}
+
+  .show-all-toggle{
+    display:inline-flex;align-items:center;gap:7px;font-size:12.5px;
+    color:var(--ink-muted);font-weight:600;cursor:pointer;user-select:none;
+  }
+  .show-all-toggle input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+
+  /* breakdown card */
+  .breakdown-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 20px 8px;margin-bottom:20px;
+  }
+  .trend-head h3 .total{
+    font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;
+    color:var(--ink-muted);font-variant-numeric:tabular-nums;margin-left:4px;
+  }
+  .breakdown-rows{display:flex;flex-direction:column;padding-bottom:10px;}
+  .breakdown-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+    background:none;border:none;padding:8px 10px;cursor:pointer;text-align:left;border-radius:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .breakdown-row:last-child{border-bottom:none;}
+  .breakdown-row:hover{background:var(--surface-sunken);}
+  .breakdown-row.active{background:var(--accent-soft);}
+  .breakdown-row .p-name{
+    font-size:13px;color:var(--ink);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;
+  }
+  .breakdown-row.active .p-name{color:var(--accent-soft-ink);font-weight:700;}
+  .breakdown-row .p-count{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:13.5px;font-weight:600;color:var(--ink-muted);font-variant-numeric:tabular-nums;
+  }
+  .breakdown-row.active .p-count{color:var(--accent);}
+  .breakdown-row .p-count small{font-family:"Gothic A1",sans-serif;font-size:11px;font-weight:500;color:var(--ink-faint);margin-left:2px;}
+  .breakdown-empty{font-size:12px;color:var(--ink-faint);padding:8px 4px 14px;}
+
+  /* bulk selection bar */
+  .bulk-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--accent-soft);border:1px solid var(--accent-soft);border-radius:8px;
+    padding:9px 14px;margin-bottom:12px;font-size:13px;color:var(--accent-soft-ink);font-weight:700;
+  }
+  .bulk-bar[hidden]{display:none;}
+  .bulk-bar .btn-bulk-delete{
+    background:transparent;border:1px solid currentColor;color:inherit;
+    padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;
+  }
+  .bulk-bar .btn-bulk-delete:hover{background:rgba(0,0,0,0.06);}
+
+  /* toolbar */
+  .toolbar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;
+  }
+  .chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-muted);
+    padding:7px 12px;border-radius:999px;font-size:12.5px;cursor:pointer;
+    display:flex;align-items:center;gap:6px;white-space:nowrap;
+    transition:background .12s,color .12s,border-color .12s;
+  }
+  .chip:hover{border-color:var(--line-strong);background:var(--surface-sunken);}
+  .chip b{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11.5px;opacity:0.75;}
+  .chip.active{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+  .chip.active b{opacity:0.6;}
+
+  .sort select{
+    padding:8px 10px;border-radius:8px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink);font-size:12.5px;
+  }
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:9px 16px;border-radius:8px;border:1px solid transparent;
+    font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .btn-primary{background:var(--accent);color:var(--accent-ink);}
+  .btn-primary:hover{background:var(--accent-hover);}
+  .btn-ghost{background:transparent;border-color:var(--line-strong);color:var(--ink);}
+  .btn-ghost:hover{background:var(--surface-sunken);}
+
+  /* table */
+  .table-wrap{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;
+  }
+  .table-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:1200px;}
+  thead th{
+    text-align:left;font-size:11px;color:var(--table-head-ink);font-weight:700;
+    letter-spacing:0.03em;padding:12px 14px;border-bottom:1px solid var(--line);
+    background:var(--table-head-bg);white-space:nowrap;
+  }
+  tbody td{
+    padding:12px 14px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle;
+  }
+  th.checkbox-col, td.checkbox-col{width:38px;padding-left:16px;padding-right:0;}
+  .row-check, #selectAllCheckbox{width:16px;height:16px;accent-color:var(--selected-check);cursor:pointer;display:block;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{transition:background .1s;cursor:pointer;}
+  tbody tr:nth-child(even){background:var(--surface-sunken);}
+  tbody tr:hover{background:var(--accent-soft);}
+  tbody tr.is-selected{background:var(--selected-bg);}
+  tbody .checkbox-col, tbody .row-actions{cursor:default;}
+  td.mono, .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;}
+  td.num{text-align:right;}
+  .customer{
+    font-weight:700;color:var(--ink);background:none;border:none;padding:0;
+    font-family:inherit;font-size:inherit;cursor:pointer;text-align:left;
+    text-decoration:underline;text-decoration-color:transparent;
+    transition:color .12s,text-decoration-color .12s;
+  }
+  .customer:hover{color:var(--accent);text-decoration-color:var(--accent);}
+  .order-link{
+    background:none;border:none;padding:0;font-family:inherit;cursor:pointer;text-align:left;
+    color:var(--ink);text-decoration:underline;text-decoration-color:transparent;font-weight:600;
+    transition:color .12s,text-decoration-color .12s;
+  }
+  .order-link:hover{color:var(--accent);text-decoration-color:var(--accent);}
+  .order-link.payment-cancelled{color:var(--urgent);}
+  .order-link.payment-cancelled:hover{color:var(--urgent);text-decoration-color:var(--urgent);}
+  .product{display:flex;align-items:center;gap:11px;}
+  .product-thumb{
+    flex:none;width:46px;height:46px;border-radius:10px;
+    background:linear-gradient(160deg, var(--accent-soft), var(--surface));
+    color:var(--accent);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;transition:transform .12s,box-shadow .12s,border-color .12s;
+  }
+  .product-thumb:hover{transform:scale(1.06);box-shadow:var(--shadow);border-color:var(--accent-soft);}
+  .product-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .product-text .name{font-weight:600;}
+  .product-text .opt{font-size:12px;color:var(--ink-muted);}
+  .subrow{font-size:12px;color:var(--ink-faint);}
+  .wed-date.urgent{color:var(--urgent);font-weight:800;}
+  .subrow.urgent{color:var(--urgent);font-weight:700;}
+
+  .pill{
+    display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;
+    font-size:12px;font-weight:700;white-space:nowrap;
+  }
+  .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .pill.st-주문완료{color:var(--st-received-ink);background:var(--st-received-bg);}
+  .pill.st-초안등록{color:var(--st-draft-ink);background:var(--st-draft-bg);}
+  .pill.st-고객확정완료{color:var(--st-ready-ink);background:var(--st-ready-bg);}
+  .pill.st-외주발주{color:var(--st-outsource-ink);background:var(--st-outsource-bg);}
+  .pill.st-인쇄팀전달{color:var(--st-production-ink);background:var(--st-production-bg);}
+  .pill.st-인쇄완료{color:var(--st-printed-ink);background:var(--st-printed-bg);}
+  .pill.st-배송중{color:var(--st-shipping-ink);background:var(--st-shipping-bg);}
+  .pill.st-배송완료{color:var(--st-done-ink);background:var(--st-done-bg);}
+  .pill.st-취소{color:var(--st-cancelled-ink);background:var(--st-cancelled-bg);}
+  .pill.pay-결제대기{color:var(--pay-wait-ink);background:var(--pay-wait-bg);}
+  .pill.pay-결제완료{color:var(--pay-done-ink);background:var(--pay-done-bg);}
+  .pill.pay-결제취소{color:var(--st-cancelled-ink);background:var(--st-cancelled-bg);}
+  .pill.inv-yes{color:var(--accent-soft-ink);background:var(--accent-soft);}
+  .pill.inv-yes::before{display:none;}
+  .pill.inv-no{color:var(--ink-muted);background:var(--surface-sunken);font-weight:600;}
+  .pill.inv-no::before{display:none;}
+
+  .row-actions{display:flex;gap:6px;justify-content:flex-end;}
+  .icon-btn{
+    position:relative;width:30px;height:30px;border-radius:7px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink-muted);cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:hover{background:var(--surface-sunken);color:var(--ink);}
+  .icon-btn.note-active{color:var(--accent);border-color:var(--accent-soft);background:var(--accent-soft);}
+  .icon-btn.note-active:hover{background:var(--accent-soft);color:var(--accent-hover);}
+  .icon-btn:disabled{opacity:0.32;cursor:default;}
+  .icon-btn:disabled:hover{background:var(--surface);color:var(--ink-muted);}
+  .icon-btn .mini-badge{
+    position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 3px;
+    border-radius:999px;background:var(--accent);color:var(--accent-ink);
+    font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    font-family:"IBM Plex Mono",monospace;
+  }
+
+  .item-code{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+    color:var(--ink-muted);background:var(--surface-sunken);
+    padding:3px 9px;border-radius:6px;white-space:nowrap;
+  }
+
+  .file-row{
+    display:flex;align-items:center;gap:9px;padding:8px 4px;
+    border-bottom:1px solid var(--line);font-size:13px;color:var(--ink);
+  }
+  .file-row:last-child{border-bottom:none;}
+  .file-row svg{flex:none;color:var(--ink-faint);}
+  .file-row .file-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .file-remove{
+    flex:none;width:22px;height:22px;border-radius:6px;border:none;background:transparent;
+    color:var(--ink-faint);cursor:pointer;font-size:15px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .file-remove:hover{background:var(--st-cancelled-bg);color:var(--st-cancelled-ink);}
+  .file-add-label{
+    margin-top:12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  }
+
+  .courier-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 2px;border-bottom:1px solid var(--line);font-size:13.5px;
+  }
+  .courier-row:last-child{border-bottom:none;}
+  .courier-row .courier-label{color:var(--ink-muted);font-weight:600;}
+  .courier-row .courier-value{
+    color:var(--ink);font-weight:700;font-family:"IBM Plex Mono",monospace;
+    text-align:right;
+  }
+  .courier-row .courier-value.muted{color:var(--ink-faint);font-weight:500;font-family:inherit;}
+
+  .empty{padding:64px 20px;text-align:center;color:var(--ink-muted);}
+  .empty .big{font-family:"Gothic A1",sans-serif;font-weight:800;font-size:16px;color:var(--ink);margin-bottom:6px;}
+
+  .table-controls{
+    display:flex;align-items:center;gap:6px;padding:12px 14px;
+    font-size:12.5px;color:var(--ink-muted);border-bottom:1px solid var(--line);
+  }
+  .table-controls select{
+    padding:5px 8px;border-radius:6px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink);font-size:12.5px;
+  }
+
+  .table-foot{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    padding:12px 14px;font-size:12px;color:var(--ink-faint);border-top:1px solid var(--line);
+  }
+  .pagination{display:flex;align-items:center;gap:4px;}
+  .page-btn{
+    min-width:28px;height:28px;padding:0 8px;border-radius:6px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink-muted);font-size:12px;font-weight:600;cursor:pointer;
+    font-family:"IBM Plex Mono",monospace;
+  }
+  .page-btn:hover{background:var(--surface-sunken);}
+  .page-btn.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .page-btn:disabled{opacity:0.35;cursor:default;}
+  .page-btn:disabled:hover{background:var(--surface);}
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(20,15,20,0.42);
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:5vh 16px;overflow-y:auto;z-index:50;
+  }
+  .overlay[hidden]{display:none;}
+  .overlay.bottom-sheet{align-items:flex-end;padding:0;}
+  .drawer{
+    background:var(--surface);border-radius:16px 16px 0 0;box-shadow:var(--shadow-lg);
+    width:100%;max-width:720px;border:1px solid var(--line);border-bottom:none;
+    max-height:78vh;display:flex;flex-direction:column;
+  }
+  .drawer .modal-body{overflow-y:auto;}
+  .drawer-summary{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;
+    background:var(--surface-sunken);border-radius:9px;padding:14px 16px;margin-bottom:18px;
+  }
+  .drawer-summary .item{display:flex;flex-direction:column;gap:3px;}
+  .drawer-summary .item .k{font-size:11px;color:var(--ink-muted);font-weight:700;}
+  .drawer-summary .item .v{font-size:13.5px;color:var(--ink);font-weight:600;}
+  .drawer-section-title{
+    font-family:"Gothic A1",sans-serif;font-size:13px;font-weight:800;
+    color:var(--ink);margin-bottom:8px;
+  }
+  .drawer-memo{
+    font-size:13.5px;line-height:1.6;color:var(--ink);white-space:pre-wrap;
+    background:var(--accent-soft);border-radius:9px;padding:12px 14px;margin-bottom:18px;
+  }
+  .drawer-memo.empty{color:var(--ink-faint);background:var(--surface-sunken);font-style:italic;}
+  .modal{
+    background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);
+    width:100%;max-width:640px;border:1px solid var(--line);
+  }
+  .modal-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 22px 16px;border-bottom:1px solid var(--line);
+  }
+  .modal-head h2{font-family:"Gothic A1",sans-serif;font-size:18px;margin:0;font-weight:800;}
+  .modal-close{
+    width:30px;height:30px;border-radius:7px;border:none;background:transparent;
+    color:var(--ink-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .modal-close:hover{background:var(--surface-sunken);color:var(--ink);}
+  .modal-body{padding:20px 22px;max-height:64vh;overflow-y:auto;}
+  .modal-foot{
+    display:flex;justify-content:flex-end;gap:8px;
+    padding:16px 22px;border-top:1px solid var(--line);
+  }
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{font-size:12px;font-weight:700;color:var(--ink-muted);}
+  .field .req{color:var(--accent);}
+  .field input,.field select,.field textarea{
+    padding:8px 10px;border-radius:8px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink);font-size:13.5px;font-family:inherit;
+    width:100%;
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+  .field .hint{font-size:11.5px;color:var(--ink-faint);}
+  .field-total{
+    grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;
+    background:var(--surface-sunken);border-radius:8px;padding:10px 14px;
+    font-size:13px;color:var(--ink-muted);
+  }
+  .field-total b{font-family:"IBM Plex Mono",monospace;font-size:16px;color:var(--ink);font-weight:600;}
+
+  .field-check{
+    grid-column:1 / -1;display:flex;align-items:center;gap:9px;
+    background:var(--surface-sunken);border-radius:8px;padding:11px 14px;
+  }
+  .field-check input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex:none;}
+  .field-check label{font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;}
+
+  .confirm-body{padding:22px;font-size:14px;color:var(--ink);}
+  .confirm-body .name{font-weight:700;}
+
+  .note-meta{
+    display:flex;align-items:center;gap:10px;padding:20px 22px 14px;
+    border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-muted);
+  }
+  .note-meta .note-customer{font-weight:800;color:var(--ink);font-size:14px;}
+  .note-body{
+    padding:20px 22px 24px;font-size:17px;line-height:1.75;color:var(--ink);
+    white-space:pre-wrap;word-break:break-word;
+  }
+
+  @media (max-width:760px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .quick-stats{grid-template-columns:repeat(2,1fr);}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="dot"></span>커스텀</div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a class="nav-item" data-nav="dashboard" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>대시보드</span>
+      </a>
+      <a class="nav-item active" data-nav="orders" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        <span>주문관리</span>
+      </a>
+      <a class="nav-item" data-nav="customers" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>고객관리</span>
+      </a>
+      <a class="nav-item" data-nav="products" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 8V6a2 2 0 0 1 2-2h4l2 2 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 12v5"/><path d="M9.5 14.5h5"/></svg>
+        <span>상품관리</span>
+      </a>
+      <a class="nav-item" data-nav="settings" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        <span>설정</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar-new">
+      <div class="topbar-right">
+        <button type="button" class="bell-btn" id="bellBtn" title="오늘 신규 주문">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="badge" id="bellBadge">0</span>
+        </button>
+        <div class="user-chip">
+          <div class="avatar">🎀</div>
+          <span class="uname">스튜디오</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-head">
+      <div>
+        <h1>전체 주문</h1>
+        <div class="breadcrumb">대시보드 <span class="sep">›</span> 주문관리 <span class="sep">›</span> <span class="current">전체 주문</span></div>
+      </div>
+      <div class="today" id="todayLabel"></div>
+    </div>
+
+  <div class="app">
+  <div class="view-tabs" id="viewTabs">
+    <button type="button" class="view-tab active" data-view="list">주문 목록</button>
+    <button type="button" class="view-tab" data-view="summary">요약 <span class="view-tab-badge" id="summaryBadge"></span></button>
+  </div>
+
+  <div id="summaryView" hidden>
+  <section class="stats" id="stats"></section>
+
+  <section class="breakdown-card">
+    <div class="trend-head">
+      <h3>품목별 주문 현황 <span class="total" id="breakdownTotal"></span></h3>
+      <div class="seg" id="breakdownSeg">
+        <button type="button" class="seg-btn active" data-period="day">일일</button>
+        <button type="button" class="seg-btn" data-period="week">주간</button>
+      </div>
+    </div>
+    <div class="breakdown-rows" id="breakdownList"></div>
+  </section>
+
+  <section class="trend-card">
+    <div class="trend-head">
+      <h3>진행상태별 건수</h3>
+      <div class="date-picker" id="quickStatsDateWrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <input type="date" id="quickStatsDate" />
+      </div>
+    </div>
+    <div class="quick-stats" id="statusQuickTiles"></div>
+  </section>
+  </div>
+
+  <div id="listView">
+  <div class="toolbar">
+    <div class="chips" id="statusChips"></div>
+    <div class="sort">
+      <select id="sortSelect">
+        <option value="orderDateDesc">주문일 최신순</option>
+        <option value="orderDateAsc">주문일 오래된순</option>
+        <option value="weddingDateAsc">예식일 임박순</option>
+        <option value="amountDesc">금액 높은순</option>
+      </select>
+    </div>
+    <div class="sort">
+      <select id="paymentFilterSelect">
+        <option value="전체">결제 전체</option>
+        <option value="결제대기">결제대기</option>
+        <option value="결제완료">결제완료</option>
+        <option value="결제취소">결제취소</option>
+      </select>
+    </div>
+    <div class="toolbar-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="주문자명, 주문번호, 연락처, 상품명으로 검색" />
+    </div>
+    <div class="date-picker" id="orderDateFilterWrap" title="주문일자로 조회">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <input type="date" id="orderDateFilter" />
+    </div>
+    <label class="show-all-toggle">
+      <input type="checkbox" id="showAllDates" />
+      전체 주문건 보기
+    </label>
+  </div>
+
+  <div class="bulk-bar" id="bulkBar" hidden>
+    <span id="bulkCount"></span>
+    <button type="button" class="btn-bulk-delete" id="bulkDeleteBtn">선택 삭제</button>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-controls">
+      Show
+      <select id="pageSizeSelect">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+      entries
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox" aria-label="전체 선택" /></th>
+            <th>주문번호</th>
+            <th>주문자명</th>
+            <th>예식일</th>
+            <th>상품명</th>
+            <th>품목코드</th>
+            <th>청첩장</th>
+            <th class="num">수량</th>
+            <th>결제</th>
+            <th>진행상태</th>
+            <th>첨부파일</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="table-foot" id="tableFoot"></div>
+  </div>
+  </div>
+  </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- order form modal -->
+<div class="overlay" id="orderOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">새 주문 등록</h2>
+      <button class="modal-close" id="closeOrderModal" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="orderForm">
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>주문자명 <span class="req">*</span></label>
+            <input name="customerName" required placeholder="김도윤" />
+          </div>
+          <div class="field">
+            <label>연락처</label>
+            <input name="phone" placeholder="010-0000-0000" />
+          </div>
+
+          <div class="field">
+            <label>예식일 <span class="req">*</span></label>
+            <input type="date" name="weddingDate" required />
+          </div>
+          <div class="field">
+            <label>주문일자 <span class="req">*</span></label>
+            <input type="date" name="orderDate" required />
+          </div>
+
+          <div class="field full">
+            <label>상품명 <span class="req">*</span></label>
+            <input name="productName" list="productList" required placeholder="예: 아크릴 키링" />
+            <datalist id="productList">
+              <option value="아크릴 키링">
+              <option value="아크릴 폰그립">
+              <option value="아크릴 마그넷">
+              <option value="즉석 포토프린팅">
+              <option value="웨딩스탬프">
+              <option value="웨딩신문">
+              <option value="커스텀 스티커">
+              <option value="메시지카드">
+              <option value="퍼즐액자">
+              <option value="엽서 세트">
+              <option value="테이블 캘린더">
+            </datalist>
+          </div>
+          <div class="field full">
+            <label>옵션 (디자인 · 사이즈 · 각인문구 등)</label>
+            <input name="option" placeholder="예: 원형 5cm / 시안 B / 각인 &quot;2026.09.12&quot;" />
+          </div>
+
+          <div class="field">
+            <label>수량 <span class="req">*</span></label>
+            <input type="number" name="quantity" min="1" step="1" required value="100" />
+          </div>
+          <div class="field">
+            <label>단가(원) <span class="req">*</span></label>
+            <input type="number" name="unitPrice" min="0" step="100" required value="2500" />
+          </div>
+
+          <div class="field-total">
+            <span>총 금액</span>
+            <b id="totalPreview">₩0</b>
+          </div>
+
+          <div class="field">
+            <label>수령 방법</label>
+            <select name="deliveryMethod">
+              <option value="택배배송">택배배송</option>
+              <option value="방문수령">방문수령</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>배송지 주소</label>
+            <input name="address" placeholder="방문수령인 경우 비워두세요" />
+          </div>
+
+          <div class="field-check">
+            <input type="checkbox" name="withInvitation" id="withInvitation" />
+            <label for="withInvitation">청첩장과 함께 주문한 건이에요</label>
+          </div>
+
+          <div class="field">
+            <label>결제 상태</label>
+            <select name="paymentStatus">
+              <option value="결제대기">결제대기</option>
+              <option value="결제완료">결제완료</option>
+              <option value="결제취소">결제취소</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>진행 상태</label>
+            <select name="orderStatus">
+              <option value="주문완료">주문완료</option>
+              <option value="초안등록">초안등록</option>
+              <option value="고객확정완료">고객확정완료</option>
+              <option value="외주발주">외주발주</option>
+              <option value="인쇄팀전달">인쇄팀전달</option>
+              <option value="인쇄완료">인쇄완료</option>
+              <option value="배송중">배송중</option>
+              <option value="배송완료">배송완료</option>
+              <option value="취소">취소</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>택배사</label>
+            <select name="courierCompany">
+              <option value="">선택 안 함</option>
+              <option value="CJ대한통운">CJ대한통운</option>
+              <option value="롯데택배">롯데택배</option>
+              <option value="한진택배">한진택배</option>
+              <option value="우체국택배">우체국택배</option>
+              <option value="로젠택배">로젠택배</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>운송장번호</label>
+            <input name="trackingNumber" placeholder="예: 1234567890" />
+          </div>
+          <div class="field">
+            <label>배송완료일</label>
+            <input type="date" name="deliveredDate" />
+          </div>
+
+          <div class="field full">
+            <label>메모</label>
+            <textarea name="memo" placeholder="특이사항을 입력하세요"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="cancelOrderModal">취소</button>
+        <button type="submit" class="btn btn-primary" id="saveOrderBtn">등록하기</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- delete confirm modal -->
+<div class="overlay" id="deleteOverlay" hidden>
+  <div class="modal" style="max-width:420px;" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+    <div class="modal-head">
+      <h2 id="deleteTitle">주문 삭제</h2>
+      <button class="modal-close" id="closeDeleteModal" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="confirm-body">
+      <span class="name" id="deleteTargetName"></span> 주문을 삭제할까요?<br>
+      삭제한 내용은 되돌릴 수 없습니다.
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" id="cancelDeleteModal">취소</button>
+      <button type="button" class="btn btn-primary" id="confirmDeleteBtn" style="background:var(--st-cancelled-ink);">삭제하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- customer request note modal -->
+<div class="overlay" id="noteOverlay" hidden>
+  <div class="modal" style="max-width:480px;" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
+    <div class="modal-head">
+      <h2 id="noteTitle">고객 요청사항</h2>
+      <button class="modal-close" id="closeNoteModal" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="note-meta">
+      <span class="note-customer" id="noteCustomer"></span>
+      <span id="noteOrderNo" class="mono"></span>
+    </div>
+    <div class="note-body" id="noteBody"></div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-primary" id="closeNoteBtn2">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- attachments modal -->
+<div class="overlay" id="filesOverlay" hidden>
+  <div class="modal" style="max-width:440px;" role="dialog" aria-modal="true" aria-labelledby="filesTitle">
+    <div class="modal-head">
+      <h2 id="filesTitle">첨부파일</h2>
+      <button class="modal-close" id="closeFilesModal" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding-top:16px;">
+      <div id="filesList"></div>
+      <label class="file-add-label btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        파일 추가
+        <input type="file" id="filesInput" multiple style="display:none;" />
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-primary" id="closeFilesBtn2">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- courier info modal -->
+<div class="overlay" id="courierOverlay" hidden>
+  <div class="modal" style="max-width:440px;" role="dialog" aria-modal="true" aria-labelledby="courierTitle">
+    <div class="modal-head">
+      <h2 id="courierTitle">택배 정보</h2>
+      <button class="modal-close" id="closeCourierModal" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="note-meta">
+      <span class="note-customer" id="courierCustomer"></span>
+      <span id="courierOrderNo" class="mono"></span>
+    </div>
+    <div class="modal-body" style="padding-top:8px;">
+      <div id="courierBody"></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" id="courierEditBtn">정보 수정</button>
+      <button type="button" class="btn btn-primary" id="closeCourierBtn2">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- status detail modal -->
+<div class="overlay" id="statusDetailOverlay" hidden>
+  <div class="modal" style="max-width:420px;" role="dialog" aria-modal="true" aria-labelledby="statusDetailTitle">
+    <div class="modal-head">
+      <h2 id="statusDetailTitle">오늘 · 주문완료</h2>
+      <button class="modal-close" id="closeStatusDetailModal" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding-top:8px;">
+      <div class="breakdown-rows" id="statusDetailList"></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-primary" id="closeStatusDetailBtn2">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- customer info modal -->
+<div class="overlay" id="customerOverlay" hidden>
+  <div class="modal" style="max-width:420px;" role="dialog" aria-modal="true" aria-labelledby="customerModalTitle">
+    <div class="modal-head">
+      <h2 id="customerModalTitle">고객 정보</h2>
+      <button class="modal-close" id="closeCustomerModal" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding-top:8px;">
+      <div id="customerInfoBody"></div>
+      <div class="courier-row" style="border-bottom:none;padding-top:16px;padding-bottom:4px;">
+        <span class="courier-label" style="font-family:'Gothic A1',sans-serif;font-weight:800;color:var(--ink);">주문건 정보</span>
+      </div>
+      <div id="customerOrderBody"></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-primary" id="closeCustomerBtn2">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- draft upload drawer -->
+<div class="overlay bottom-sheet" id="draftOverlay" hidden>
+  <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="draftDrawerTitle">
+    <div class="modal-head">
+      <h2 id="draftDrawerTitle">주문 내용 · 초안 업로드</h2>
+      <button class="modal-close" id="closeDraftDrawer" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="drawer-summary" id="draftOrderSummary"></div>
+      <div class="drawer-section-title">고객 요청사항</div>
+      <div id="draftMemoBody" class="drawer-memo"></div>
+      <div class="drawer-section-title">초안 파일</div>
+      <div id="draftFilesList"></div>
+      <label class="file-add-label btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        초안 업로드
+        <input type="file" id="draftFilesInput" multiple style="display:none;" />
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-primary" id="closeDraftDrawerBtn2">확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "gift-order-manager-v12";
+  var STATUS_LIST = ["주문완료","초안등록","고객확정완료","외주발주","인쇄팀전달","인쇄완료","배송중","배송완료","취소"];
+  var ACTIVE_STATUSES = ["주문완료","초안등록","고객확정완료","외주발주","인쇄팀전달","인쇄완료","배송중"];
+  var TODAY = "2026-08-24";
+
+  function seedData(){
+    return [
+      {id:1, orderNo:"ORD-2026-000001", customerName:"한지민", weddingDate:"2026-05-02", productName:"웨딩스탬프", option:"원형 3cm / 각인 이니셜", quantity:1, unitPrice:35000, orderDate:"2026-04-14", deliveryMethod:"방문수령", address:"", phone:"010-1111-2222", paymentStatus:"결제완료", orderStatus:"배송완료", withInvitation:true, deliveredDate:"2026-04-16"},
+      {id:2, orderNo:"ORD-2026-000002", customerName:"오승훈", weddingDate:"2026-05-24", productName:"웨딩신문", option:"타블로이드 / 20부", quantity:20, unitPrice:12000, orderDate:"2026-05-06", deliveryMethod:"택배배송", address:"서울시 강남구 테헤란로 101", phone:"010-2323-4545", paymentStatus:"결제완료", orderStatus:"배송완료", withInvitation:false, courierCompany:"CJ대한통운", trackingNumber:"654321098765", deliveredDate:"2026-05-12"},
+      {id:3, orderNo:"ORD-2026-000003", customerName:"김나연", weddingDate:"2026-06-20", productName:"메시지카드", option:"금박 레터링 / 5x7", quantity:150, unitPrice:2100, orderDate:"2026-05-29", deliveryMethod:"택배배송", address:"대구시 수성구 동대구로 55", phone:"010-3434-5656", paymentStatus:"결제완료", orderStatus:"배송완료", withInvitation:true, courierCompany:"롯데택배", trackingNumber:"402198765432", deliveredDate:"2026-06-03"},
+      {id:4, orderNo:"ORD-2026-000004", customerName:"이준혁", weddingDate:"2026-07-11", productName:"엽서 세트", option:"6매입 / 시안 A", quantity:130, unitPrice:2000, orderDate:"2026-06-12", deliveryMethod:"택배배송", address:"대전시 서구 둔산로 20", phone:"010-4545-6767", paymentStatus:"결제완료", orderStatus:"배송완료", withInvitation:false, courierCompany:"한진택배", trackingNumber:"588213467890", deliveredDate:"2026-06-17"},
+      {id:5, orderNo:"ORD-2026-000005", customerName:"박지영", weddingDate:"2026-08-15", productName:"커스텀 스티커", option:"원형 4cm / 30매 시트", quantity:200, unitPrice:1500, orderDate:"2026-06-30", deliveryMethod:"방문수령", address:"", phone:"010-5656-7878", paymentStatus:"결제완료", orderStatus:"배송완료", withInvitation:true, deliveredDate:"2026-07-03"},
+      {id:6, orderNo:"ORD-2026-000006", customerName:"서준혁", weddingDate:"2026-07-30", productName:"테이블 캘린더", option:"탁상형 / 커플 사진 인쇄", quantity:110, unitPrice:2900, orderDate:"2026-07-01", deliveryMethod:"택배배송", address:"광주시 서구 상무대로 21", phone:"010-6262-3535", paymentStatus:"결제완료", orderStatus:"취소", memo:"고객 요청으로 주문 취소", withInvitation:false},
+      {id:7, orderNo:"ORD-2026-000007", customerName:"윤지호", weddingDate:"2026-08-24", productName:"아크릴 마그넷", option:"하트형 / 시안 C", quantity:100, unitPrice:2400, orderDate:"2026-07-28", deliveryMethod:"방문수령", address:"", phone:"010-7777-9090", paymentStatus:"결제완료", orderStatus:"배송완료", withInvitation:false, deliveredDate:"2026-08-01"},
+      {id:8, orderNo:"ORD-2026-000008", customerName:"임현우", weddingDate:"2026-08-27", productName:"아크릴 폰그립", option:"미니 캐릭터 시안 / 골드 링", quantity:90, unitPrice:5200, orderDate:"2026-08-01", deliveryMethod:"택배배송", address:"대전시 유성구 대학로 55", phone:"010-3131-8282", paymentStatus:"결제완료", orderStatus:"인쇄완료", withInvitation:true},
+      {id:9, orderNo:"ORD-2026-000009", customerName:"박서준", weddingDate:"2026-08-29", productName:"즉석 포토프린팅", option:"2x6 필름 / 프레임 포함", quantity:120, unitPrice:1900, orderDate:"2026-08-05", deliveryMethod:"방문수령", address:"", phone:"010-2222-3333", paymentStatus:"결제완료", orderStatus:"배송중", withInvitation:false},
+      {id:10, orderNo:"ORD-2026-000010", customerName:"김도윤", weddingDate:"2026-09-12", productName:"아크릴 키링", option:"원형 5cm / 시안 A", quantity:120, unitPrice:2800, orderDate:"2026-08-10", deliveryMethod:"택배배송", address:"서울시 마포구 양화로 12", phone:"010-1234-5678", paymentStatus:"결제완료", orderStatus:"인쇄팀전달", memo:"9/5까지 제작 완료 요청", withInvitation:true, attachments:["시안_최종확인.jpg","각인문구.txt"]},
+      {id:11, orderNo:"ORD-2026-000011", customerName:"정우진", weddingDate:"2026-10-03", productName:"퍼즐액자", option:"200pcs / 6x8 프레임", quantity:150, unitPrice:6200, orderDate:"2026-08-18", deliveryMethod:"택배배송", address:"인천시 연수구 송도과학로 32", phone:"010-4444-1212", paymentStatus:"결제대기", orderStatus:"고객확정완료", withInvitation:false},
+      {id:12, orderNo:"ORD-2026-000012", customerName:"강민재", weddingDate:"2026-09-20", productName:"커스텀 스티커", option:"하트형 / 20매 시트", quantity:200, unitPrice:1600, orderDate:"2026-08-22", deliveryMethod:"택배배송", address:"부산시 해운대구 센텀로 8", phone:"010-5555-6161", paymentStatus:"결제대기", orderStatus:"고객확정완료", withInvitation:true},
+      {id:13, orderNo:"ORD-2026-000013", customerName:"조성민", weddingDate:"2026-11-08", productName:"메시지카드", option:"금박 레터링 / 5x7", quantity:130, unitPrice:2100, orderDate:"2026-08-24", deliveryMethod:"방문수령", address:"", phone:"010-9090-1414", paymentStatus:"결제대기", orderStatus:"고객확정완료", withInvitation:false},
+      {id:14, orderNo:"ORD-2026-000014", customerName:"한다인", weddingDate:"2026-09-05", productName:"아크릴 키링", option:"원형 5cm / 시안 D", quantity:100, unitPrice:2800, orderDate:"2026-08-24", deliveryMethod:"택배배송", address:"서울시 송파구 올림픽로 45", phone:"010-1010-2020", paymentStatus:"결제완료", orderStatus:"고객확정완료", withInvitation:true},
+      {id:15, orderNo:"ORD-2026-000015", customerName:"오지훈", weddingDate:"2026-09-01", productName:"웨딩스탬프", option:"사각 4cm / 각인 성함", quantity:1, unitPrice:36000, orderDate:"2026-08-24", deliveryMethod:"방문수령", address:"", phone:"010-2020-3030", paymentStatus:"결제대기", orderStatus:"고객확정완료", withInvitation:false},
+      {id:16, orderNo:"ORD-2026-000016", customerName:"배소연", weddingDate:"2026-09-18", productName:"커스텀 스티커", option:"사각 5cm / 20매 시트", quantity:150, unitPrice:1500, orderDate:"2026-08-24", deliveryMethod:"택배배송", address:"수원시 영통구 광교로 12", phone:"010-3030-4040", paymentStatus:"결제완료", orderStatus:"외주발주", withInvitation:true, attachments:["스티커시안_v2.ai"]},
+      {id:17, orderNo:"ORD-2026-000017", customerName:"최윤서", weddingDate:"2026-10-02", productName:"아크릴 마그넷", option:"원형 6cm / 시안 E", quantity:120, unitPrice:2400, orderDate:"2026-08-25", deliveryMethod:"택배배송", address:"창원시 성산구 창이대로 88", phone:"010-4040-5050", paymentStatus:"결제대기", orderStatus:"초안등록", withInvitation:false},
+      {id:18, orderNo:"ORD-2026-000018", customerName:"장하늘", weddingDate:"2026-09-27", productName:"메시지카드", option:"은박 레터링 / 4x6", quantity:140, unitPrice:2100, orderDate:"2026-08-25", deliveryMethod:"방문수령", address:"", phone:"010-5050-6060", paymentStatus:"결제완료", orderStatus:"초안등록", withInvitation:true},
+      {id:19, orderNo:"ORD-2026-000019", customerName:"심유진", weddingDate:"2026-10-10", productName:"아크릴 키링", option:"하트형 4cm / 시안 F", quantity:110, unitPrice:2800, orderDate:"2026-08-26", deliveryMethod:"택배배송", address:"전주시 완산구 홍산로 5", phone:"010-6060-7070", paymentStatus:"결제대기", orderStatus:"초안등록", withInvitation:false},
+      {id:20, orderNo:"ORD-2026-000020", customerName:"노태양", weddingDate:"2026-09-14", productName:"웨딩신문", option:"타블로이드 / 25부", quantity:25, unitPrice:12000, orderDate:"2026-08-26", deliveryMethod:"택배배송", address:"청주시 흥덕구 사직대로 20", phone:"010-7070-8080", paymentStatus:"결제완료", orderStatus:"초안등록", withInvitation:false},
+      {id:21, orderNo:"ORD-2026-000021", customerName:"구민서", weddingDate:"2026-09-30", productName:"즉석 포토프린팅", option:"2x6 필름 / 프레임 없음", quantity:100, unitPrice:1900, orderDate:"2026-08-27", deliveryMethod:"방문수령", address:"", phone:"010-8080-9090", paymentStatus:"결제대기", orderStatus:"초안등록", withInvitation:true},
+      {id:22, orderNo:"ORD-2026-000022", customerName:"홍서준", weddingDate:"2026-10-15", productName:"퍼즐액자", option:"300pcs / 8x10 프레임", quantity:130, unitPrice:6200, orderDate:"2026-08-27", deliveryMethod:"택배배송", address:"천안시 서북구 불당대로 30", phone:"010-9090-0101", paymentStatus:"결제취소", orderStatus:"주문완료", withInvitation:false, memo:"고객 카드 결제 취소로 재결제 안내 필요"},
+      {id:23, orderNo:"ORD-2026-000023", customerName:"권나윤", weddingDate:"2026-09-22", productName:"엽서 세트", option:"8매입 / 시안 B", quantity:100, unitPrice:2000, orderDate:"2026-08-28", deliveryMethod:"택배배송", address:"울산시 남구 삼산로 15", phone:"010-0101-1212", paymentStatus:"결제대기", orderStatus:"주문완료", withInvitation:true},
+      {id:24, orderNo:"ORD-2026-000024", customerName:"안도현", weddingDate:"2026-10-20", productName:"테이블 캘린더", option:"탁상형 / 웨딩 사진 인쇄", quantity:90, unitPrice:2900, orderDate:"2026-08-29", deliveryMethod:"방문수령", address:"", phone:"010-1212-2323", paymentStatus:"결제완료", orderStatus:"주문완료", withInvitation:false},
+      {id:25, orderNo:"ORD-2026-000025", customerName:"문서영", weddingDate:"2026-11-01", productName:"아크릴 키링", option:"원형 5cm / 시안 G", quantity:130, unitPrice:2800, orderDate:"2026-08-30", deliveryMethod:"택배배송", address:"성남시 분당구 판교로 22", phone:"010-2323-3434", paymentStatus:"결제대기", orderStatus:"주문완료", withInvitation:true},
+      {id:26, orderNo:"ORD-2026-000026", customerName:"윤하람", weddingDate:"2026-09-25", productName:"아크릴 폰그립", option:"미니 캐릭터 시안 / 실버 링", quantity:95, unitPrice:5200, orderDate:"2026-08-30", deliveryMethod:"택배배송", address:"광주시 북구 무등로 60", phone:"010-3434-4545", paymentStatus:"결제완료", orderStatus:"주문완료", withInvitation:false}
+    ];
+  }
+
+  var state = {
+    orders: [],
+    search: "",
+    status: "전체",
+    productFilter: null,
+    orderDateFilter: TODAY,
+    showAllDates: false,
+    paymentFilter: "전체",
+    draftEditingId: null,
+    sort: "orderDateDesc",
+    view: "list",
+    breakdownPeriod: "day",
+    editingId: null,
+    deletingId: null,
+    filesEditingId: null,
+    courierViewingId: null,
+    quickStatsDate: TODAY,
+    selectedIds: [],
+    page: 1,
+    pageSize: 10
+  };
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){ state.orders = JSON.parse(raw); return; }
+    }catch(e){}
+    state.orders = seedData();
+    save();
+  }
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders)); }catch(e){}
+  }
+  function nextOrderNo(){
+    var max = 0;
+    state.orders.forEach(function(o){
+      var m = /ORD-2026-(\d+)/.exec(o.orderNo);
+      if(m) max = Math.max(max, parseInt(m[1],10));
+    });
+    return "ORD-2026-" + String(max+1).padStart(6,"0");
+  }
+  function nextId(){
+    var max = 0;
+    state.orders.forEach(function(o){ max = Math.max(max, o.id); });
+    return max + 1;
+  }
+  function won(n){ return "₩" + Number(n||0).toLocaleString("ko-KR"); }
+  function fmtDate(d){
+    if(!d) return "-";
+    var p = d.split("-");
+    return p[0] + "." + p[1] + "." + p[2];
+  }
+  function diffDays(weddingDate){
+    return Math.round((new Date(weddingDate) - new Date(TODAY)) / 86400000);
+  }
+  function dday(diff){
+    if(diff === 0) return "D-DAY";
+    if(diff > 0) return "D-" + diff;
+    return "D+" + Math.abs(diff);
+  }
+  function orderNoShort(orderNo){
+    var m = /(\d{6})$/.exec(orderNo || "");
+    return m ? m[1] : (orderNo || "");
+  }
+
+  // ---------- rendering ----------
+  function renderStats(){
+    var total = state.orders.length;
+    var active = state.orders.filter(function(o){ return ACTIVE_STATUSES.indexOf(o.orderStatus) !== -1; }).length;
+    var todayNew = state.orders.filter(function(o){ return o.orderDate === TODAY; }).length;
+
+    var tiles = [
+      {label:"전체 주문", value: total, unit:"건"},
+      {label:"진행중", value: active, unit:"건"},
+      {label:"오늘 신규 주문", value: todayNew, unit:"건"}
+    ];
+    document.getElementById("stats").innerHTML = tiles.map(function(t){
+      return '<div class="stat">' +
+        '<div class="label"><span class="dot"></span>'+t.label+'</div>' +
+        '<div class="value">'+ t.value + ' <small>'+t.unit+'</small></div>' +
+      '</div>';
+    }).join("");
+    document.getElementById("bellBadge").textContent = todayNew;
+    var summaryBadge = document.getElementById("summaryBadge");
+    if(summaryBadge) summaryBadge.textContent = "진행중 " + active;
+  }
+
+  function switchView(view){
+    state.view = view;
+    document.querySelectorAll("#viewTabs .view-tab").forEach(function(t){
+      t.classList.toggle("active", t.getAttribute("data-view") === view);
+    });
+    document.getElementById("summaryView").hidden = view !== "summary";
+    document.getElementById("listView").hidden = view !== "list";
+  }
+
+  function renderChips(){
+    var counts = {"전체": state.orders.length};
+    STATUS_LIST.forEach(function(s){ counts[s] = state.orders.filter(function(o){return o.orderStatus===s;}).length; });
+    var all = ["전체"].concat(STATUS_LIST);
+    document.getElementById("statusChips").innerHTML = all.map(function(s){
+      return '<button type="button" class="chip'+(state.status===s?' active':'')+'" data-status="'+s+'">'+
+        s + ' <b>' + counts[s] + '</b></button>';
+    }).join("");
+  }
+
+  function getFiltered(){
+    var q = state.search.trim().toLowerCase();
+    var list = state.orders.filter(function(o){
+      if(state.status !== "전체" && o.orderStatus !== state.status) return false;
+      if(state.productFilter && o.productName !== state.productFilter) return false;
+      if(!state.showAllDates && state.orderDateFilter && o.orderDate !== state.orderDateFilter) return false;
+      if(state.paymentFilter !== "전체" && o.paymentStatus !== state.paymentFilter) return false;
+      if(!q) return true;
+      var hay = [o.orderNo,o.customerName,o.phone,o.productName].join(" ").toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    list.sort(function(a,b){
+      switch(state.sort){
+        case "orderDateAsc": return a.orderDate.localeCompare(b.orderDate);
+        case "weddingDateAsc": return a.weddingDate.localeCompare(b.weddingDate);
+        case "amountDesc": return (b.quantity*b.unitPrice) - (a.quantity*a.unitPrice);
+        default: return b.orderDate.localeCompare(a.orderDate);
+      }
+    });
+    return list;
+  }
+
+  function renderTable(){
+    var list = getFiltered();
+    var tbody = document.getElementById("tbody");
+    state.selectedIds = state.selectedIds.filter(function(id){
+      return state.orders.some(function(o){ return o.id === id; });
+    });
+
+    var totalPages = Math.max(1, Math.ceil(list.length / state.pageSize));
+    if(state.page > totalPages) state.page = totalPages;
+    if(state.page < 1) state.page = 1;
+    var startIdx = (state.page - 1) * state.pageSize;
+    var pageList = list.slice(startIdx, startIdx + state.pageSize);
+
+    if(list.length === 0){
+      tbody.innerHTML = '<tr><td colspan="12"><div class="empty"><div class="big">조건에 맞는 주문이 없어요</div>검색어나 필터를 조정해보세요.</div></td></tr>';
+    } else {
+      tbody.innerHTML = pageList.map(function(o){
+        var checked = state.selectedIds.indexOf(o.id) !== -1;
+        var diff = diffDays(o.weddingDate);
+        var urgent = diff >= 0 && diff < 10;
+        return '<tr data-id="'+o.id+'"'+(checked?' class="is-selected"':'')+'>' +
+          '<td class="checkbox-col"><input type="checkbox" class="row-check" data-id="'+o.id+'"'+(checked?' checked':'')+' aria-label="'+esc(o.orderNo)+' 선택" /></td>' +
+          '<td><button type="button" class="order-link mono'+(o.paymentStatus==="결제취소"?' payment-cancelled':'')+'" data-action="draft">'+orderNoShort(o.orderNo)+'</button><div class="subrow mono">'+fmtDate(o.orderDate)+'</div></td>' +
+          '<td><button type="button" class="customer" data-action="customer">'+esc(o.customerName)+'</button><div class="subrow">'+esc(o.phone||"-")+'</div></td>' +
+          '<td><div class="mono wed-date'+(urgent?' urgent':'')+'">'+fmtDate(o.weddingDate)+'</div><div class="subrow'+(urgent?' urgent':'')+'">'+dday(diff)+'</div></td>' +
+          '<td><div class="product">'+productIcon(o.productName)+'<div class="product-text"><span class="name">'+esc(o.productName)+'</span>'+(o.option?'<span class="opt">'+esc(o.option)+'</span>':'')+'</div></div></td>' +
+          '<td><span class="item-code">'+esc(productCode(o))+'</span></td>' +
+          '<td>'+(o.withInvitation ? '<span class="pill inv-yes">함께주문</span>' : '<span class="pill inv-no">단독 주문</span>')+'</td>' +
+          '<td class="num mono">'+o.quantity.toLocaleString("ko-KR")+'</td>' +
+          '<td><span class="pill pay-'+o.paymentStatus+'">'+o.paymentStatus+'</span></td>' +
+          '<td><span class="pill st-'+o.orderStatus+'">'+o.orderStatus+'</span></td>' +
+          '<td>' + folderButton(o) + '</td>' +
+          '<td><div class="row-actions">' +
+            '<button class="icon-btn'+(o.memo?' note-active':'')+'" data-action="note" title="'+(o.memo?'요청사항 보기':'요청사항 없음')+'"'+(o.memo?'':' disabled')+'><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join("");
+    }
+    renderPagination(list.length, totalPages, startIdx, pageList.length);
+    syncSelectAllCheckbox(pageList);
+    renderBulkBar();
+  }
+
+  function renderPagination(total, totalPages, startIdx, shownCount){
+    var foot = document.getElementById("tableFoot");
+    var rangeText = total === 0 ? "0건" : ("전체 "+total+"건 중 "+(startIdx+1)+"–"+(startIdx+shownCount)+"건 표시");
+    var btns = '<button type="button" class="page-btn" data-page="prev"'+(state.page<=1?' disabled':'')+'>‹</button>';
+    for(var p=1; p<=totalPages; p++){
+      btns += '<button type="button" class="page-btn'+(p===state.page?' active':'')+'" data-page="'+p+'">'+p+'</button>';
+    }
+    btns += '<button type="button" class="page-btn" data-page="next"'+(state.page>=totalPages?' disabled':'')+'>›</button>';
+    foot.innerHTML = '<span>'+rangeText+'</span><div class="pagination">'+btns+'</div>';
+  }
+
+  function currentPageList(){
+    var list = getFiltered();
+    var totalPages = Math.max(1, Math.ceil(list.length / state.pageSize));
+    var page = Math.min(Math.max(state.page, 1), totalPages);
+    var start = (page - 1) * state.pageSize;
+    return list.slice(start, start + state.pageSize);
+  }
+
+  function syncSelectAllCheckbox(list){
+    var cb = document.getElementById("selectAllCheckbox");
+    if(!list.length){ cb.checked = false; cb.indeterminate = false; return; }
+    var selectedCount = list.filter(function(o){ return state.selectedIds.indexOf(o.id) !== -1; }).length;
+    cb.checked = selectedCount === list.length;
+    cb.indeterminate = selectedCount > 0 && selectedCount < list.length;
+  }
+
+  function renderBulkBar(){
+    var bar = document.getElementById("bulkBar");
+    var n = state.selectedIds.length;
+    if(n === 0){ bar.hidden = true; return; }
+    bar.hidden = false;
+    document.getElementById("bulkCount").textContent = n + "건 선택됨";
+  }
+
+  function esc(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  var PRODUCT_ICONS = {
+    "아크릴 키링": '<path d="M12 3l7 4v10l-7 4-7-4V7l7-4Z"/><circle cx="12" cy="12" r="2"/>',
+    "아크릴 폰그립": '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/>',
+    "아크릴 마그넷": '<path d="M7 4v7a5 5 0 0 0 10 0V4"/><path d="M7 4h4M13 4h4"/><path d="M7 11h4M13 11h4"/>',
+    "즉석 포토프린팅": '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-4 4-3-3-6 6"/>',
+    "웨딩스탬프": '<rect x="5" y="4" width="14" height="16" rx="1.5"/><path d="M5 8l2-1 2 1 2-1 2 1 2-1 2 1V4H5v4Z"/><circle cx="12" cy="13" r="3"/>',
+    "웨딩신문": '<rect x="3" y="5" width="15" height="15" rx="1"/><path d="M18 8h3v10a2 2 0 0 1-2 2H8"/><path d="M6 9h9M6 12h9M6 15h5"/>',
+    "커스텀 스티커": '<path d="M12 3l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8L12 3Z"/>',
+    "메시지카드": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+    "퍼즐액자": '<path d="M6 3h5v3.5a1.5 1.5 0 0 0 3 0V3h5v5h-3.5a1.5 1.5 0 0 0 0 3H19v5h-5v-3.5a1.5 1.5 0 0 0-3 0V16H6v-5h3.5a1.5 1.5 0 0 0 0-3H6V3Z"/>',
+    "엽서 세트": '<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 7l9 5 9-5"/><path d="M15 15h4"/><path d="M15 17.5h4"/>',
+    "테이블 캘린더": '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1"/><circle cx="12" cy="14.5" r="1"/><circle cx="15.5" cy="14.5" r="1"/>'
+  };
+  var PRODUCT_ICON_FALLBACK = '<path d="M4 8l8-4 8 4v9l-8 4-8-4V8Z"/><path d="M4 8l8 4 8-4"/><path d="M12 12v9"/>';
+  var PRODUCT_LINK_URL = "https://www.barunsoncard.com/Product/CardList?MdSeq=137";
+  function productIcon(name){
+    var inner = PRODUCT_ICONS[name] || PRODUCT_ICON_FALLBACK;
+    return '<a class="product-thumb" href="'+PRODUCT_LINK_URL+'" target="_blank" rel="noopener noreferrer" ' +
+      'title="바른손카드에서 ' + esc(name) + ' 보기" onclick="event.stopPropagation()">' +
+      '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>' +
+    '</a>';
+  }
+
+  var PRODUCT_CODE_SLUGS = {
+    "아크릴 키링": "keyring",
+    "아크릴 폰그립": "phonegrip",
+    "아크릴 마그넷": "magnet",
+    "즉석 포토프린팅": "photo",
+    "웨딩스탬프": "stamp",
+    "웨딩신문": "newspaper",
+    "커스텀 스티커": "sticker",
+    "메시지카드": "card",
+    "퍼즐액자": "puzzle",
+    "엽서 세트": "postcard",
+    "테이블 캘린더": "calendar"
+  };
+  function productCode(o){
+    var year = (o.orderDate || "").slice(0,4) || "2026";
+    var slug = PRODUCT_CODE_SLUGS[o.productName] || "item";
+    return year + "_" + slug + "_01";
+  }
+
+  var FOLDER_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>';
+  function folderButton(o){
+    var n = (o.attachments || []).length;
+    return '<button class="icon-btn'+(n?' note-active':'')+'" data-action="files" title="첨부파일'+(n?' ('+n+'건)':' 추가')+'">' +
+      FOLDER_ICON + (n ? '<span class="mini-badge">'+n+'</span>' : '') +
+    '</button>';
+  }
+
+  function weekStart(dateStr){
+    var d = new Date(dateStr + "T00:00:00");
+    var day = d.getDay();
+    var diff = (day === 0 ? -6 : 1) - day;
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+  var QUICK_STATUSES = ["주문완료","초안등록","고객확정완료","인쇄팀전달"];
+  function renderQuickStats(){
+    document.getElementById("statusQuickTiles").innerHTML = QUICK_STATUSES.map(function(s){
+      var count = state.orders.filter(function(o){ return o.orderStatus === s && o.orderDate === state.quickStatsDate; }).length;
+      return '<button type="button" class="quick-stat" data-status="'+s+'">' +
+        '<span class="label">'+s+'</span>' +
+        '<span class="value">'+count+' <small>건</small></span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function openStatusDetail(status){
+    var source = state.orders.filter(function(o){ return o.orderStatus === status && o.orderDate === state.quickStatsDate; });
+    var counts = {};
+    source.forEach(function(o){ counts[o.productName] = (counts[o.productName] || 0) + 1; });
+    var entries = Object.keys(counts).map(function(name){ return {name:name, count:counts[name]}; });
+    entries.sort(function(a,b){ return b.count - a.count; });
+    document.getElementById("statusDetailTitle").textContent = fmtDate(state.quickStatsDate) + " · " + status + " (" + source.length + "건)";
+    var el = document.getElementById("statusDetailList");
+    if(!entries.length){
+      el.innerHTML = '<div class="breakdown-empty">선택한 날짜에 해당 상태의 주문이 없어요</div>';
+    } else {
+      el.innerHTML = entries.map(function(e){
+        return '<button type="button" class="breakdown-row" data-status="'+status+'" data-product="'+esc(e.name)+'">' +
+          '<span class="p-name">'+esc(e.name)+'</span>' +
+          '<span class="p-count">'+e.count+' <small>건</small></span>' +
+        '</button>';
+      }).join("");
+    }
+    document.getElementById("statusDetailOverlay").hidden = false;
+  }
+  function closeStatusDetail(){ document.getElementById("statusDetailOverlay").hidden = true; }
+
+  function renderBreakdown(){
+    var source;
+    if(state.breakdownPeriod === "week"){
+      var wStart = weekStart(TODAY);
+      var wEnd = new Date(wStart); wEnd.setDate(wEnd.getDate() + 6);
+      source = state.orders.filter(function(o){
+        var d = new Date(o.orderDate + "T00:00:00");
+        return d >= wStart && d <= wEnd;
+      });
+    } else {
+      source = state.orders.filter(function(o){ return o.orderDate === TODAY; });
+    }
+    var counts = {};
+    source.forEach(function(o){
+      counts[o.productName] = (counts[o.productName] || 0) + 1;
+    });
+    var entries = Object.keys(counts).map(function(name){
+      return { name: name, count: counts[name] };
+    });
+    entries.sort(function(a,b){ return b.count - a.count; });
+    var total = entries.reduce(function(s,e){ return s + e.count; }, 0);
+
+    document.getElementById("breakdownTotal").textContent = total ? ("· 총 " + total + "건") : "";
+
+    var rowsEl = document.getElementById("breakdownList");
+    if(entries.length === 0){
+      rowsEl.innerHTML = '<div class="breakdown-empty">' + (state.breakdownPeriod === "week" ? "이번 주 등록된 주문이 없어요" : "오늘 등록된 주문이 없어요") + '</div>';
+      return;
+    }
+    rowsEl.innerHTML = entries.map(function(e){
+      var active = state.productFilter === e.name;
+      return '<button type="button" class="breakdown-row'+(active?' active':'')+'" data-product="'+esc(e.name)+'">' +
+        '<span class="p-name">'+esc(e.name)+'</span>' +
+        '<span class="p-count">'+e.count+' <small>건</small></span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function renderAll(){ renderStats(); renderChips(); renderBreakdown(); renderTable(); renderQuickStats(); }
+
+  // ---------- order modal ----------
+  var overlay = document.getElementById("orderOverlay");
+  var form = document.getElementById("orderForm");
+  var modalTitle = document.getElementById("modalTitle");
+  var saveBtn = document.getElementById("saveOrderBtn");
+
+  function openEditOrder(id){
+    var o = state.orders.find(function(x){ return x.id === id; });
+    if(!o) return;
+    state.editingId = id;
+    modalTitle.textContent = "주문 수정 · " + o.orderNo;
+    saveBtn.textContent = "저장하기";
+    form.reset();
+    Object.keys(o).forEach(function(k){
+      if(form[k] && k !== "withInvitation") form[k].value = o[k];
+    });
+    form.withInvitation.checked = !!o.withInvitation;
+    updateTotalPreview();
+    overlay.hidden = false;
+  }
+
+  function closeOrderModal(){ overlay.hidden = true; state.editingId = null; }
+
+  function updateTotalPreview(){
+    var q = parseInt(form.quantity.value,10) || 0;
+    var p = parseInt(form.unitPrice.value,10) || 0;
+    document.getElementById("totalPreview").textContent = won(q*p);
+  }
+
+  form.addEventListener("input", function(e){
+    if(e.target.name === "quantity" || e.target.name === "unitPrice") updateTotalPreview();
+  });
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var fd = new FormData(form);
+    var data = {};
+    fd.forEach(function(v,k){ data[k] = v; });
+    data.quantity = parseInt(data.quantity,10) || 0;
+    data.unitPrice = parseInt(data.unitPrice,10) || 0;
+    data.withInvitation = form.withInvitation.checked;
+
+    if(state.editingId){
+      var idx = state.orders.findIndex(function(x){ return x.id === state.editingId; });
+      state.orders[idx] = Object.assign({}, state.orders[idx], data);
+    } else {
+      data.id = nextId();
+      data.orderNo = nextOrderNo();
+      state.orders.push(data);
+    }
+    save();
+    closeOrderModal();
+    renderAll();
+  });
+
+  document.getElementById("closeOrderModal").addEventListener("click", closeOrderModal);
+  document.getElementById("cancelOrderModal").addEventListener("click", closeOrderModal);
+  overlay.addEventListener("click", function(e){ if(e.target === overlay) closeOrderModal(); });
+
+  // ---------- delete modal ----------
+  var deleteOverlay = document.getElementById("deleteOverlay");
+  function openBulkDeleteModal(){
+    if(state.selectedIds.length === 0) return;
+    state.deletingId = "BULK";
+    document.getElementById("deleteTargetName").textContent = "선택한 " + state.selectedIds.length + "건의";
+    deleteOverlay.hidden = false;
+  }
+  function closeDeleteModal(){ deleteOverlay.hidden = true; state.deletingId = null; }
+  document.getElementById("closeDeleteModal").addEventListener("click", closeDeleteModal);
+  document.getElementById("cancelDeleteModal").addEventListener("click", closeDeleteModal);
+  deleteOverlay.addEventListener("click", function(e){ if(e.target === deleteOverlay) closeDeleteModal(); });
+  document.getElementById("confirmDeleteBtn").addEventListener("click", function(){
+    if(state.deletingId === "BULK"){
+      var ids = state.selectedIds;
+      state.orders = state.orders.filter(function(o){ return ids.indexOf(o.id) === -1; });
+      state.selectedIds = [];
+    } else {
+      state.orders = state.orders.filter(function(o){ return o.id !== state.deletingId; });
+    }
+    save();
+    closeDeleteModal();
+    renderAll();
+  });
+  document.getElementById("bulkDeleteBtn").addEventListener("click", openBulkDeleteModal);
+
+  // ---------- customer request note modal ----------
+  var noteOverlay = document.getElementById("noteOverlay");
+  function openNoteModal(id){
+    var o = state.orders.find(function(x){ return x.id === id; });
+    if(!o || !o.memo) return;
+    document.getElementById("noteCustomer").textContent = o.customerName + " 고객님";
+    document.getElementById("noteOrderNo").textContent = o.orderNo;
+    document.getElementById("noteBody").textContent = o.memo;
+    noteOverlay.hidden = false;
+  }
+  function closeNoteModal(){ noteOverlay.hidden = true; }
+  document.getElementById("closeNoteModal").addEventListener("click", closeNoteModal);
+  document.getElementById("closeNoteBtn2").addEventListener("click", closeNoteModal);
+  noteOverlay.addEventListener("click", function(e){ if(e.target === noteOverlay) closeNoteModal(); });
+
+  // ---------- attachments modal ----------
+  var filesOverlay = document.getElementById("filesOverlay");
+  function openFilesModal(id){
+    var o = state.orders.find(function(x){ return x.id === id; });
+    if(!o) return;
+    state.filesEditingId = id;
+    document.getElementById("filesTitle").textContent = "첨부파일 · " + o.orderNo;
+    renderFilesList();
+    filesOverlay.hidden = false;
+  }
+  function closeFilesModal(){ filesOverlay.hidden = true; state.filesEditingId = null; }
+  function renderFilesList(){
+    var o = state.orders.find(function(x){ return x.id === state.filesEditingId; });
+    var list = (o && o.attachments) || [];
+    var el = document.getElementById("filesList");
+    if(!list.length){
+      el.innerHTML = '<div class="breakdown-empty" style="padding:4px 0 4px;">첨부된 파일이 없어요</div>';
+      return;
+    }
+    el.innerHTML = list.map(function(fn, idx){
+      return '<div class="file-row">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>' +
+        '<span class="file-name">'+esc(fn)+'</span>' +
+        '<button type="button" class="file-remove" data-idx="'+idx+'" aria-label="삭제">×</button>' +
+      '</div>';
+    }).join("");
+  }
+  document.getElementById("closeFilesModal").addEventListener("click", closeFilesModal);
+  document.getElementById("closeFilesBtn2").addEventListener("click", closeFilesModal);
+  filesOverlay.addEventListener("click", function(e){ if(e.target === filesOverlay) closeFilesModal(); });
+  document.getElementById("filesInput").addEventListener("change", function(e){
+    var o = state.orders.find(function(x){ return x.id === state.filesEditingId; });
+    if(!o) return;
+    if(!o.attachments) o.attachments = [];
+    Array.prototype.forEach.call(e.target.files, function(f){ o.attachments.push(f.name); });
+    e.target.value = "";
+    save();
+    renderFilesList();
+    renderTable();
+  });
+  document.getElementById("filesList").addEventListener("click", function(e){
+    var btn = e.target.closest(".file-remove");
+    if(!btn) return;
+    var o = state.orders.find(function(x){ return x.id === state.filesEditingId; });
+    if(!o || !o.attachments) return;
+    o.attachments.splice(parseInt(btn.getAttribute("data-idx"),10), 1);
+    save();
+    renderFilesList();
+    renderTable();
+  });
+
+  // ---------- courier info modal ----------
+  var courierOverlay = document.getElementById("courierOverlay");
+  function openCourierModal(id){
+    var o = state.orders.find(function(x){ return x.id === id; });
+    if(!o) return;
+    state.courierViewingId = id;
+    document.getElementById("courierCustomer").textContent = o.customerName + " 고객님";
+    document.getElementById("courierOrderNo").textContent = o.orderNo;
+    var rows = [
+      {label:"택배사", value: o.courierCompany || "미입력"},
+      {label:"운송장번호", value: o.trackingNumber || "미입력"},
+      {label:"배송완료일", value: o.deliveredDate ? fmtDate(o.deliveredDate) : "미입력"},
+      {label:"수령방법", value: o.deliveryMethod || "미입력"},
+      {label:"배송지", value: o.address || (o.deliveryMethod === "방문수령" ? "방문수령" : "미입력")}
+    ];
+    document.getElementById("courierBody").innerHTML = rows.map(function(r){
+      var muted = r.value === "미입력";
+      return '<div class="courier-row"><span class="courier-label">'+r.label+'</span><span class="courier-value'+(muted?' muted':'')+'">'+esc(r.value)+'</span></div>';
+    }).join("");
+    courierOverlay.hidden = false;
+  }
+  function closeCourierModal(){ courierOverlay.hidden = true; state.courierViewingId = null; }
+  document.getElementById("closeCourierModal").addEventListener("click", closeCourierModal);
+  document.getElementById("closeCourierBtn2").addEventListener("click", closeCourierModal);
+  courierOverlay.addEventListener("click", function(e){ if(e.target === courierOverlay) closeCourierModal(); });
+  document.getElementById("courierEditBtn").addEventListener("click", function(){
+    var id = state.courierViewingId;
+    closeCourierModal();
+    if(id) openEditOrder(id);
+  });
+
+  // ---------- customer info modal ----------
+  var customerOverlay = document.getElementById("customerOverlay");
+  function openCustomerModal(id){
+    var o = state.orders.find(function(x){ return x.id === id; });
+    if(!o) return;
+    document.getElementById("customerModalTitle").textContent = o.customerName + " 고객님";
+    var infoRows = [
+      {label:"ID", value: orderNoShort(o.orderNo)},
+      {label:"연락처", value: o.phone || "미입력"},
+      {label:"주소", value: o.address || (o.deliveryMethod === "방문수령" ? "방문수령" : "미입력")}
+    ];
+    document.getElementById("customerInfoBody").innerHTML = infoRows.map(function(r){
+      var muted = r.value === "미입력";
+      return '<div class="courier-row"><span class="courier-label">'+r.label+'</span><span class="courier-value'+(muted?' muted':'')+'">'+esc(r.value)+'</span></div>';
+    }).join("");
+    var amount = o.quantity * o.unitPrice;
+    var orderRows = [
+      {label:"상품명", value: o.productName},
+      {label:"수량", value: o.quantity.toLocaleString("ko-KR") + "개"},
+      {label:"금액", value: won(amount)},
+      {label:"예식일", value: fmtDate(o.weddingDate)},
+      {label:"진행상태", value: o.orderStatus}
+    ];
+    document.getElementById("customerOrderBody").innerHTML = orderRows.map(function(r){
+      return '<div class="courier-row"><span class="courier-label">'+r.label+'</span><span class="courier-value">'+esc(r.value)+'</span></div>';
+    }).join("");
+    customerOverlay.hidden = false;
+  }
+  function closeCustomerModal(){ customerOverlay.hidden = true; }
+  document.getElementById("closeCustomerModal").addEventListener("click", closeCustomerModal);
+  document.getElementById("closeCustomerBtn2").addEventListener("click", closeCustomerModal);
+  customerOverlay.addEventListener("click", function(e){ if(e.target === customerOverlay) closeCustomerModal(); });
+
+  // ---------- draft upload drawer ----------
+  var draftOverlay = document.getElementById("draftOverlay");
+  function openDraftDrawer(id){
+    var o = state.orders.find(function(x){ return x.id === id; });
+    if(!o) return;
+    state.draftEditingId = id;
+    document.getElementById("draftDrawerTitle").textContent = "주문 내용 · 초안 업로드 · " + o.orderNo;
+    var summary = [
+      {k:"주문자명", v:o.customerName},
+      {k:"상품명", v:o.productName + (o.option ? " · " + o.option : "")},
+      {k:"수량", v:o.quantity.toLocaleString("ko-KR") + "개"},
+      {k:"예식일", v:fmtDate(o.weddingDate)},
+      {k:"진행상태", v:o.orderStatus},
+      {k:"주문일자", v:fmtDate(o.orderDate)}
+    ];
+    document.getElementById("draftOrderSummary").innerHTML = summary.map(function(s){
+      return '<div class="item"><span class="k">'+s.k+'</span><span class="v">'+esc(s.v)+'</span></div>';
+    }).join("");
+    var memoEl = document.getElementById("draftMemoBody");
+    if(o.memo){
+      memoEl.textContent = o.memo;
+      memoEl.classList.remove("empty");
+    } else {
+      memoEl.textContent = "등록된 요청사항이 없어요";
+      memoEl.classList.add("empty");
+    }
+    renderDraftFilesList();
+    draftOverlay.hidden = false;
+  }
+  function closeDraftDrawer(){ draftOverlay.hidden = true; state.draftEditingId = null; }
+  function renderDraftFilesList(){
+    var o = state.orders.find(function(x){ return x.id === state.draftEditingId; });
+    var list = (o && o.drafts) || [];
+    var el = document.getElementById("draftFilesList");
+    if(!list.length){
+      el.innerHTML = '<div class="breakdown-empty" style="padding:4px 0 4px;">업로드된 초안이 없어요</div>';
+      return;
+    }
+    el.innerHTML = list.map(function(fn, idx){
+      return '<div class="file-row">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>' +
+        '<span class="file-name">'+esc(fn)+'</span>' +
+        '<button type="button" class="file-remove" data-idx="'+idx+'" aria-label="삭제">×</button>' +
+      '</div>';
+    }).join("");
+  }
+  document.getElementById("closeDraftDrawer").addEventListener("click", closeDraftDrawer);
+  document.getElementById("closeDraftDrawerBtn2").addEventListener("click", closeDraftDrawer);
+  draftOverlay.addEventListener("click", function(e){ if(e.target === draftOverlay) closeDraftDrawer(); });
+  document.getElementById("draftFilesInput").addEventListener("change", function(e){
+    var o = state.orders.find(function(x){ return x.id === state.draftEditingId; });
+    if(!o) return;
+    if(!o.drafts) o.drafts = [];
+    Array.prototype.forEach.call(e.target.files, function(f){ o.drafts.push(f.name); });
+    e.target.value = "";
+    save();
+    renderDraftFilesList();
+  });
+  document.getElementById("draftFilesList").addEventListener("click", function(e){
+    var btn = e.target.closest(".file-remove");
+    if(!btn) return;
+    var o = state.orders.find(function(x){ return x.id === state.draftEditingId; });
+    if(!o || !o.drafts) return;
+    o.drafts.splice(parseInt(btn.getAttribute("data-idx"),10), 1);
+    save();
+    renderDraftFilesList();
+  });
+
+  // ---------- table row actions ----------
+  document.getElementById("tbody").addEventListener("click", function(e){
+    var noteBtn = e.target.closest('[data-action="note"]');
+    if(noteBtn){
+      openNoteModal(parseInt(noteBtn.closest("tr").getAttribute("data-id"),10));
+      return;
+    }
+    var filesBtn = e.target.closest('[data-action="files"]');
+    if(filesBtn){
+      openFilesModal(parseInt(filesBtn.closest("tr").getAttribute("data-id"),10));
+      return;
+    }
+    var customerBtn = e.target.closest('[data-action="customer"]');
+    if(customerBtn){
+      openCustomerModal(parseInt(customerBtn.closest("tr").getAttribute("data-id"),10));
+      return;
+    }
+    var draftBtn = e.target.closest('[data-action="draft"]');
+    if(draftBtn){
+      openDraftDrawer(parseInt(draftBtn.closest("tr").getAttribute("data-id"),10));
+      return;
+    }
+    if(e.target.closest(".product-thumb")) return;
+    if(e.target.closest(".row-check")) return;
+    var tr = e.target.closest("tr[data-id]");
+    if(!tr) return;
+    var id = parseInt(tr.getAttribute("data-id"),10);
+    var o = state.orders.find(function(x){ return x.id === id; });
+    if(o && o.orderStatus === "배송완료") openCourierModal(id);
+    else openEditOrder(id);
+  });
+  document.getElementById("tbody").addEventListener("change", function(e){
+    if(!e.target.classList.contains("row-check")) return;
+    var id = parseInt(e.target.getAttribute("data-id"),10);
+    var idx = state.selectedIds.indexOf(id);
+    if(e.target.checked && idx === -1) state.selectedIds.push(id);
+    if(!e.target.checked && idx !== -1) state.selectedIds.splice(idx,1);
+    syncSelectAllCheckbox(currentPageList());
+    renderBulkBar();
+  });
+  document.getElementById("selectAllCheckbox").addEventListener("change", function(e){
+    var list = currentPageList();
+    if(e.target.checked){
+      list.forEach(function(o){ if(state.selectedIds.indexOf(o.id) === -1) state.selectedIds.push(o.id); });
+    } else {
+      var visibleIds = list.map(function(o){ return o.id; });
+      state.selectedIds = state.selectedIds.filter(function(id){ return visibleIds.indexOf(id) === -1; });
+    }
+    renderTable();
+  });
+
+  // ---------- breakdown filters ----------
+  function toggleProductFilter(product){
+    state.productFilter = state.productFilter === product ? null : product;
+    state.page = 1;
+    renderBreakdown(); renderTable();
+  }
+  document.getElementById("breakdownList").addEventListener("click", function(e){
+    var row = e.target.closest(".breakdown-row");
+    if(!row) return;
+    toggleProductFilter(row.getAttribute("data-product"));
+  });
+
+  // ---------- toolbar ----------
+  document.getElementById("searchInput").addEventListener("input", function(e){
+    state.search = e.target.value; state.page = 1; renderTable();
+  });
+  var orderDateFilterInput = document.getElementById("orderDateFilter");
+  orderDateFilterInput.value = state.orderDateFilter;
+  orderDateFilterInput.addEventListener("change", function(e){
+    state.orderDateFilter = e.target.value || "";
+    state.page = 1;
+    renderTable();
+  });
+  document.getElementById("orderDateFilterWrap").addEventListener("click", function(){
+    if(state.showAllDates) return;
+    try{ orderDateFilterInput.showPicker(); }catch(err){ orderDateFilterInput.focus(); }
+  });
+  document.getElementById("showAllDates").addEventListener("change", function(e){
+    state.showAllDates = e.target.checked;
+    document.getElementById("orderDateFilterWrap").classList.toggle("disabled", state.showAllDates);
+    state.page = 1;
+    renderTable();
+  });
+  document.getElementById("statusChips").addEventListener("click", function(e){
+    var chip = e.target.closest(".chip");
+    if(!chip) return;
+    state.status = chip.getAttribute("data-status");
+    state.page = 1;
+    renderChips(); renderTable();
+  });
+  document.getElementById("sortSelect").addEventListener("change", function(e){
+    state.sort = e.target.value; renderTable();
+  });
+  document.getElementById("paymentFilterSelect").addEventListener("change", function(e){
+    state.paymentFilter = e.target.value; state.page = 1; renderTable();
+  });
+  document.getElementById("pageSizeSelect").addEventListener("change", function(e){
+    state.pageSize = parseInt(e.target.value, 10) || 10;
+    state.page = 1;
+    renderTable();
+  });
+  document.getElementById("tableFoot").addEventListener("click", function(e){
+    var btn = e.target.closest(".page-btn");
+    if(!btn || btn.disabled) return;
+    var p = btn.getAttribute("data-page");
+    if(p === "prev") state.page -= 1;
+    else if(p === "next") state.page += 1;
+    else state.page = parseInt(p, 10);
+    renderTable();
+  });
+  document.getElementById("statusQuickTiles").addEventListener("click", function(e){
+    var btn = e.target.closest(".quick-stat");
+    if(!btn) return;
+    openStatusDetail(btn.getAttribute("data-status"));
+  });
+  var statusDetailOverlay = document.getElementById("statusDetailOverlay");
+  document.getElementById("closeStatusDetailModal").addEventListener("click", closeStatusDetail);
+  document.getElementById("closeStatusDetailBtn2").addEventListener("click", closeStatusDetail);
+  statusDetailOverlay.addEventListener("click", function(e){ if(e.target === statusDetailOverlay) closeStatusDetail(); });
+  document.getElementById("statusDetailList").addEventListener("click", function(e){
+    var row = e.target.closest(".breakdown-row");
+    if(!row) return;
+    state.status = row.getAttribute("data-status");
+    state.productFilter = row.getAttribute("data-product");
+    state.page = 1;
+    closeStatusDetail();
+    renderChips(); renderBreakdown(); renderTable();
+    switchView("list");
+  });
+  document.getElementById("breakdownSeg").addEventListener("click", function(e){
+    var btn = e.target.closest(".seg-btn");
+    if(!btn) return;
+    state.breakdownPeriod = btn.getAttribute("data-period");
+    document.querySelectorAll("#breakdownSeg .seg-btn").forEach(function(b){
+      b.classList.toggle("active", b === btn);
+    });
+    renderBreakdown();
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){
+      if(!overlay.hidden) closeOrderModal();
+      if(!deleteOverlay.hidden) closeDeleteModal();
+      if(!noteOverlay.hidden) closeNoteModal();
+      if(!filesOverlay.hidden) closeFilesModal();
+      if(!courierOverlay.hidden) closeCourierModal();
+      if(!statusDetailOverlay.hidden) closeStatusDetail();
+      if(!customerOverlay.hidden) closeCustomerModal();
+      if(!draftOverlay.hidden) closeDraftDrawer();
+    }
+  });
+
+  // ---------- sidebar nav ----------
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 1800);
+  }
+  document.getElementById("sidebarNav").addEventListener("click", function(e){
+    var item = e.target.closest(".nav-item");
+    if(!item) return;
+    e.preventDefault();
+    if(item.classList.contains("active")) return;
+    showToast("준비 중인 화면이에요");
+  });
+
+  // ---------- quick stats date picker ----------
+  var quickStatsDateInput = document.getElementById("quickStatsDate");
+  quickStatsDateInput.value = state.quickStatsDate;
+  quickStatsDateInput.addEventListener("change", function(e){
+    state.quickStatsDate = e.target.value || TODAY;
+    renderQuickStats();
+  });
+  document.getElementById("quickStatsDateWrap").addEventListener("click", function(){
+    try{ quickStatsDateInput.showPicker(); }catch(err){ quickStatsDateInput.focus(); }
+  });
+
+  document.getElementById("viewTabs").addEventListener("click", function(e){
+    var tab = e.target.closest(".view-tab");
+    if(!tab) return;
+    switchView(tab.getAttribute("data-view"));
+  });
+
+  // ---------- init ----------
+  document.getElementById("todayLabel").textContent = TODAY.replace(/-/g,".") + " 기준";
+  load();
+  renderAll();
+  switchView(state.view);
+})();
+</script>
+
+</body></html>
