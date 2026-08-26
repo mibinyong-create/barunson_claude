@@ -40,8 +40,9 @@ export function AppShell({ title, breadcrumb, children, actions }: Props) {
     api
       .summary(TODAY, controller.signal)
       .then((s) => setTodayCount(s.todayNewOrders))
-      .catch(() => {
-        /* 벨 배지는 실패해도 화면을 막지 않는다 */
+      .catch((e: unknown) => {
+        // 벨 배지는 실패해도 화면을 막지 않되, 원인은 남긴다.
+        if (!controller.signal.aborted) console.warn("[shell] 오늘 신규 주문 조회 실패:", e);
       });
     return () => controller.abort();
   }, []);

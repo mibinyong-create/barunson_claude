@@ -13,9 +13,13 @@ import { Client } from "pg";
 const ROOT = process.cwd();
 
 async function main() {
-  const connectionString =
-    process.env.DATABASE_URL ??
-    "postgresql://order_admin:order_admin_pw@localhost:5433/order_manager";
+  // 이 스크립트는 DROP SCHEMA public CASCADE 를 실행한다.
+  // 기본값으로 폴백하면 의도치 않은 DB 를 날릴 수 있으므로 반드시 명시해야 한다.
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error("DATABASE_URL 이 설정되지 않았습니다. .env 를 확인하세요.");
+    process.exit(1);
+  }
 
   const client = new Client({ connectionString });
   await client.connect();

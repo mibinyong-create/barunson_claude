@@ -1,5 +1,7 @@
 import { ZodError } from "zod";
 
+const isProduction = () => process.env.NODE_ENV === "production";
+
 export function ok<T>(data: T, init?: ResponseInit) {
   return Response.json(data, init);
 }
@@ -11,6 +13,9 @@ export function fail(message: string, status = 400, extra?: unknown) {
 /**
  * 라우트 핸들러 공통 래퍼.
  * zod 검증 실패 → 400 + 필드별 메시지, 그 외 예외 → 500.
+ *
+ * 프로덕션에서는 예외 원문을 응답에 싣지 않는다. pg 에러 메시지에는
+ * 테이블/컬럼명·접속 호스트·실패한 입력값이 포함되어 정보 노출 경로가 된다.
  */
 export async function handle(fn: () => Promise<Response>): Promise<Response> {
   try {
@@ -25,15 +30,19 @@ export async function handle(fn: () => Promise<Response>): Promise<Response> {
       if (e.code === "23503") return fail("참조하는 데이터가 존재하지 않습니다.", 400);
       if (e.code === "23514") return fail("데이터 제약 조건을 위반했습니다.", 400);
       if (e.code === "ECONNREFUSED" || e.code === "57P03") {
+        console.error("[api] database unavailable:", e);
         return fail(
-          "데이터베이스에 연결할 수 없습니다. `docker compose up -d` 로 postgres 를 먼저 띄워주세요.",
+          isProduction()
+            ? "일시적으로 데이터베이스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."
+            : "데이터베이스에 연결할 수 없습니다. `docker compose up -d` 로 postgres 를 먼저 띄워주세요.",
           503,
         );
       }
     }
+
     console.error("[api] unhandled error:", e);
-    const message = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
-    return fail(message, 500);
+    const detail = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
+    return fail(isProduction() ? "서버 오류가 발생했습니다." : detail, 500);
   }
 }
 

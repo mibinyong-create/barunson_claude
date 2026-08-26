@@ -9,9 +9,9 @@ import type {
 } from "@/lib/types";
 
 /** order_list_view 의 snake_case 행 → camelCase Order */
-type OrderRow = Record<string, unknown>;
+export type OrderRow = Record<string, unknown>;
 
-function mapOrder(r: OrderRow): Order {
+export function mapOrder(r: OrderRow): Order {
   return {
     id: r.id as number,
     orderNo: r.order_no as string,
@@ -64,12 +64,14 @@ function mapFile(r: OrderRow): OrderFile {
   };
 }
 
-const SORT_SQL: Record<string, string> = {
-  orderDateDesc: "order_date DESC, id DESC",
-  orderDateAsc: "order_date ASC, id ASC",
-  weddingDateAsc: "wedding_date ASC, id ASC",
-  amountDesc: "total_amount DESC, id DESC",
-};
+// Map 을 쓰면 sort="constructor" 같은 값이 Object.prototype 의 멤버를 반환하는 일이 없다.
+const SORT_SQL = new Map<string, string>([
+  ["orderDateDesc", "order_date DESC, id DESC"],
+  ["orderDateAsc", "order_date ASC, id ASC"],
+  ["weddingDateAsc", "wedding_date ASC, id ASC"],
+  ["amountDesc", "total_amount DESC, id DESC"],
+]);
+const DEFAULT_SORT_SQL = SORT_SQL.get("orderDateDesc")!;
 
 /**
  * 목록 조회. 원본의 getFiltered() 와 동일한 필터 조합(AND)을 SQL 로 옮긴 것.
@@ -95,11 +97,21 @@ export async function listOrders(params: OrderListParams): Promise<Paged<Order>>
   const add = (v: unknown) => `$${values.push(v)}`;
 
   if (search && search.trim()) {
-    const like = `%${search.trim()}%`;
-    const p = add(like);
-    where.push(
-      `(customer_name ILIKE ${p} OR order_no ILIKE ${p} OR coalesce(customer_phone,'') ILIKE ${p} OR product_name ILIKE ${p})`,
-    );
+    // 서로 다른 테이블 컬럼을 OR 로 묶으면 어떤 인덱스도 타지 못하고 조인 결과 전체를
+    // Join Filter 로 훑는다. 테이블별로 분해해 각자의 trigram 인덱스를 쓰게 한다.
+    // 검색어는 trim() 후 비어있지 않으므로 coalesce(phone,'') 와 phone 은 결과가 같다.
+    const p = add(`%${search.trim()}%`);
+    where.push(`id IN (
+      SELECT o2.id FROM orders o2 WHERE o2.order_no ILIKE ${p}
+      UNION
+      SELECT o2.id FROM orders o2
+        JOIN customers c2 ON c2.id = o2.customer_id
+       WHERE c2.name ILIKE ${p} OR c2.phone ILIKE ${p}
+      UNION
+      SELECT o2.id FROM orders o2
+        JOIN products p2 ON p2.id = o2.product_id
+       WHERE p2.name ILIKE ${p}
+    )`);
   }
   if (status && status !== "전체") where.push(`order_status = ${add(status)}`);
   if (paymentStatus && paymentStatus !== "전체")
@@ -108,23 +120,26 @@ export async function listOrders(params: OrderListParams): Promise<Paged<Order>>
   if (!showAllDates && orderDate) where.push(`order_date = ${add(orderDate)}`);
 
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  const orderSql = SORT_SQL[sort] ?? SORT_SQL.orderDateDesc;
+  const orderSql = SORT_SQL.get(sort) ?? DEFAULT_SORT_SQL;
 
   const safePageSize = Math.min(Math.max(pageSize, 1), 200);
   const safePage = Math.max(page, 1);
   const offset = (safePage - 1) * safePageSize;
 
+  // 필터 파라미터 스냅샷. 두 쿼리가 같은 배열을 공유하면 실행 순서에 의존하게 된다.
+  const whereValues = [...values];
+
   const countRow = await queryOne<{ total: number }>(
     `SELECT count(*)::int AS total FROM order_list_view ${whereSql}`,
-    values,
+    whereValues,
   );
   const total = countRow?.total ?? 0;
 
   const rows = await query<OrderRow>(
     `SELECT * FROM order_list_view ${whereSql}
      ORDER BY ${orderSql}
-     LIMIT ${add(safePageSize)} OFFSET ${add(offset)}`,
-    values,
+     LIMIT $${whereValues.length + 1} OFFSET $${whereValues.length + 2}`,
+    [...whereValues, safePageSize, offset],
   );
 
   return {
@@ -136,12 +151,6 @@ export async function listOrders(params: OrderListParams): Promise<Paged<Order>>
   };
 }
 
-/** 필터에 걸린 주문의 id 전체 (페이지를 넘어가는 '전체 선택'용) */
-export async function listOrderIds(params: OrderListParams): Promise<number[]> {
-  const { items } = await listOrders({ ...params, page: 1, pageSize: 10_000 });
-  return items.map((o) => o.id);
-}
-
 export async function getOrder(id: number): Promise<OrderDetail | null> {
   const row = await queryOne<OrderRow>(
     `SELECT * FROM order_list_view WHERE id = $1`,
@@ -149,14 +158,17 @@ export async function getOrder(id: number): Promise<OrderDetail | null> {
   );
   if (!row) return null;
 
-  const files = await query<OrderRow>(
-    `SELECT * FROM order_files WHERE order_id = $1 ORDER BY uploaded_at, id`,
-    [id],
-  );
-  const history = await query<OrderRow>(
-    `SELECT * FROM order_status_history WHERE order_id = $1 ORDER BY changed_at DESC, id DESC`,
-    [id],
-  );
+  // 서로 독립적이므로 직렬로 기다릴 이유가 없다.
+  const [files, history] = await Promise.all([
+    query<OrderRow>(
+      `SELECT * FROM order_files WHERE order_id = $1 ORDER BY uploaded_at, id`,
+      [id],
+    ),
+    query<OrderRow>(
+      `SELECT * FROM order_status_history WHERE order_id = $1 ORDER BY changed_at DESC, id DESC`,
+      [id],
+    ),
+  ]);
 
   const mapped = files.map(mapFile);
   return {

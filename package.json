@@ -2,6 +2,9 @@
   "name": "barunson-order-manager",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,7 +15,7 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "npm run db:migrate && npm run db:seed",
-    "db:psql": "docker compose exec -e PGPASSWORD=order_admin_pw postgres psql -U order_admin -d order_manager",
+    "db:psql": "docker compose exec postgres sh -c 'psql -U $POSTGRES_USER -d $POSTGRES_DB'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -23,7 +26,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",

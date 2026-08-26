@@ -146,8 +146,9 @@ export function OrdersView() {
     api
       .chips(c.signal)
       .then(setChips)
-      .catch(() => {
-        /* 칩 건수 실패는 치명적이지 않다 */
+      .catch((e: unknown) => {
+        // 칩 건수 실패는 화면을 막지 않되, 원인 추적은 가능해야 한다.
+        if (!c.signal.aborted) console.warn("[orders] chips 조회 실패:", e);
       });
     return () => c.abort();
   }, [refreshKey]);
@@ -169,8 +170,10 @@ export function OrdersView() {
   const startIdx = (page - 1) * pageSize;
 
   const pageIds = items.map((o) => o.id);
-  const allChecked = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
-  const someChecked = pageIds.some((id) => selectedIds.includes(id));
+  // includes 반복은 O(page × selected) 라 Set 으로 조회한다.
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const allChecked = pageIds.length > 0 && pageIds.every((id) => selectedSet.has(id));
+  const someChecked = pageIds.some((id) => selectedSet.has(id));
 
   const selectAllRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -522,14 +525,24 @@ export function OrdersView() {
                     </tr>
                   ) : (
                     items.map((o) => {
-                      const checked = selectedIds.includes(o.id);
+                      const checked = selectedSet.has(o.id);
                       const diff = diffDays(o.weddingDate);
                       const urgent = diff >= 0 && diff < URGENT_DAYS;
                       return (
                         <tr
                           key={o.id}
                           className={checked ? "is-selected" : undefined}
+                          tabIndex={0}
+                          aria-label={`${o.orderNo} 상세 열기`}
                           onClick={() => handleRowClick(o)}
+                          onKeyDown={(e) => {
+                            // 행 안의 버튼·체크박스에서 올라온 키 입력은 무시한다.
+                            if (e.target !== e.currentTarget) return;
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleRowClick(o);
+                            }
+                          }}
                         >
                           <td className="checkbox-col" onClick={(e) => e.stopPropagation()}>
                             <input

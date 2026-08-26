@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, basePath } from "@/lib/api";
 import { TODAY } from "@/lib/constants";
 import { fmtDate } from "@/lib/format";
 import type { Meta } from "@/lib/types";
@@ -32,8 +32,9 @@ export default function SettingsPage() {
     api
       .meta(c.signal)
       .then(setMeta)
-      .catch(() => {
-        /* 코드 목록은 실패해도 무방 */
+      .catch((e: unknown) => {
+        // 코드 목록은 화면을 막지 않되, 원인 추적은 가능해야 한다.
+        if (!c.signal.aborted) console.warn("[settings] meta 조회 실패:", e);
       });
 
     return () => c.abort();
@@ -76,7 +77,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <dt>Base path</dt>
-            <dd className="mono">{process.env.NEXT_PUBLIC_BASE_PATH || "(없음)"}</dd>
+            <dd className="mono">{basePath || "(없음)"}</dd>
           </div>
         </dl>
         {healthError ? <p className="form-error">{healthError}</p> : null}

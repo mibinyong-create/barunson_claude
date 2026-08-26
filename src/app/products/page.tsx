@@ -1,27 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { AppShell } from "@/components/AppShell";
 import { ProductThumb } from "@/components/icons";
 import { useToast } from "@/components/Toast";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import { api } from "@/lib/client-api";
 import { num, won } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
 export default function ProductsPage() {
   const toast = useToast();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const fetcher = useCallback((signal: AbortSignal) => api.products(signal), []);
+  const { data, error, loading } = useAsyncData<Product[]>("products", fetcher);
+  const products = data ?? [];
 
   useEffect(() => {
-    const c = new AbortController();
-    api
-      .products(c.signal)
-      .then(setProducts)
-      .catch((e: Error) => !c.signal.aborted && toast(e.message, "error"))
-      .finally(() => !c.signal.aborted && setLoading(false));
-    return () => c.abort();
-  }, [toast]);
+    if (error) toast(error, "error");
+  }, [error, toast]);
 
   return (
     <AppShell title="상품관리" breadcrumb={["대시보드", "상품관리"]}>

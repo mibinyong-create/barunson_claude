@@ -38,7 +38,9 @@ export async function getStatusChipCounts(): Promise<{
   byStatus: StatusCountRow[];
 }> {
   const rows = await query<{ code: string; order_count: number }>(
-    `SELECT os.code, count(o.id)::int AS order_count
+    // order_status 는 NOT NULL 이라 count(o.id) 와 결과가 같고,
+    // 인덱스에 있는 컬럼을 세므로 heap 접근을 줄일 수 있다.
+    `SELECT os.code, count(o.order_status)::int AS order_count
      FROM order_statuses os
      LEFT JOIN orders o ON o.order_status = os.code
      GROUP BY os.code, os.sort_order
@@ -121,10 +123,14 @@ export async function getQuickStats(date: string): Promise<
     order_count: number;
     is_quick_tile: boolean;
   }>(
+    // 날짜 조건을 FILTER 가 아니라 ON 절에 두면 orders_date_status_idx 를 탈 수 있다.
+    // LEFT JOIN 이므로 해당 날짜에 주문이 없는 상태도 count 0 으로 그대로 남는다.
     `SELECT os.code, os.is_quick_tile,
-            count(o.id) FILTER (WHERE o.order_date = $1)::int AS order_count
+            count(o.id)::int AS order_count
      FROM order_statuses os
-     LEFT JOIN orders o ON o.order_status = os.code
+     LEFT JOIN orders o
+       ON o.order_status = os.code
+      AND o.order_date   = $1
      GROUP BY os.code, os.sort_order, os.is_quick_tile
      ORDER BY os.sort_order`,
     [date],

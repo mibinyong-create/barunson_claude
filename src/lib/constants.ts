@@ -24,11 +24,3 @@ export const PAGE_SIZES = [10, 25, 50] as const;
 
 /** 예식일이 이 일수 미만으로 남으면 목록에서 빨간색으로 강조 */
 export const URGENT_DAYS = 10;
-
-export const SIDEBAR_MENUS = [
-  { key: "dashboard", label: "대시보드", href: "/dashboard" },
-  { key: "orders", label: "주문관리", href: "/" },
-  { key: "customers", label: "고객관리", href: "/customers" },
-  { key: "products", label: "상품관리", href: "/products" },
-  { key: "settings", label: "설정", href: "/settings" },
-] as const;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { CloseIcon } from "./icons";
 
 type Props = {
@@ -28,6 +28,19 @@ export function Modal({
   size = "md",
 }: Props) {
   const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // 열릴 때 다이얼로그 안으로 포커스를 옮기고, 닫히면 원래 위치로 되돌린다.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
+    dialogRef.current
+      ?.querySelector<HTMLElement>(
+        'button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      ?.focus();
+    return () => previous?.focus();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -58,6 +71,7 @@ export function Modal({
       }}
     >
       <div
+        ref={dialogRef}
         className={variant === "sheet" ? "sheet" : "modal"}
         role="dialog"
         aria-modal="true"

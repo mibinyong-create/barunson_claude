@@ -11,11 +11,13 @@
 ## 빠른 시작
 
 ```bash
-# 1) PostgreSQL 컨테이너 기동 (호스트 5433 포트)
-npm run db:up
-
-# 2) 환경변수
+# 1) 환경변수 준비 (CHANGE_ME 를 실제 비밀번호로 바꾸고,
+#    로컬 개발이면 DATABASE_URL 호스트를 localhost:5433 으로 두세요)
 cp .env.example .env
+$EDITOR .env
+
+# 2) PostgreSQL 컨테이너 기동 (호스트 5433 포트)
+npm run db:up
 
 # 3) 의존성
 npm install
@@ -26,6 +28,9 @@ npm run db:reset
 # 5) 개발 서버
 npm run dev            # http://localhost:3000
 ```
+
+> `.env` 를 먼저 만들어야 합니다. `docker-compose.yml` 이 `POSTGRES_PASSWORD` 를 `.env` 에서 읽고,
+> 앱과 스크립트도 `DATABASE_URL` 이 없으면 하드코딩 폴백 없이 즉시 실패합니다.
 
 첫 화면의 주문일자 필터는 기준일(`2026-08-24`)로 걸려 있습니다.
 전체 목록을 보려면 **"전체 주문건 보기"** 체크박스를 켜세요.
@@ -42,7 +47,7 @@ npm run dev            # http://localhost:3000
 | `npm run db:migrate` | `db/schema.sql` + `db/reference-data.sql` 실행 (**기존 데이터 삭제**) |
 | `npm run db:seed` | 샘플 데이터 생성 (멱등 — 시드 고정 난수) |
 | `npm run db:reset` | migrate + seed |
-| `npm run db:psql` | 컨테이너 psql 접속 |
+| `npm run db:psql` | 컨테이너 psql 접속 (`.env` 의 계정 정보 사용) |
 
 ---
 
@@ -54,7 +59,7 @@ npm run dev            # http://localhost:3000
 | API | Next.js Route Handlers (REST) |
 | DB | PostgreSQL 17 (Docker) |
 | DB 접근 | `pg` (node-postgres) + 직접 작성한 SQL — ORM 없음 |
-| 검증 | zod |
+| 검증 | zod (요청 본문 + 쿼리스트링 전수 검증) |
 | 스타일 | 원본 HTML의 CSS를 그대로 이식한 `globals.css` (CSS 변수 기반) |
 | 배포 | `output: 'standalone'` |
 
@@ -274,13 +279,20 @@ SEED_ORDER_COUNT=2000 npm run db:seed
 
 ## 환경변수
 
-| 변수 | 기본값 | 설명 |
-|---|---|---|
-| `DATABASE_URL` | `postgresql://order_admin:order_admin_pw@localhost:5433/order_manager` | DB 접속 URL |
-| `PGPOOL_MAX` | `10` | 커넥션 풀 최대 크기 |
-| `NEXT_PUBLIC_BASE_PATH` | (없음) | 서브패스 배포 시 `apiFetch` 가 붙일 prefix |
-| `NEXT_PUBLIC_TODAY` | `2026-08-24` | 화면 기준일. 비우면 실제 오늘 날짜 |
-| `PORT` / `HOSTNAME` | `3000` / `0.0.0.0` | standalone 서버 |
+| 변수 | 로컬 개발 | 배포 (Docker Manager) | 설명 |
+|---|---|---|---|
+| `DATABASE_URL` | `postgresql://order_admin:<PW>@localhost:5433/order_manager` | `postgresql://order_admin:<PW>@shared-postgres:5432/order_manager` | **필수.** 미설정 시 폴백 없이 즉시 실패 |
+| `PGPOOL_MAX` | `10` | `10` | 커넥션 풀 최대 크기 (양의 정수만 유효) |
+| `POSTGRES_PASSWORD` / `POSTGRES_USER` / `POSTGRES_DB` | `.env` 값 | 사용 안 함 | 로컬 `docker-compose.yml` 전용 |
+| `NEXT_PUBLIC_BASE_PATH` | (비움) | `/c/프로젝트명` | 서브패스 배포 시 `apiFetch` 가 붙일 prefix |
+| `NEXT_PUBLIC_TODAY` | `2026-08-24` | (비움 권장) | 화면 기준일. 비우면 실제 오늘 날짜 |
+| `PORT` / `HOSTNAME` | `3000` / `0.0.0.0` | 동일 | standalone 서버 |
+| `SEED_ORDER_COUNT` | (선택) `500` | 사용 안 함 | 시드 생성 주문 건수 |
+
+> **`NEXT_PUBLIC_*` 는 빌드 시점에 클라이언트 번들로 인라인됩니다.**
+> 컨테이너 런타임 환경변수만 바꿔도 브라우저 동작은 바뀌지 않으므로,
+> `NEXT_PUBLIC_BASE_PATH` 는 반드시 `npm run build` **이전**에 설정되어야 합니다.
+> 비밀번호는 이 문서가 아니라 `.env`(커밋 금지)에서 관리하세요.
 
 `NEXT_PUBLIC_TODAY` 는 원본이 `TODAY = "2026-08-24"` 로 하드코딩되어 있던 것을 환경변수로 뺀 것입니다.
 샘플 데이터가 이 날짜를 기준으로 생성되므로, 기본값으로 두어야 화면이 자연스럽습니다.
@@ -320,3 +332,35 @@ node .next/standalone/server.js
 - **파일은 메타데이터만 저장합니다.** 실제 바이너리 업로드/다운로드는 구현하지 않았습니다
   (파일명·크기·MIME·업로드 시각만 기록). 원본과 동일한 범위입니다.
 - **인증/권한이 없습니다.** 업로더는 `'스튜디오'` 로 고정되어 있습니다.
+
+---
+
+## 주의사항
+
+- **Nginx 서브패스 환경**(`/c/프로젝트명/`)에 배포됩니다. 클라이언트에서 절대 경로로
+  직접 `fetch` 하지 마세요. 반드시 `src/lib/api.ts` 의 `apiFetch()` / `apiUrl()` 을 쓰세요.
+  (`<Link>` 와 `router.push` 는 Next.js 가 basePath 를 자동 적용하므로 절대 경로 그대로 둡니다.)
+- **`.env` 를 Git 에 커밋하지 마세요.** `.gitignore` 에 포함되어 있으며,
+  `.env.example` 에는 실제 비밀번호 대신 `CHANGE_ME` 플레이스홀더만 둡니다.
+- **`docker-compose.yml` 은 로컬 개발 전용입니다.** 배포 환경에서는 Docker Manager 의
+  공유 서비스 `shared-postgres` 를 사용합니다.
+- **DB 스키마 재생성은 파괴적입니다.** `npm run db:migrate` 는 `DROP SCHEMA public CASCADE` 로
+  시작합니다. `DATABASE_URL` 을 반드시 확인하세요 (미설정 시 실행되지 않고 종료됩니다).
+- **`NEXT_PUBLIC_TODAY`** 는 데모용 고정 기준일입니다. 실제 운영에서는 비워 두세요.
+
+## 알려진 이슈
+
+- **모든 API 가 무인증입니다.** 특히 `DELETE /api/orders/:id` 와 `POST /api/orders/bulk-delete`
+  는 되돌릴 수 없는 삭제를 수행합니다. 일괄 삭제에 500건 상한을 두었으나 근본 대책은 아니며,
+  배포 전 Nginx IP allowlist / Basic Auth 또는 SSO 연동이 필요합니다.
+- **CSRF 방어가 없습니다.** 상태 변경 메서드에 대한 Origin 검사 미들웨어가 필요하지만,
+  서브패스 프록시 설정과 함께 검증해야 해서 적용하지 않았습니다.
+- **DB 비밀번호가 Git 히스토리에 남아 있습니다.** 환경변수로 옮겼으나 과거 커밋에서는 읽을 수
+  있으므로, 배포 시 새 비밀번호로 교체하세요.
+- **CSP 헤더가 없습니다.** `X-Frame-Options` / `X-Content-Type-Options` / `Referrer-Policy` 만
+  적용했습니다. CSP 는 Next.js 인라인 스크립트 때문에 nonce 전략이 필요합니다.
+- **Rate limiting 과 요청 본문 크기 제한이 없습니다.** Nginx 단에서 처리하세요.
+- **`engines` 가 Node 22.13+ 를 요구합니다.** 그보다 낮은 로컬 Node 에서는 `npm install` 시
+  EBADENGINE 경고가 표시됩니다 (설치·빌드는 정상 동작).
+
+자세한 내용은 [IMPROVEMENTS.md](./IMPROVEMENTS.md) 의 "수동 조치 필요 항목" 을 참고하세요.

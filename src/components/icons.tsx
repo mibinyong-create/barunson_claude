@@ -105,7 +105,25 @@ export const TrashIcon = ({ size = 14 }: { size?: number }) => (
   </svg>
 );
 
-/** 상품 썸네일 (원본 productIcon) — DB 의 icon_path 문자열을 그대로 그린다 */
+const FALLBACK_ICON_PATH =
+  '<path d="M4 8l8-4 8 4v9l-8 4-8-4V8Z"/><path d="M4 8l8 4 8-4"/><path d="M12 12v9"/>';
+
+/** SVG 도형 태그만 허용한다. script/foreignObject/on* 핸들러 등은 전부 거른다. */
+const SAFE_SVG_TAG =
+  /^<(?:path|circle|rect|line|polyline|polygon|ellipse|g)\b[^<>]*\/?>$|^<\/g>$/;
+
+function sanitizeIconPath(rawPath: string | null): string | null {
+  if (!rawPath) return null;
+  if (/<\s*(script|foreignObject|iframe|image|use|a)\b/i.test(rawPath)) return null;
+  if (/\son\w+\s*=/i.test(rawPath)) return null;
+  if (/(javascript|data)\s*:/i.test(rawPath)) return null;
+
+  const tags = rawPath.match(/<[^>]+>/g) ?? [];
+  if (tags.length === 0) return null;
+  return tags.every((t) => SAFE_SVG_TAG.test(t)) ? rawPath : null;
+}
+
+/** 상품 썸네일 (원본 productIcon) — DB 의 icon_path 문자열을 검증 후 그린다 */
 export function ProductThumb({
   name,
   iconPath,
@@ -115,8 +133,6 @@ export function ProductThumb({
   iconPath: string | null;
   linkUrl: string | null;
 }) {
-  const fallback =
-    '<path d="M4 8l8-4 8 4v9l-8 4-8-4V8Z"/><path d="M4 8l8 4 8-4"/><path d="M12 12v9"/>';
   const svg = (
     <svg
       width="26"
@@ -128,7 +144,7 @@ export function ProductThumb({
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
-      dangerouslySetInnerHTML={{ __html: iconPath || fallback }}
+      dangerouslySetInnerHTML={{ __html: sanitizeIconPath(iconPath) ?? FALLBACK_ICON_PATH }}
     />
   );
 

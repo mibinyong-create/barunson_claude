@@ -63,12 +63,6 @@ export function weekRange(dateStr: string): { start: string; end: string } {
   return { start: toISODate(s), end: toISODate(e) };
 }
 
-/** "ORD-2026-000010" → "000010" */
-export function orderNoShort(orderNo: string): string {
-  const m = /(\d{6})$/.exec(orderNo ?? "");
-  return m ? m[1] : (orderNo ?? "");
-}
-
 /** 1024 → "1.0 KB" */
 export function fmtFileSize(bytes: number | null | undefined): string {
   if (bytes == null) return "";

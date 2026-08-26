@@ -82,11 +82,23 @@ export default function CustomersPage() {
                 </tr>
               ) : (
                 data?.items.map((c) => (
-                  <tr key={c.id} onClick={() => setOpenId(c.id)}>
+                  <tr
+                    key={c.id}
+                    tabIndex={0}
+                    aria-label={`${c.name} 고객 상세 열기`}
+                    onClick={() => setOpenId(c.id)}
+                    onKeyDown={(e) => {
+                      if (e.target !== e.currentTarget) return;
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpenId(c.id);
+                      }
+                    }}
+                  >
                     <td>
-                      <button type="button" className="customer">
-                        {c.name}
-                      </button>
+                      {/* 실제 클릭은 행 전체가 처리한다. button 으로 두면
+                          스크린리더가 동작하지 않는 버튼으로 읽는다. */}
+                      <span className="customer">{c.name}</span>
                     </td>
                     <td className="mono">{c.phone ?? "-"}</td>
                     <td>{c.address ?? "-"}</td>

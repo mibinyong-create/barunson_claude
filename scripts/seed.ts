@@ -11,7 +11,9 @@
 import "dotenv/config";
 import { Client } from "pg";
 
-const TOTAL_ORDERS = Number(process.env.SEED_ORDER_COUNT ?? 500);
+const parsedOrderCount = Number(process.env.SEED_ORDER_COUNT);
+const TOTAL_ORDERS =
+  Number.isInteger(parsedOrderCount) && parsedOrderCount > 0 ? parsedOrderCount : 500;
 const TODAY = "2026-08-24";
 
 // ─── 시드 고정 난수 ───────────────────────────────────────────────────────────
@@ -199,9 +201,12 @@ function decidePayment(status: string): string {
 type ProductRow = { id: number; name: string; slug: string; default_unit_price: number };
 
 async function main() {
-  const connectionString =
-    process.env.DATABASE_URL ??
-    "postgresql://order_admin:order_admin_pw@localhost:5433/order_manager";
+  // TRUNCATE ... CASCADE 를 실행하므로 기본값 폴백을 두지 않는다.
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error("DATABASE_URL 이 설정되지 않았습니다. .env 를 확인하세요.");
+    process.exit(1);
+  }
   const client = new Client({ connectionString });
   await client.connect();
 
@@ -503,6 +508,22 @@ async function main() {
     `);
 
     await client.query("COMMIT");
+  } catch (e) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // 이미 종료된 트랜잭션이면 무시한다. 원본 예외를 가려서는 안 된다.
+    }
+    await client.end();
+    throw e;
+  }
+
+  try {
+    // 대량 INSERT 직후에는 플래너 통계를 갱신해야 인덱스가 제대로 선택된다.
+    console.log("▸ 통계 갱신(ANALYZE)…");
+    await client.query(
+      "ANALYZE orders; ANALYZE customers; ANALYZE order_files; ANALYZE order_status_history;",
+    );
 
     // ── 요약 출력 ────────────────────────────────────────────────────────────
     const { rows: summary } = await client.query(`
@@ -516,9 +537,6 @@ async function main() {
     `);
     console.log("\n샘플 데이터 생성 완료");
     console.table(summary[0]);
-  } catch (e) {
-    await client.query("ROLLBACK");
-    throw e;
   } finally {
     await client.end();
   }

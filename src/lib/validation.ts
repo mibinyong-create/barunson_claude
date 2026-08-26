@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const dateStr = z
+export const dateStr = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD 형식이어야 합니다.");
 
@@ -58,13 +58,24 @@ export const courierSchema = z.object({
 
 export const fileInputSchema = z.object({
   kind: z.enum(["attachment", "draft"]),
-  fileName: z.string().trim().min(1, "파일명은 필수입니다.").max(255),
+  fileName: z
+    .string()
+    .trim()
+    .min(1, "파일명은 필수입니다.")
+    .max(255)
+    .refine(
+      (v) => !/[/\\]/.test(v) && v !== "." && v !== ".." && !v.includes("\0"),
+      "파일명에 경로 구분자를 포함할 수 없습니다.",
+    ),
   fileSize: z.coerce.number().int().min(0).nullish(),
   contentType: z.string().trim().max(120).nullish(),
 });
 
 export const bulkDeleteSchema = z.object({
-  ids: z.array(z.coerce.number().int().positive()).min(1, "삭제할 주문을 선택하세요."),
+  ids: z
+    .array(z.coerce.number().int().positive())
+    .min(1, "삭제할 주문을 선택하세요.")
+    .max(500, "한 번에 최대 500건까지 삭제할 수 있습니다."),
 });
 
 export const customerUpdateSchema = z.object({
@@ -78,7 +89,12 @@ export const productUpdateSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   defaultUnitPrice: z.coerce.number().int().min(0).optional(),
   isActive: z.coerce.boolean().optional(),
-  linkUrl: z.string().trim().max(500).nullish(),
+  linkUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => /^https?:\/\//i.test(v), "http(s) URL 만 허용됩니다.")
+    .nullish(),
 });
 
 export const orderListQuerySchema = z.object({
@@ -96,4 +112,23 @@ export const orderListQuerySchema = z.object({
     .optional(),
   page: z.coerce.number().int().min(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(200).optional(),
+});
+
+/** GET /api/customers 쿼리스트링 */
+export const customerListQuerySchema = z.object({
+  search: z.string().trim().max(100).optional(),
+  page: z.coerce.number().int().min(1).max(100_000).optional(),
+  pageSize: z.coerce.number().int().min(1).max(200).optional(),
+});
+
+/** GET /api/stats/* 공통 쿼리스트링 */
+export const statsQuerySchema = z.object({
+  date: dateStr.optional(),
+  period: z.enum(["day", "week"]).optional(),
+  status: z.string().trim().min(1).max(20).optional(),
+});
+
+/** GET /api/stats/trend 쿼리스트링 */
+export const trendQuerySchema = z.object({
+  months: z.coerce.number().int().min(1).max(120).optional(),
 });

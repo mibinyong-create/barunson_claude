@@ -1,4 +1,5 @@
 import { query, queryOne } from "@/lib/db";
+import { mapOrder } from "@/lib/repositories/orders";
 import type { Customer, Order, Paged } from "@/lib/types";
 
 type Row = Record<string, unknown>;
@@ -31,11 +32,15 @@ export async function listCustomers(params: {
 
   if (search && search.trim()) {
     const p = add(`%${search.trim()}%`);
-    whereSql = `WHERE name ILIKE ${p} OR coalesce(phone,'') ILIKE ${p} OR coalesce(address,'') ILIKE ${p}`;
+    // coalesce 로 감싸면 trigram 인덱스를 타지 못한다.
+    // 검색어가 비어있지 않으므로 NULL 은 어차피 '%X%' 에 매칭되지 않아 결과가 같다.
+    whereSql = `WHERE (name ILIKE ${p} OR phone ILIKE ${p} OR address ILIKE ${p})`;
   }
 
+  // 검색 조건이 customers 컬럼만 쓰므로 전체 GROUP BY 를 유발하는 집계 뷰 대신
+  // 원본 테이블에서 센다. 결과는 동일하다.
   const countRow = await queryOne<{ total: number }>(
-    `SELECT count(*)::int AS total FROM customer_summary_view ${whereSql}`,
+    `SELECT count(*)::int AS total FROM customers ${whereSql}`,
     values,
   );
   const total = countRow?.total ?? 0;
@@ -69,49 +74,18 @@ export async function getCustomerWithOrders(
   if (!row) return null;
 
   const orders = await query<Row>(
-    `SELECT * FROM order_list_view WHERE customer_id = $1 ORDER BY order_date DESC, id DESC`,
+    `SELECT * FROM order_list_view
+      WHERE customer_id = $1
+      ORDER BY order_date DESC, id DESC
+      LIMIT 200`,
     [id],
   );
 
   return {
     customer: mapCustomer(row),
-    orders: orders.map((o) => ({
-      id: o.id as number,
-      orderNo: o.order_no as string,
-      orderNoShort: o.order_no_short as string,
-      customerId: o.customer_id as number,
-      customerName: o.customer_name as string,
-      customerPhone: (o.customer_phone as string) ?? null,
-      customerAddress: (o.customer_address as string) ?? null,
-      productId: o.product_id as number,
-      productName: o.product_name as string,
-      productSlug: o.product_slug as string,
-      productIconPath: (o.product_icon_path as string) ?? null,
-      productLinkUrl: (o.product_link_url as string) ?? null,
-      productCode: o.product_code as string,
-      optionText: (o.option_text as string) ?? null,
-      quantity: o.quantity as number,
-      unitPrice: o.unit_price as number,
-      totalAmount: o.total_amount as number,
-      orderDate: o.order_date as string,
-      weddingDate: o.wedding_date as string,
-      deliveryMethod: o.delivery_method as Order["deliveryMethod"],
-      shippingAddress: (o.shipping_address as string) ?? null,
-      paymentStatus: o.payment_status as Order["paymentStatus"],
-      orderStatus: o.order_status as Order["orderStatus"],
-      isActiveStage: o.is_active_stage as boolean,
-      withInvitation: o.with_invitation as boolean,
-      courierId: (o.courier_id as number) ?? null,
-      courierName: (o.courier_name as string) ?? null,
-      trackingUrlTemplate: (o.tracking_url_template as string) ?? null,
-      trackingNumber: (o.tracking_number as string) ?? null,
-      deliveredDate: (o.delivered_date as string) ?? null,
-      memo: (o.memo as string) ?? null,
-      createdAt: String(o.created_at),
-      updatedAt: String(o.updated_at),
-      attachmentCount: o.attachment_count as number,
-      draftCount: o.draft_count as number,
-    })),
+    // orders.ts 의 mapOrder 를 재사용한다. 같은 뷰를 두 곳에서 따로 매핑하면
+    // 뷰 컬럼이 바뀔 때 한쪽만 고쳐지는 drift 가 생긴다.
+    orders: orders.map((o) => mapOrder(o) as Order),
   };
 }
 

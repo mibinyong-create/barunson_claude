@@ -23,8 +23,9 @@ async function unwrap<T>(res: Response): Promise<T> {
         const first = body.details[0] as { message?: string };
         if (first?.message) message = `${message} — ${first.message}`;
       }
-    } catch {
-      /* 본문이 JSON 이 아닌 경우 기본 메시지 사용 */
+    } catch (e) {
+      // 본문이 JSON 이 아니면 기본 메시지를 쓰되, 원인은 남긴다.
+      console.warn("[api] 오류 응답 본문을 파싱하지 못했습니다:", e);
     }
     throw new Error(message);
   }
