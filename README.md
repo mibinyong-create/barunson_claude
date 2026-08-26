@@ -12,11 +12,13 @@
 
 ```bash
 # 1) 환경변수 준비 (CHANGE_ME 를 실제 비밀번호로 바꾸고,
-#    로컬 개발이면 DATABASE_URL 호스트를 localhost:5433 으로 두세요)
+#    로컬 개발이면 DATABASE_URL 호스트를 localhost:5433 으로 두세요.
+#    Docker 없이 PostgreSQL 을 직접 설치했다면 포트는 5432 입니다)
 cp .env.example .env
 $EDITOR .env
 
 # 2) PostgreSQL 컨테이너 기동 (호스트 5433 포트)
+#    ※ Docker 가 없다면(예: Intel MacBook) 아래 "로컬 PostgreSQL 실행" 절을 먼저 보세요.
 npm run db:up
 
 # 3) 의존성
@@ -35,6 +37,153 @@ npm run dev            # http://localhost:3000
 첫 화면의 주문일자 필터는 기준일(`2026-08-24`)로 걸려 있습니다.
 전체 목록을 보려면 **"전체 주문건 보기"** 체크박스를 켜세요.
 
+> **개발 환경 참고 — Intel MacBook.** 이 프로젝트의 개발자는 Intel(x86_64) MacBook 을 사용하며,
+> **Docker Desktop 은 구동하지 않는 것을 전제로 합니다.** 위 2번(`npm run db:up`)은 Docker 가
+> 있을 때의 경로이므로, 그대로 실행되지 않습니다. Docker 없이 PostgreSQL 을 띄우는 방법은
+> 바로 아래 절을 보세요.
+
+### 로컬 PostgreSQL 실행 (Docker Desktop 없이)
+
+앱이 요구하는 것은 **접속 가능한 PostgreSQL 17 인스턴스 하나**뿐입니다.
+`DATABASE_URL` 만 올바르면 `db:migrate` · `db:seed` · 개발 서버는 Docker 유무와 무관하게 동작합니다.
+Docker 에 의존하는 것은 `db:up` / `db:down` / `db:psql` **세 개의 npm 스크립트뿐**이며, 아래에 대체 명령을 적어 두었습니다.
+
+세 가지 선택지가 있습니다.
+
+| 방법 | 포트 | `npm run db:up`/`db:psql` | 비고 |
+|---|---|---|---|
+| A. Homebrew `postgresql@17` | 5432 | 사용 불가 (대체 명령 사용) | **Intel Mac 권장.** 가장 가볍고 빠름 |
+| B. Postgres.app | 5432 | 사용 불가 (대체 명령 사용) | GUI 로 기동/정지. 설치가 가장 쉬움 |
+| C. Colima + docker CLI | 5433 | **그대로 사용 가능** | 기존 워크플로 유지. Linux VM 이 하나 더 뜸 |
+
+#### 방법 A — Homebrew PostgreSQL 17 (권장)
+
+```bash
+brew install postgresql@17
+
+# Intel Mac 의 Homebrew prefix 는 /usr/local 입니다. (Apple Silicon 은 /opt/homebrew)
+echo 'export PATH="/usr/local/opt/postgresql@17/bin:$PATH"' >> ~/.zshrc
+exec "$SHELL" -l
+
+# 기동 (로그인 시 자동 시작). 기본 포트 5432
+brew services start postgresql@17
+
+# 계정 · DB 생성 — Homebrew 는 macOS 로그인 계정을 슈퍼유저로 만들어 둡니다.
+psql -d postgres -c "CREATE ROLE order_admin LOGIN PASSWORD '실제비밀번호';"
+createdb -O order_admin order_manager      # -O 로 소유자를 지정하는 것이 중요합니다 (아래 주의 참고)
+
+# 컨테이너 설정(TZ/PGTZ=Asia/Seoul)과 동일하게 타임존 고정
+psql -d order_manager -c "ALTER DATABASE order_manager SET timezone = 'Asia/Seoul';"
+```
+
+`.env` 의 `DATABASE_URL` 을 **5432** 로 맞춥니다. (5433 은 docker compose 가 호스트로 매핑하던 포트입니다.)
+
+```bash
+DATABASE_URL=postgresql://order_admin:실제비밀번호@localhost:5432/order_manager
+```
+
+이후는 동일합니다.
+
+```bash
+npm install
+npm run db:reset       # 스키마 생성 + 샘플 데이터 500건
+npm run dev
+```
+
+기동/정지/상태 확인:
+
+```bash
+brew services start postgresql@17
+brew services stop  postgresql@17
+brew services list
+```
+
+데이터는 `/usr/local/var/postgresql@17` 에 있습니다. 초기화는 볼륨 삭제가 아니라 `npm run db:reset` 으로 합니다.
+
+#### 방법 B — Postgres.app
+
+1. <https://postgresapp.com> 에서 내려받아 `/Applications` 에 설치 (Intel 빌드 제공).
+2. 앱을 열고 **Initialize** → PostgreSQL 17 서버가 포트 5432 로 뜹니다.
+3. CLI(`psql` · `createdb`) 경로 등록:
+
+```bash
+sudo mkdir -p /etc/paths.d
+echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresapp
+exec "$SHELL" -l
+```
+
+이후 계정·DB 생성과 `DATABASE_URL`(포트 5432)은 **방법 A 와 동일**합니다.
+기동·정지는 메뉴 막대 아이콘에서 합니다.
+
+#### 방법 C — Colima (docker compose 를 그대로 쓰고 싶을 때)
+
+Docker Desktop 없이 Docker 엔진만 띄우는 방식입니다. `docker-compose.yml` 과 `db:*` 스크립트를
+**수정 없이** 그대로 쓸 수 있고, 포트도 기존 **5433** 이 유지됩니다.
+
+```bash
+brew install colima docker docker-compose
+
+# Homebrew 의 docker-compose 를 docker CLI 플러그인으로 연결 (Intel prefix: /usr/local)
+mkdir -p ~/.docker/cli-plugins
+ln -sfn /usr/local/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+
+# macOS 13+ 라면 Apple Virtualization.framework 백엔드가 QEMU 보다 빠릅니다 (Intel 에서도 동작).
+colima start --cpu 2 --memory 4 --vm-type vz
+# macOS 12 이하라면 --vm-type 을 빼면 기본값 qemu 로 뜹니다.
+
+npm run db:up                      # 이후 db:down · db:psql 도 그대로 동작
+```
+
+- Colima 의 기본 `vmType` 은 `qemu` 이며, **VM 생성 후에는 바꿀 수 없습니다.**
+  백엔드를 바꾸려면 `colima delete` 후 다시 `colima start --vm-type vz` 로 만들어야 합니다.
+- `--vm-type vz` 자체는 Intel Mac 에서도 됩니다(macOS 13 이상). **Apple Silicon 전용인 것은
+  `--vz-rosetta` (amd64 에뮬레이션)** 이고, Intel Mac 은 amd64 가 네이티브라 애초에 필요 없습니다.
+- 사용을 마치면 `colima stop` 으로 VM 을 내립니다. DB 하나만 필요한 상황이면 방법 A 가 더 가볍습니다.
+
+#### 참고 — Intel Mac 에서 쓸 수 있는 Docker Desktop 대안 (2026-08 기준)
+
+| 도구 | Intel Mac | 최소 macOS | 비용 | 메모 |
+|---|---|---|---|---|
+| **Colima** (+ docker CLI) | ✅ | 제한 없음 (`vz` 는 13+) | 무료 · OSS | CLI 전용. 가장 가볍고 이 프로젝트에 충분 |
+| **OrbStack** | ✅ (Intel 빌드 별도 배포) | **14.0+** | 개인 무료 / 업무 $8·인·월 | 가장 빠르고 GUI 완비. macOS 14 미만이면 불가 |
+| **Rancher Desktop** | ✅ (VT-x 필요) | 13+ | 무료 · OSS | GUI + Kubernetes. 8GB RAM·4코어 권장 |
+| **Podman Desktop** | ⚠️ **기한 있음** | — | 무료 · OSS | **Podman 6 이 Intel Mac 지원 중단.** Podman Desktop 이 Intel 에는 Podman 5 를 계속 번들하나 **2027-06 까지** |
+| **Finch** (AWS) | ✅ | 최근 2개 메이저 (26/15) | 무료 · OSS | 내부적으로 Lima 사용. 구형 macOS 면 대상 밖 |
+| Docker Desktop | ✅ (중단 공지 없음) | 최신 + 직전 2개 메이저 | 개인/소규모 무료 | Intel 지원은 유지되나 구형 macOS 는 지원 창 밖 |
+
+Intel MacBook 은 macOS 26 Tahoe 가 마지막 지원 버전이고 그마저 2019~2020 모델만 해당하므로,
+구형 Intel 기기라면 **최소 macOS 요구사항이 사실상의 선택 기준**입니다.
+OrbStack(14+)·Rancher(13+)·Finch(15+)가 막히는 경우에도 **Colima 는 QEMU 백엔드로 동작**합니다.
+
+다만 이 프로젝트에 필요한 것은 컨테이너 런타임이 아니라 **PostgreSQL 하나**뿐이므로,
+위 도구를 새로 도입하기보다 **방법 A(Homebrew) 를 권장**합니다.
+
+#### 네이티브 설치 시 대체 명령
+
+```bash
+# npm run db:up / db:down  → brew services start|stop postgresql@17 (또는 Postgres.app 메뉴)
+
+# npm run db:psql 대체
+set -a; source .env; set +a
+psql "$DATABASE_URL"
+
+# 접속 확인
+psql "$DATABASE_URL" -c "select version(), current_setting('TimeZone');"
+```
+
+#### 주의
+
+- **`createdb -O order_admin` 으로 DB 소유자를 지정하세요.** `db/schema.sql` 이
+  `DROP SCHEMA public CASCADE` 로 시작하는데, PostgreSQL 15+ 에서는 DB 소유자가 아니면
+  `public` 스키마를 삭제할 권한이 없어 `npm run db:migrate` 가 실패합니다.
+- **`pg_trgm` 확장이 필요합니다.** Homebrew·Postgres.app 모두 contrib 에 포함되어 있고,
+  PostgreSQL 13+ 에서 trusted 확장이라 DB 소유자 권한이면 설치됩니다 (별도 슈퍼유저 불필요).
+- **포트를 5433 으로 착각하지 마세요.** 네이티브 설치는 5432 입니다. `.env` 의 `DATABASE_URL`
+  과 `.env.example` 주석의 5433 은 docker compose 전용 매핑 포트입니다.
+- **`POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB`** 는 `docker-compose.yml` 만 읽습니다.
+  네이티브로 실행하면 이 값들은 무시되므로, 위 `CREATE ROLE` 에서 쓴 비밀번호가 곧 실제 값입니다.
+- PostgreSQL 버전은 17 을 권장합니다(배포 환경과 동일). 스키마 자체는 15+ 면 동작합니다.
+
 ### npm 스크립트
 
 | 스크립트 | 설명 |
@@ -43,11 +192,11 @@ npm run dev            # http://localhost:3000
 | `npm run build` / `npm start` | 프로덕션 빌드 / 실행 (`output: 'standalone'`) |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
-| `npm run db:up` / `db:down` | postgres 컨테이너 기동 / 종료 |
+| `npm run db:up` / `db:down` | postgres 컨테이너 기동 / 종료 (**Docker 필요**) |
 | `npm run db:migrate` | `db/schema.sql` + `db/reference-data.sql` 실행 (**기존 데이터 삭제**) |
 | `npm run db:seed` | 샘플 데이터 생성 (멱등 — 시드 고정 난수) |
 | `npm run db:reset` | migrate + seed |
-| `npm run db:psql` | 컨테이너 psql 접속 (`.env` 의 계정 정보 사용) |
+| `npm run db:psql` | 컨테이너 psql 접속 (`.env` 의 계정 정보 사용, **Docker 필요**) |
 
 ---
 
@@ -281,9 +430,9 @@ SEED_ORDER_COUNT=2000 npm run db:seed
 
 | 변수 | 로컬 개발 | 배포 (Docker Manager) | 설명 |
 |---|---|---|---|
-| `DATABASE_URL` | `postgresql://order_admin:<PW>@localhost:5433/order_manager` | `postgresql://order_admin:<PW>@shared-postgres:5432/order_manager` | **필수.** 미설정 시 폴백 없이 즉시 실패 |
+| `DATABASE_URL` | `postgresql://order_admin:<PW>@localhost:5433/order_manager` (Docker 없이 네이티브 설치 시 **5432**) | `postgresql://order_admin:<PW>@shared-postgres:5432/order_manager` | **필수.** 미설정 시 폴백 없이 즉시 실패 |
 | `PGPOOL_MAX` | `10` | `10` | 커넥션 풀 최대 크기 (양의 정수만 유효) |
-| `POSTGRES_PASSWORD` / `POSTGRES_USER` / `POSTGRES_DB` | `.env` 값 | 사용 안 함 | 로컬 `docker-compose.yml` 전용 |
+| `POSTGRES_PASSWORD` / `POSTGRES_USER` / `POSTGRES_DB` | `.env` 값 | 사용 안 함 | 로컬 `docker-compose.yml` 전용 (네이티브 설치 시 무시됨) |
 | `NEXT_PUBLIC_BASE_PATH` | (비움) | `/c/프로젝트명` | 서브패스 배포 시 `apiFetch` 가 붙일 prefix |
 | `NEXT_PUBLIC_TODAY` | `2026-08-24` | (비움 권장) | 화면 기준일. 비우면 실제 오늘 날짜 |
 | `PORT` / `HOSTNAME` | `3000` / `0.0.0.0` | 동일 | standalone 서버 |
@@ -344,6 +493,9 @@ node .next/standalone/server.js
   `.env.example` 에는 실제 비밀번호 대신 `CHANGE_ME` 플레이스홀더만 둡니다.
 - **`docker-compose.yml` 은 로컬 개발 전용입니다.** 배포 환경에서는 Docker Manager 의
   공유 서비스 `shared-postgres` 를 사용합니다.
+- **Docker Desktop 을 전제하지 않습니다.** 개발자 환경이 Intel MacBook 이라 Homebrew /
+  Postgres.app 로 PostgreSQL 을 직접 띄우는 것을 기본 경로로 봅니다. 자세한 절차는
+  [로컬 PostgreSQL 실행 (Docker Desktop 없이)](#로컬-postgresql-실행-docker-desktop-없이) 참고.
 - **DB 스키마 재생성은 파괴적입니다.** `npm run db:migrate` 는 `DROP SCHEMA public CASCADE` 로
   시작합니다. `DATABASE_URL` 을 반드시 확인하세요 (미설정 시 실행되지 않고 종료됩니다).
 - **`NEXT_PUBLIC_TODAY`** 는 데모용 고정 기준일입니다. 실제 운영에서는 비워 두세요.
