@@ -1,471 +1,322 @@
 # 커스텀 주문관리 (Custom Order Manager)
 
-웨딩 굿즈·커스텀 인쇄물 주문을 관리하는 **단일 HTML 파일 기반 프로토타입 웹앱**입니다.
-빌드 도구·서버·백엔드 없이 `커스텀_주문관리.html` 파일 하나만 브라우저로 열면 바로 동작하며,
-모든 데이터는 브라우저의 `localStorage`에 저장됩니다.
+웨딩 굿즈·커스텀 인쇄물 주문을 **접수 → 초안 → 인쇄 → 배송**까지 관리하는 어드민입니다.
 
-> 바른손카드 커스텀 상품(아크릴 키링, 웨딩스탬프, 웨딩신문 등)의 주문 접수 → 초안 → 인쇄 → 배송까지의
-> 흐름을 한 화면에서 관리하는 어드민 UI를 상정한 화면 설계/동작 프로토타입입니다.
-
----
-
-## 목차
-
-1. [빠른 시작](#빠른-시작)
-2. [기술 스택 및 구조](#기술-스택-및-구조)
-3. [화면 구성](#화면-구성)
-4. [데이터 모델](#데이터-모델)
-5. [상태(Status) 정의](#상태status-정의)
-6. [주요 기능 상세](#주요-기능-상세)
-7. [모달 · 드로어 목록](#모달--드로어-목록)
-8. [상태 관리 객체 (state)](#상태-관리-객체-state)
-9. [주요 함수 레퍼런스](#주요-함수-레퍼런스)
-10. [디자인 시스템](#디자인-시스템)
-11. [데이터 저장 및 초기화](#데이터-저장-및-초기화)
-12. [알려진 제약 및 미구현 사항](#알려진-제약-및-미구현-사항)
-13. [커스터마이징 가이드](#커스터마이징-가이드)
+`original/custom-order.html` (localStorage 기반 단일 파일 프로토타입)의 화면과 데이터 모델을
+분석해 **Next.js(App Router) + TypeScript + REST API + PostgreSQL** 풀스택 애플리케이션으로
+재구현한 것입니다. 원본의 디자인 토큰·클래스명·화면 흐름은 그대로 유지했습니다.
 
 ---
 
 ## 빠른 시작
 
 ```bash
-# 저장소 클론 후
-open 커스텀_주문관리.html          # macOS
-# 또는 브라우저로 파일을 드래그 앤 드롭
+# 1) PostgreSQL 컨테이너 기동 (호스트 5433 포트)
+npm run db:up
+
+# 2) 환경변수
+cp .env.example .env
+
+# 3) 의존성
+npm install
+
+# 4) 스키마 생성 + 샘플 데이터 500건 주입
+npm run db:reset
+
+# 5) 개발 서버
+npm run dev            # http://localhost:3000
 ```
 
-별도의 설치·빌드·실행 명령이 필요 없습니다. 인터넷 연결이 있으면 Google Fonts
-(`Gothic A1`, `IBM Plex Mono`)가 로드되고, 없으면 시스템 폰트로 대체됩니다.
+첫 화면의 주문일자 필터는 기준일(`2026-08-24`)로 걸려 있습니다.
+전체 목록을 보려면 **"전체 주문건 보기"** 체크박스를 켜세요.
 
-**초기 실행 시** 26건의 샘플 주문 데이터(`seedData()`)가 자동으로 생성되어 `localStorage`에 저장됩니다.
+### npm 스크립트
+
+| 스크립트 | 설명 |
+|---|---|
+| `npm run dev` | 개발 서버 |
+| `npm run build` / `npm start` | 프로덕션 빌드 / 실행 (`output: 'standalone'`) |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint |
+| `npm run db:up` / `db:down` | postgres 컨테이너 기동 / 종료 |
+| `npm run db:migrate` | `db/schema.sql` + `db/reference-data.sql` 실행 (**기존 데이터 삭제**) |
+| `npm run db:seed` | 샘플 데이터 생성 (멱등 — 시드 고정 난수) |
+| `npm run db:reset` | migrate + seed |
+| `npm run db:psql` | 컨테이너 psql 접속 |
 
 ---
 
-## 기술 스택 및 구조
+## 기술 스택
 
-| 항목 | 내용 |
+| 영역 | 선택 |
 |---|---|
-| 언어 | HTML5 + CSS3 + Vanilla JavaScript (ES5 스타일, 일부 ES6 문법) |
-| 프레임워크 | **없음** (No React/Vue/jQuery) |
-| 빌드 도구 | **없음** (단일 파일, 번들링 불필요) |
-| 상태 저장 | `localStorage` (키: `gift-order-manager-v12`) |
-| 폰트 | Google Fonts — Gothic A1 (본문), IBM Plex Mono (숫자/코드) |
-| 아이콘 | 인라인 SVG (외부 아이콘 라이브러리 없음) |
-| 코드 격리 | 전체 JS가 IIFE `(function(){ "use strict"; ... })()` 로 감싸져 전역 오염 없음 |
+| 프레임워크 | Next.js 16 (App Router) · React 19 · TypeScript |
+| API | Next.js Route Handlers (REST) |
+| DB | PostgreSQL 17 (Docker) |
+| DB 접근 | `pg` (node-postgres) + 직접 작성한 SQL — ORM 없음 |
+| 검증 | zod |
+| 스타일 | 원본 HTML의 CSS를 그대로 이식한 `globals.css` (CSS 변수 기반) |
+| 배포 | `output: 'standalone'` |
 
-### 파일 구조 (`커스텀_주문관리.html`, 약 1,880줄)
+---
 
-| 라인 범위 | 영역 | 설명 |
+## 프로젝트 구조
+
+```
+.
+├── docker-compose.yml          # postgres:17-alpine (호스트 5433 → 컨테이너 5432)
+├── db/
+│   ├── schema.sql              # 테이블·뷰·트리거·함수 DDL
+│   └── reference-data.sql      # 상태/결제/택배사/상품 기준 데이터
+├── scripts/
+│   ├── migrate.ts              # 스키마 재생성
+│   └── seed.ts                 # 샘플 데이터 생성
+├── original/                   # 분석 대상 원본 프로토타입
+│   ├── custom-order.html
+│   └── README.md               # 원본 화면/동작 분석 문서
+└── src/
+    ├── app/
+    │   ├── page.tsx            # 주문관리 (메인)
+    │   ├── dashboard/          # 대시보드
+    │   ├── customers/          # 고객관리
+    │   ├── products/           # 상품관리
+    │   ├── settings/           # 설정 (시스템 상태·코드 정의)
+    │   ├── health/route.ts     # 얕은 헬스체크
+    │   ├── globals.css         # 디자인 시스템
+    │   └── api/                # REST API (아래 표 참고)
+    ├── components/
+    │   ├── AppShell.tsx        # 사이드바 + 상단바 + 페이지 헤드
+    │   ├── Modal.tsx           # 공용 오버레이 (Esc/배경클릭 닫기)
+    │   ├── Toast.tsx           # 전역 토스트
+    │   ├── icons.tsx           # 인라인 SVG 아이콘 + 상품 썸네일
+    │   └── orders/             # 주문 화면 구성요소 + 8종 오버레이
+    ├── hooks/
+    │   ├── useAsyncData.ts     # key 기반 조회 훅
+    │   └── useDebounced.ts
+    └── lib/
+        ├── db.ts               # pg Pool + query/transaction
+        ├── api.ts              # apiUrl / apiFetch (basePath 처리)
+        ├── client-api.ts       # 프론트엔드용 API 클라이언트
+        ├── repositories/       # SQL 계층 (orders/customers/products/stats/meta)
+        ├── types.ts · validation.ts · format.ts · constants.ts
+        └── api-helpers.ts      # 응답/에러 공통 처리
+```
+
+---
+
+## 데이터베이스 설계
+
+원본은 주문 1건이 고객명·상품명·첨부파일 배열까지 모두 들고 있는 **평면 객체**였습니다.
+이를 다음과 같이 정규화했습니다.
+
+```
+order_statuses ─┐
+payment_statuses┤
+delivery_methods┼─< orders >─┬─ customers
+couriers ───────┘            ├─ products
+                             ├─< order_files          (attachment | draft)
+                             └─< order_status_history (트리거 자동 기록)
+```
+
+### 테이블
+
+| 테이블 | 역할 | 원본 대응 |
 |---|---|---|
-| 1 | `<head>` + frame-runtime | Claude Artifact 런타임 프리앰블(자동 삽입). 앱 로직과 무관하며 제거해도 동작함 |
-| 2~119 | 메타 / 폰트 / CSS 변수 | `:root` 디자인 토큰(색상·그림자·radius) 정의 |
-| 120~566 | 컴포넌트 CSS | 사이드바, 테이블, 칩, 필, 모달, 페이지네이션 등 |
-| 567~726 | 앱 레이아웃 마크업 | 사이드바 · 상단바 · 탭 · 요약 뷰 · 목록 뷰 · 테이블 |
-| 727~1019 | 모달/드로어 마크업 | 8종 오버레이 (주문폼, 삭제확인, 요청사항, 첨부파일, 택배, 상태상세, 고객정보, 초안 드로어) |
-| 1020~1878 | `<script>` | 시드 데이터, 상태, 렌더링, 이벤트 바인딩, 초기화 |
+| `order_statuses` | 진행 상태 9종 + 색상 토큰 + `is_active_stage` / `is_quick_tile` | `STATUS_LIST`, `ACTIVE_STATUSES`, `QUICK_STATUSES`, CSS 변수 |
+| `payment_statuses` | 결제 상태 3종 + 색상 | `.pill.pay-*` |
+| `delivery_methods` | 수령 방법 2종 | `select[name=deliveryMethod]` |
+| `couriers` | 택배사 5종 + 배송조회 URL 템플릿 | `select[name=courierCompany]` |
+| `customers` | 고객 (이름+연락처 유니크) | `customerName`, `phone`, `address` |
+| `products` | 상품 11종 + 슬러그 + 기본 단가 + SVG 아이콘 | `datalist#productList`, `PRODUCT_ICONS`, `PRODUCT_CODE_SLUGS` |
+| `orders` | 주문 본문 | order 객체 |
+| `order_files` | 첨부(`attachment`)·초안(`draft`) 파일 메타데이터 | `attachments[]`, `drafts[]` 두 배열을 통합 |
+| `order_status_history` | 상태 변경 이력 | **신규** (원본에 없음) |
+| `order_no_counters` | 연도별 주문번호 채번 | `nextOrderNo()` |
 
-### 아키텍처 패턴
+### 주요 설계 포인트
 
-```
-state (단일 객체)
-   │
-   ├─ load()  ← localStorage
-   ├─ save()  → localStorage
-   │
-   └─ renderAll()
-        ├─ renderStats()      : 상단 통계 타일 3종
-        ├─ renderChips()      : 상태별 필터 칩 + 건수
-        ├─ renderBreakdown()  : 품목별 주문 현황(일간/주간)
-        ├─ renderTable()      : 주문 목록 테이블 + 페이지네이션
-        └─ renderQuickStats() : 진행상태별 건수 타일 4종
-```
-
-이벤트는 대부분 **이벤트 위임(delegation)** 으로 컨테이너에 한 번만 바인딩되며,
-상태 변경 → `save()` → 해당 `render*()` 재호출의 단방향 흐름을 따릅니다.
-
----
-
-## 화면 구성
-
-### 1. 사이드바 (좌측 고정, 220px)
-
-`대시보드` / **`주문관리`(활성)** / `고객관리` / `상품관리` / `설정`
-→ **주문관리 외 항목은 클릭 시 "준비 중인 화면이에요" 토스트만 표시**됩니다.
-
-### 2. 상단바
-
-- 🔔 벨 아이콘 + 배지: 오늘(`TODAY`) 신규 주문 건수
-- 사용자 칩: `🎀 스튜디오`
-
-### 3. 페이지 헤드
-
-- 제목 `전체 주문`, 브레드크럼 `대시보드 › 주문관리 › 전체 주문`
-- 우측: `2026.08.24 기준` (기준일 표시)
-
-### 4. 뷰 탭 (2개)
-
-| 탭 | 내용 |
-|---|---|
-| **주문 목록** (기본) | 필터 툴바 + 주문 테이블 + 페이지네이션 |
-| **요약** | 통계 타일 · 품목별 주문 현황 · 진행상태별 건수 (탭 배지에 `진행중 N` 표시) |
+- **`orders.total_amount`** 은 `GENERATED ALWAYS AS (quantity * unit_price) STORED` 생성 컬럼입니다.
+  원본이 매번 파생 계산하던 값을 DB가 보장합니다.
+- **상태 이력 자동화** — `orders.order_status` 가 바뀌면 `log_order_status_change()` 트리거가
+  `order_status_history` 에 이전/이후 상태를 기록합니다. INSERT 시에는 `'주문 등록'` 으로 남습니다.
+- **주문번호 채번** — `next_order_no(year)` 함수가 `order_no_counters` 를 `INSERT … ON CONFLICT
+  DO UPDATE … RETURNING` 으로 갱신해 동시성 안전하게 `ORD-2026-000123` 을 만듭니다.
+- **`updated_at` 자동 갱신** — `set_updated_at()` 트리거.
+- **조회 뷰 3종**
+  - `order_list_view` — 목록 화면이 필요한 컬럼(고객명·상품명·품목코드·첨부 건수)을 조인해 한 번에
+  - `customer_summary_view` — 고객별 주문 건수/누적 금액/진행중 건수
+  - `product_summary_view` — 상품별 집계
+- **검색 인덱스** — `pg_trgm` GIN 인덱스로 주문자명·연락처·상품명·주문번호 부분일치 검색.
+- **품목코드**(`2026_keyring_01`)는 뷰에서 `주문연도 + 슬러그` 로 계산합니다.
 
 ---
 
-## 데이터 모델
+## REST API
 
-주문 1건은 다음 필드를 갖는 평범한 JS 객체입니다.
+모든 응답은 JSON이며, 오류는 `{ "error": string, "details"?: unknown }` + 적절한 상태 코드입니다.
 
-| 필드 | 타입 | 필수 | 설명 |
-|---|---|---|---|
-| `id` | number | ✅ | 내부 식별자 (자동 증가) |
-| `orderNo` | string | ✅ | 주문번호 `ORD-2026-000001` 형식 (자동 생성) |
-| `customerName` | string | ✅ | 주문자명 |
-| `phone` | string | | 연락처 |
-| `weddingDate` | string(YYYY-MM-DD) | ✅ | 예식일 |
-| `orderDate` | string(YYYY-MM-DD) | ✅ | 주문일자 |
-| `productName` | string | ✅ | 상품명 (datalist로 11종 추천) |
-| `option` | string | | 옵션 (디자인·사이즈·각인문구 등) |
-| `quantity` | number | ✅ | 수량 (min 1) |
-| `unitPrice` | number | ✅ | 단가(원) |
-| `deliveryMethod` | `"택배배송"` \| `"방문수령"` | | 수령 방법 |
-| `address` | string | | 배송지 주소 |
-| `paymentStatus` | `"결제대기"` \| `"결제완료"` \| `"결제취소"` | | 결제 상태 |
-| `orderStatus` | 9종 중 1 | | 진행 상태 ([아래 표](#상태status-정의)) |
-| `withInvitation` | boolean | | 청첩장 동반 주문 여부 |
-| `courierCompany` | string | | 택배사 (CJ대한통운/롯데/한진/우체국/로젠) |
-| `trackingNumber` | string | | 운송장번호 |
-| `deliveredDate` | string(YYYY-MM-DD) | | 배송완료일 |
-| `memo` | string | | 고객 요청사항 (목록의 💬 버튼으로 열람) |
-| `attachments` | string[] | | 첨부파일 **이름** 배열 |
-| `drafts` | string[] | | 초안 파일 **이름** 배열 |
+### 주문
 
-> ⚠️ `attachments` / `drafts`는 **파일명 문자열만** 저장합니다. 실제 파일 바이너리는 저장/업로드되지 않습니다.
-
-### 총 금액
-
-`총 금액 = quantity × unitPrice` 로 항상 파생 계산되며, 별도 필드로 저장하지 않습니다.
-
-### 품목코드 (`productCode`)
-
-`{주문연도}_{상품슬러그}_01` 형식으로 자동 생성됩니다. 예: `2026_keyring_01`
-
-| 상품명 | 슬러그 | 상품명 | 슬러그 |
-|---|---|---|---|
-| 아크릴 키링 | `keyring` | 커스텀 스티커 | `sticker` |
-| 아크릴 폰그립 | `phonegrip` | 메시지카드 | `card` |
-| 아크릴 마그넷 | `magnet` | 퍼즐액자 | `puzzle` |
-| 즉석 포토프린팅 | `photo` | 엽서 세트 | `postcard` |
-| 웨딩스탬프 | `stamp` | 테이블 캘린더 | `calendar` |
-| 웨딩신문 | `newspaper` | *(미등록 상품)* | `item` |
-
----
-
-## 상태(Status) 정의
-
-### 진행 상태 (`orderStatus`) — 9종
-
-| 상태 | 색상 계열 | 진행중 포함 |
+| 메서드 | 경로 | 설명 |
 |---|---|---|
-| 주문완료 | 블루그레이 | ✅ |
-| 초안등록 | 그레이 | ✅ |
-| 고객확정완료 | 퍼플 | ✅ |
-| 외주발주 | 오렌지 | ✅ |
-| 인쇄팀전달 | 골드 | ✅ |
-| 인쇄완료 | 핑크 | ✅ |
-| 배송중 | 틸그린 | ✅ |
-| 배송완료 | 그린 | ❌ |
-| 취소 | 레드 | ❌ |
+| `GET` | `/api/orders` | 목록. `search` `status` `paymentStatus` `productId` `orderDate` `showAllDates` `sort` `page` `pageSize` |
+| `POST` | `/api/orders` | 등록 (주문번호는 DB가 채번) |
+| `GET` | `/api/orders/:id` | 상세 (첨부·초안·상태이력 포함) |
+| `PUT` | `/api/orders/:id` | 전체 수정 |
+| `DELETE` | `/api/orders/:id` | 단건 삭제 |
+| `PATCH` | `/api/orders/:id/status` | 진행 상태만 변경 |
+| `PATCH` | `/api/orders/:id/courier` | 택배 정보만 변경 |
+| `POST` | `/api/orders/bulk-delete` | 다중 삭제 `{ ids: number[] }` |
+| `GET`·`POST` | `/api/orders/:id/files` | 파일 목록 / 추가 (`kind=attachment\|draft`) |
+| `DELETE` | `/api/orders/:id/files/:fileId` | 파일 삭제 |
 
-`ACTIVE_STATUSES`(진행중)는 **배송완료·취소를 제외한 7종**입니다.
+`sort` 값: `orderDateDesc`(기본) · `orderDateAsc` · `weddingDateAsc` · `amountDesc`
 
-### 결제 상태 (`paymentStatus`) — 3종
+### 통계 · 마스터 · 헬스체크
 
-`결제대기`(골드) / `결제완료`(그린) / `결제취소`(레드)
-
-> `결제취소` 주문은 목록의 **주문번호가 빨간색**으로 강조됩니다.
-
-### 청첩장 동반 여부
-
-`함께주문`(민트 필) / `단독 주문`(회색 필)
-
----
-
-## 주요 기능 상세
-
-### 🔍 검색
-
-`주문자명 · 주문번호 · 연락처 · 상품명` 4개 필드를 대상으로 대소문자 무시 부분 일치 검색.
-입력 즉시(`input` 이벤트) 필터링되며 1페이지로 이동합니다.
-
-### 🎚 필터 (AND 조건으로 중첩 적용)
-
-| 필터 | UI | 동작 |
+| 메서드 | 경로 | 설명 |
 |---|---|---|
-| 진행 상태 | 상단 칩 (전체 + 9종, 각 건수 배지) | 단일 선택 |
-| 결제 상태 | 셀렉트 박스 | 전체/결제대기/결제완료/결제취소 |
-| 주문일자 | 날짜 피커 | **기본값이 `TODAY`(2026-08-24)** 이라 첫 화면은 당일 주문만 표시 |
-| 전체 주문건 보기 | 체크박스 | 체크 시 주문일자 필터를 무시(피커가 비활성 처리됨) |
-| 품목 | 요약 탭의 "품목별 주문 현황" 행 클릭 | 토글 방식(재클릭 시 해제) |
+| `GET` | `/api/stats/summary?date=` | 전체/진행중/오늘 신규/총 금액 |
+| `GET` | `/api/stats/chips` | 상태별 필터 칩 건수 |
+| `GET` | `/api/stats/breakdown?date=&period=day\|week` | 품목별 주문 현황 (주간은 월~일) |
+| `GET` | `/api/stats/quick?date=` | 진행상태별 건수 타일 |
+| `GET` | `/api/stats/status-detail?date=&status=` | 특정 날짜·상태의 품목별 분해 |
+| `GET` | `/api/stats/trend?months=12` | 월별 주문 추이 |
+| `GET` | `/api/meta` | 상태·결제·수령방법·택배사·상품 코드 일체 |
+| `GET` | `/api/customers`, `/api/customers/:id`, `PATCH /api/customers/:id` | 고객 |
+| `GET` | `/api/products`, `/api/products/:id`, `PATCH /api/products/:id` | 상품 |
+| `GET` | `/health` | 얕은 헬스체크 `{"status":"ok"}` |
+| `GET` | `/api/health` | DB 연결까지 확인하는 심층 헬스체크 |
 
-> 💡 첫 화면에서 목록이 비어 보인다면 **"전체 주문건 보기"** 체크박스를 켜세요.
-> 주문일자 필터 기본값이 오늘 날짜로 걸려 있습니다.
+### 예시
 
-### ↕️ 정렬 (4종)
+```bash
+# 목록 (전체 기간, 인쇄팀전달 상태, 금액 높은순)
+curl "http://localhost:3000/api/orders?showAllDates=true&status=인쇄팀전달&sort=amountDesc&pageSize=5"
 
-- 주문일 최신순 (기본)
-- 주문일 오래된순
-- 예식일 임박순
-- 금액 높은순 (`quantity × unitPrice`)
+# 등록
+curl -X POST http://localhost:3000/api/orders \
+  -H 'Content-Type: application/json' \
+  -d '{"customerName":"김도윤","phone":"010-1234-5678","productName":"아크릴 키링",
+       "optionText":"원형 5cm / 시안 A","quantity":120,"unitPrice":2800,
+       "orderDate":"2026-08-24","weddingDate":"2026-09-12","deliveryMethod":"택배배송",
+       "shippingAddress":"서울시 마포구 양화로 12","paymentStatus":"결제대기",
+       "orderStatus":"주문완료","withInvitation":true}'
 
-### 📄 페이지네이션
-
-`10 / 25 / 50`건 단위 선택. 하단에 `전체 N건 중 a–b건 표시` 와 `‹ 1 2 3 ›` 버튼이 렌더링됩니다.
-
-### ☑️ 다중 선택 & 일괄 삭제
-
-- 헤더 체크박스: **현재 페이지 전체** 선택/해제 (부분 선택 시 indeterminate 표시)
-- 선택 시 상단에 민트색 bulk bar 노출 → `N건 선택됨` + `선택 삭제` 버튼
-- 삭제 확인 모달을 거쳐야 실제 삭제되며, 삭제 후 즉시 `localStorage`에 반영됩니다.
-
-### ⏰ 예식일 임박 강조
-
-`D-Day`를 `TODAY` 기준으로 계산해 `D-12`, `D-DAY`, `D+3` 형태로 표시합니다.
-**남은 일수가 0 이상 10 미만이면 예식일과 D-Day가 빨간색·굵게** 강조됩니다.
-
-### 🖱 행 클릭 동작 (조건 분기)
-
-| 클릭 위치 | 동작 |
-|---|---|
-| 주문번호 | **초안 업로드 드로어** (하단 시트) |
-| 주문자명 | **고객 정보 모달** |
-| 상품 썸네일 | 바른손카드 상품 페이지 새 탭 열기 |
-| 💬 아이콘 | 고객 요청사항 모달 (`memo` 없으면 비활성) |
-| 📁 아이콘 | 첨부파일 모달 (파일 수 배지 표시) |
-| 체크박스 | 선택 토글 |
-| **그 외 행 아무 곳** | `배송완료` 상태면 → **택배 정보 모달**<br>그 외 → **주문 수정 모달** |
-
-### 📊 요약 탭
-
-**① 통계 타일 3종** — 전체 주문 / 진행중 / 오늘 신규 주문
-
-**② 품목별 주문 현황** — `일일`/`주간` 토글
-- 일일: `orderDate === TODAY` 인 주문
-- 주간: `TODAY`가 속한 주 (**월요일 시작 ~ 일요일 종료**)
-- 건수 내림차순 정렬, 행 클릭 시 품목 필터 토글
-
-**③ 진행상태별 건수** — 날짜 피커 + 4종 타일(`주문완료`, `초안등록`, `고객확정완료`, `인쇄팀전달`)
-- 타일 클릭 → 상태 상세 모달(품목별 분해)
-- 상세 모달의 행 클릭 → **상태 + 품목 필터가 동시에 적용된 채 목록 탭으로 자동 전환**
-
-### ⌨️ 키보드
-
-`Esc` 키로 열려 있는 모든 오버레이를 닫습니다. 오버레이 배경 클릭으로도 닫힙니다.
-
-### 🔔 토스트
-
-미구현 메뉴 클릭 시 하단 중앙에 1.8초간 표시됩니다.
-
----
-
-## 모달 · 드로어 목록
-
-| # | ID | 제목 | 트리거 | 주요 내용 |
-|---|---|---|---|---|
-| 1 | `orderOverlay` | 주문 수정 · {주문번호} | 행 클릭 (배송완료 제외) | 전체 필드 편집 폼, 총 금액 실시간 미리보기 |
-| 2 | `deleteOverlay` | 주문 삭제 | 선택 삭제 버튼 | 되돌릴 수 없음 경고 + 확인 |
-| 3 | `noteOverlay` | 고객 요청사항 | 💬 아이콘 | `memo` 전문 표시 (17px 큰 글씨) |
-| 4 | `filesOverlay` | 첨부파일 · {주문번호} | 📁 아이콘 | 파일명 목록 + 추가/삭제 |
-| 5 | `courierOverlay` | 택배 정보 | 배송완료 행 클릭 | 택배사·운송장·배송완료일·수령방법·배송지 + `정보 수정` 버튼 |
-| 6 | `statusDetailOverlay` | {날짜} · {상태} (N건) | 진행상태 타일 클릭 | 품목별 건수, 클릭 시 목록으로 이동 |
-| 7 | `customerOverlay` | {고객명} 고객님 | 주문자명 클릭 | ID·연락처·주소 + 주문건 정보(상품·수량·금액·예식일·상태) |
-| 8 | `draftOverlay` | 주문 내용 · 초안 업로드 | 주문번호 클릭 | 하단 시트(bottom sheet). 주문 요약 6항목 + 요청사항 + 초안 파일 업로드 |
-
-> `attachments`(첨부파일)와 `drafts`(초안 파일)는 **서로 다른 배열**로 독립 관리됩니다.
-
----
-
-## 상태 관리 객체 (`state`)
-
-```js
-var state = {
-  orders: [],                  // 전체 주문 배열
-  search: "",                  // 검색어
-  status: "전체",              // 진행상태 필터
-  productFilter: null,         // 품목 필터 (null = 미적용)
-  orderDateFilter: TODAY,      // 주문일자 필터
-  showAllDates: false,         // 전체 주문건 보기
-  paymentFilter: "전체",       // 결제상태 필터
-  sort: "orderDateDesc",       // 정렬 기준
-  view: "list",                // "list" | "summary"
-  breakdownPeriod: "day",      // "day" | "week"
-  quickStatsDate: TODAY,       // 진행상태별 건수 기준일
-  page: 1,                     // 현재 페이지
-  pageSize: 10,                // 페이지당 건수
-  selectedIds: [],             // 선택된 주문 id
-  editingId: null,             // 수정 중인 주문
-  deletingId: null,            // 삭제 대상 ("BULK" 또는 id)
-  filesEditingId: null,        // 첨부파일 편집 중인 주문
-  draftEditingId: null,        // 초안 편집 중인 주문
-  courierViewingId: null       // 택배정보 조회 중인 주문
-};
+# 상태 변경 (이력 자동 기록)
+curl -X PATCH http://localhost:3000/api/orders/1/status \
+  -H 'Content-Type: application/json' -d '{"orderStatus":"초안등록"}'
 ```
 
 ---
 
-## 주요 함수 레퍼런스
+## 화면
 
-### 데이터 · 유틸
+### 주문관리 (`/`)
 
-| 함수 | 설명 |
-|---|---|
-| `seedData()` | 26건의 샘플 주문 반환 (2026-04-14 ~ 2026-08-30) |
-| `load()` | `localStorage` 로드, 없으면 시드 생성 후 저장 |
-| `save()` | `state.orders`를 JSON으로 직렬화해 저장 (try/catch로 안전 처리) |
-| `nextId()` | 기존 최대 `id + 1` |
-| `nextOrderNo()` | 기존 최대 일련번호 + 1 → `ORD-2026-000027` |
-| `won(n)` | `₩120,000` 형식 (ko-KR 로케일) |
-| `fmtDate(d)` | `2026-08-24` → `2026.08.24` |
-| `diffDays(d)` | `TODAY` 대비 남은 일수 |
-| `dday(diff)` | `D-12` / `D-DAY` / `D+3` |
-| `orderNoShort(no)` | `ORD-2026-000010` → `000010` |
-| `esc(s)` | HTML 이스케이프 (XSS 방지) |
-| `weekStart(dateStr)` | 해당 주 **월요일** Date 객체 반환 |
+원본의 모든 상호작용을 재현했습니다.
 
-### 렌더링
+- **필터** — 상태 칩(전체 + 9종, 건수 배지) · 결제 상태 · 검색(주문자명/주문번호/연락처/상품명,
+  300ms 디바운스) · 주문일자 · 전체 주문건 보기 · 품목 필터
+- **정렬** 4종, **페이지네이션** 10/25/50건
+- **다중 선택** — 헤더 체크박스(부분 선택 시 indeterminate), 선택 삭제 + 확인 모달
+- **예식일 임박 강조** — D-Day 10일 미만이면 빨간색
+- **행 클릭 분기**
+  | 클릭 위치 | 동작 |
+  |---|---|
+  | 주문번호 | 초안 업로드 드로어 (요약 + 요청사항 + 초안 + 상태 이력) |
+  | 주문자명 | 고객 정보 모달 (해당 고객의 전체 주문) |
+  | 상품 썸네일 | 바른손카드 상품 페이지 |
+  | 📁 | 첨부파일 모달 |
+  | 💬 | 고객 요청사항 모달 |
+  | 그 외 | `배송완료` → 택배 정보 모달 / 그 외 → 주문 수정 모달 |
+- **요약 탭** — 통계 타일, 품목별 주문 현황(일일/주간), 진행상태별 건수 타일
+  (타일 클릭 → 상세 모달 → 행 클릭 시 상태+품목 필터가 걸린 목록으로 이동)
 
-`renderAll()` = `renderStats()` + `renderChips()` + `renderBreakdown()` + `renderTable()` + `renderQuickStats()`
+> 원본에서 **미구현이던 "신규 주문 등록" 버튼을 추가**했습니다. (원본은 폼만 있고 여는 버튼이 없었음)
 
-그 외: `getFiltered()`(필터+정렬), `renderPagination()`, `currentPageList()`,
-`syncSelectAllCheckbox()`, `renderBulkBar()`, `productIcon()`, `productCode()`, `folderButton()`
+### 그 외
 
-### 모달 제어
-
-`openEditOrder` / `openBulkDeleteModal` / `openNoteModal` / `openFilesModal` /
-`openCourierModal` / `openCustomerModal` / `openDraftDrawer` / `openStatusDetail`
-— 각각 대응하는 `close*()` 함수 보유.
+- `/dashboard` — 통계 타일, 월별 주문 추이 막대 차트, 진행 상태별 분포, 주문 많은 상품 TOP 6
+- `/customers` — 고객 목록/검색, 행 클릭 시 고객 상세 모달
+- `/products` — 상품별 주문 건수·수량·누적 금액
+- `/settings` — DB 연결 상태·응답시간·PostgreSQL 버전, 코드 테이블 정의
 
 ---
 
-## 디자인 시스템
+## 샘플 데이터
 
-### 컬러 토큰 (`:root` CSS 변수)
+`npm run db:seed` 는 **시드 고정 난수(mulberry32)** 를 쓰므로 몇 번을 실행해도 동일한 데이터가 나옵니다.
 
-| 용도 | 변수 | 값 |
+| 항목 | 건수 |
+|---|---|
+| 고객 | 336명 |
+| 주문 | 500건 (총 ₩212,005,200) |
+| 첨부·초안 파일 | 522건 |
+| 상태 변경 이력 | 2,177건 |
+| 기준일(2026-08-24) 주문 | 8건 |
+
+- **원본 프로토타입의 시드 26건**(`ORD-2026-000001` ~ `000026`)을 주문번호·날짜·옵션·메모까지
+  그대로 재현하고, 그 뒤에 474건을 이어 생성합니다.
+- 주문일은 2026년 전체에 분포하되 기준일 부근(성수기)에 가중치를 둡니다.
+- 진행 상태는 *주문일로부터 흐른 시간* 과 *예식일까지 남은 기간* 으로 결정해
+  파이프라인을 자연스럽게 따라가고, 약 3.5%는 취소 처리됩니다.
+- 결제 상태·택배사·운송장·배송완료일·요청사항·첨부파일 유무를 상태에 맞춰 상관되게 생성합니다.
+- 상태 이력은 주문일 ~ 완료일 사이에 단계를 고르게 분포시켜 재구성합니다.
+
+생성량 조절:
+
+```bash
+SEED_ORDER_COUNT=2000 npm run db:seed
+```
+
+---
+
+## 환경변수
+
+| 변수 | 기본값 | 설명 |
 |---|---|---|
-| 배경/서피스 | `--paper`, `--surface` | `#FFFFFF` |
-| 가라앉은 배경 | `--surface-sunken` | `#F5F5F3` |
-| 본문 텍스트 | `--ink` | `#232022` |
-| 보조 텍스트 | `--ink-muted` / `--ink-faint` | `#736C68` / `#A39C97` |
-| 구분선 | `--line` / `--line-strong` | `#EAE8E5` / `#DAD7D2` |
-| **강조색(민트)** | `--accent` | `#1FB6AC` |
-| 긴급(빨강) | `--urgent` | `#C42B2B` |
-| 사이드바 | `--sidebar-bg` | `#1E2A3D` (다크 네이비) |
-| 테이블 헤더 | `--table-head-bg` | `#28364B` |
+| `DATABASE_URL` | `postgresql://order_admin:order_admin_pw@localhost:5433/order_manager` | DB 접속 URL |
+| `PGPOOL_MAX` | `10` | 커넥션 풀 최대 크기 |
+| `NEXT_PUBLIC_BASE_PATH` | (없음) | 서브패스 배포 시 `apiFetch` 가 붙일 prefix |
+| `NEXT_PUBLIC_TODAY` | `2026-08-24` | 화면 기준일. 비우면 실제 오늘 날짜 |
+| `PORT` / `HOSTNAME` | `3000` / `0.0.0.0` | standalone 서버 |
 
-상태별 색상은 `--st-*-ink` / `--st-*-bg` 쌍으로 9종, 결제 상태는 `--pay-*` 쌍으로 정의되어
-`.pill.st-{상태명}` / `.pill.pay-{상태명}` 클래스로 자동 매칭됩니다.
-(클래스명에 한글이 그대로 사용됩니다.)
-
-### 타이포그래피
-
-- 본문: **Gothic A1** (400/500/700/800/900)
-- 숫자·코드·주문번호·날짜: **IBM Plex Mono** + `font-variant-numeric: tabular-nums`
-
-### 반응형
-
-`@media (max-width: 760px)` 에서 통계 타일 3열→2열, 진행상태 타일 4열→2열, 폼 2열→1열로 전환.
-테이블은 `min-width: 1200px` + 가로 스크롤 컨테이너로 처리됩니다.
-
-### 접근성
-
-- 모든 모달에 `role="dialog"` `aria-modal="true"` `aria-labelledby` 지정
-- 아이콘 버튼에 `aria-label` / `title` 지정
-- `*:focus-visible` 에 민트색 아웃라인 2px
+`NEXT_PUBLIC_TODAY` 는 원본이 `TODAY = "2026-08-24"` 로 하드코딩되어 있던 것을 환경변수로 뺀 것입니다.
+샘플 데이터가 이 날짜를 기준으로 생성되므로, 기본값으로 두어야 화면이 자연스럽습니다.
 
 ---
 
-## 데이터 저장 및 초기화
+## 프로덕션 실행
 
-- **저장 키**: `gift-order-manager-v12`
-- **저장 시점**: 주문 등록/수정, 삭제, 첨부파일·초안 추가/삭제 시 즉시
-- **저장 범위**: `state.orders`만 저장 (필터·정렬·페이지 등 UI 상태는 새로고침 시 초기화)
-
-### 데이터 초기화 방법
-
-브라우저 콘솔에서:
-
-```js
-localStorage.removeItem("gift-order-manager-v12");
-location.reload();   // 26건의 시드 데이터로 복원
+```bash
+npm run build
+cp -r public .next/standalone/public
+cp -r .next/static .next/standalone/.next/static
+node .next/standalone/server.js
 ```
 
+`output: 'standalone'` 이므로 `.next/standalone` 만 배포하면 됩니다.
+정적 자산(`.next/static`, `public`)은 위처럼 함께 복사해야 합니다.
+
 ---
 
-## 알려진 제약 및 미구현 사항
+## 원본 대비 변경 사항
 
-프로토타입 특성상 다음 항목은 의도적으로 구현되지 않았거나 제한적입니다.
-
-| 항목 | 내용 |
+| 원본 | 이 프로젝트 |
 |---|---|
-| **신규 주문 등록 버튼 없음** | 주문 등록 폼(`orderForm`)과 `nextId()`/`nextOrderNo()` 로직은 완성되어 있으나, 이를 여는 UI 버튼이 화면에 배치되어 있지 않습니다. 현재 폼은 **수정 용도로만** 열립니다. |
-| **개별 삭제 없음** | 삭제는 체크박스 다중 선택 후 `선택 삭제`만 가능합니다. (`state.deletingId`의 단건 분기 코드는 존재하나 호출 경로 없음) |
-| **기준일 하드코딩** | `TODAY = "2026-08-24"` 로 고정. 실제 오늘 날짜가 아닌 데모용 고정값입니다. |
-| **주문번호 연도 고정** | `nextOrderNo()`가 `ORD-2026-` 접두사와 `/ORD-2026-(\d+)/` 정규식을 사용해 2026년에 고정되어 있습니다. |
-| **파일 업로드는 이름만 저장** | 실제 파일은 저장·전송되지 않으며 새로고침 후에도 파일명 문자열만 남습니다. |
-| **사이드바 메뉴 미구현** | 주문관리 외 4개 메뉴는 토스트만 표시합니다. |
-| **상품 링크 고정** | 모든 상품 썸네일이 동일한 바른손카드 URL(`MdSeq=137`)로 연결됩니다. |
-| **백엔드/인증 없음** | 단일 브라우저의 `localStorage`에만 저장되므로 기기·브라우저 간 동기화가 되지 않습니다. |
-| **Artifact 런타임 코드 포함** | 1번째 줄의 `frame-runtime` 스크립트는 Claude Artifact에서 내보내며 생성된 코드로, 앱 기능과 무관합니다. |
+| `localStorage` 저장 | PostgreSQL + REST API (기기·브라우저 간 공유) |
+| 신규 주문 등록 버튼 없음 | 페이지 헤드에 **신규 주문 등록** 버튼 추가 |
+| 개별 삭제 경로 없음 | `DELETE /api/orders/:id` 추가 (UI는 다중 선택 삭제 유지) |
+| `TODAY` 하드코딩 | `NEXT_PUBLIC_TODAY` 환경변수 |
+| 주문번호 연도 2026 고정 | 주문일자 연도 기준으로 채번 |
+| 첨부/초안이 문자열 배열 | `order_files` 테이블 (크기·MIME·업로드 시각 기록) |
+| 상태 이력 없음 | `order_status_history` + 자동 기록 트리거 |
+| 사이드바 메뉴 4종 미구현 | 대시보드·고객관리·상품관리·설정 화면 구현 |
+| 상품 링크 고정 | `products.link_url` 로 상품별 관리 |
 
----
+### 남아 있는 제약
 
-## 커스터마이징 가이드
-
-### 기준일 변경
-
-```js
-var TODAY = "2026-08-24";
-// → 실제 오늘 날짜로 바꾸려면:
-var TODAY = new Date().toISOString().slice(0, 10);
-```
-
-### 상품 추가
-
-3곳을 함께 수정해야 합니다.
-
-1. `<datalist id="productList">` — 입력 자동완성 옵션
-2. `PRODUCT_ICONS` — SVG path 문자열 (없으면 `PRODUCT_ICON_FALLBACK` 사용)
-3. `PRODUCT_CODE_SLUGS` — 품목코드 슬러그 (없으면 `item`)
-
-### 진행 상태 추가
-
-1. `STATUS_LIST` 배열에 추가
-2. 진행중으로 집계하려면 `ACTIVE_STATUSES`에도 추가
-3. CSS에 `.pill.st-{상태명}` 규칙과 `--st-*-ink` / `--st-*-bg` 변수 추가
-4. `<select name="orderStatus">`에 `<option>` 추가
-
-### 요약 탭 타일 변경
-
-```js
-var QUICK_STATUSES = ["주문완료","초안등록","고객확정완료","인쇄팀전달"];
-```
-CSS의 `.quick-stats { grid-template-columns: repeat(4,1fr); }` 도 개수에 맞춰 조정하세요.
-
-### 임박 기준 변경
-
-`renderTable()` 내부:
-```js
-var urgent = diff >= 0 && diff < 10;   // 10일 → 원하는 값으로
-```
-
-### 저장 키 변경
-
-`STORAGE_KEY`를 바꾸면 기존 데이터와 분리된 새 저장소가 만들어집니다.
-(데이터 구조 변경 시 버전 번호를 올리는 용도로 사용됩니다: `...-v12`)
-
----
-
-## 라이선스
-
-내부 프로토타입 용도. 별도 라이선스 명시 없음.
+- **파일은 메타데이터만 저장합니다.** 실제 바이너리 업로드/다운로드는 구현하지 않았습니다
+  (파일명·크기·MIME·업로드 시각만 기록). 원본과 동일한 범위입니다.
+- **인증/권한이 없습니다.** 업로더는 `'스튜디오'` 로 고정되어 있습니다.
