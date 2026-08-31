@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { CalendarIcon, FolderIcon, NoteIcon, PlusIcon, ProductThumb, SearchIcon } from "@/components/icons";
+import { FolderIcon, NoteIcon, PlusIcon, ProductThumb, SearchIcon } from "@/components/icons";
+import { DateRangeFilter } from "@/components/DateRangeFilter";
 import { useToast } from "@/components/Toast";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { useDebounced } from "@/hooks/useDebounced";
 import { api } from "@/lib/client-api";
-import { PAGE_SIZES, SORT_OPTIONS, TODAY, URGENT_DAYS } from "@/lib/constants";
-import { dday, diffDays, fmtDate, num } from "@/lib/format";
+import { PAGE_SIZES, SORT_OPTIONS, TODAY } from "@/lib/constants";
+import { resolveDateRange, type DatePreset } from "@/lib/date-range";
+import { fmtDate, num, won } from "@/lib/format";
 import type {
   Meta,
   Order,
@@ -61,8 +63,9 @@ export function OrdersView() {
   const [status, setStatus] = useState("전체");
   const [paymentStatus, setPaymentStatus] = useState("전체");
   const [productFilter, setProductFilter] = useState<number | null>(null);
-  const [orderDate, setOrderDate] = useState(TODAY);
-  const [showAllDates, setShowAllDates] = useState(false);
+  // 날짜 필터: 프리셋 + 기준일(anchor). "week" 는 anchor 가 속한 주(월~일), "day" 는 anchor 하루.
+  const [datePreset, setDatePreset] = useState<DatePreset>("today");
+  const [dateAnchor, setDateAnchor] = useState(TODAY);
   const [sort, setSort] = useState<OrderSort>("orderDateDesc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -111,6 +114,12 @@ export function OrdersView() {
     return () => c.abort();
   }, [onError]);
 
+  // 프리셋 → 실제 조회 기간 [from, to] (또는 전체)
+  const dateRange = useMemo(
+    () => resolveDateRange(datePreset, dateAnchor),
+    [datePreset, dateAnchor],
+  );
+
   // ── 목록 로드 ──────────────────────────────────────────────────────────────
   const listParams = useMemo(
     () => ({
@@ -118,13 +127,14 @@ export function OrdersView() {
       status: status !== "전체" ? status : undefined,
       paymentStatus: paymentStatus !== "전체" ? paymentStatus : undefined,
       productId: productFilter ?? undefined,
-      orderDate: showAllDates ? undefined : orderDate,
-      showAllDates,
+      dateFrom: dateRange.all ? undefined : dateRange.from,
+      dateTo: dateRange.all ? undefined : dateRange.to,
+      showAllDates: dateRange.all,
       sort,
       page,
       pageSize,
     }),
-    [search, status, paymentStatus, productFilter, orderDate, showAllDates, sort, page, pageSize],
+    [search, status, paymentStatus, productFilter, dateRange, sort, page, pageSize],
   );
 
   const listFetcher = useCallback(
@@ -162,7 +172,7 @@ export function OrdersView() {
     }
     setPage(1);
     setSelectedIds([]);
-  }, [search, status, paymentStatus, productFilter, orderDate, showAllDates, sort, pageSize]);
+  }, [search, status, paymentStatus, productFilter, datePreset, dateAnchor, sort, pageSize]);
 
   const items = paged?.items ?? [];
   const total = paged?.total ?? 0;
@@ -333,13 +343,23 @@ export function OrdersView() {
           onPickProduct={(id) => {
             setProductFilter((prev) => (prev === id ? null : id));
             setView("list");
-            setShowAllDates(true);
+            setDatePreset("all");
           }}
           onPickStatusTile={(s, d) => setStatusDetail({ status: s, date: d })}
         />
       ) : (
         <>
           <div className="toolbar">
+            {/* 날짜 검색 — 맨 앞. 날짜를 고르면 그 주(월~일) 단위로 조회 */}
+            <DateRangeFilter
+              preset={datePreset}
+              anchor={dateAnchor}
+              onChange={(p, a) => {
+                setDatePreset(p);
+                setDateAnchor(a);
+              }}
+            />
+
             <div className="chips">
               <button
                 type="button"
@@ -404,26 +424,6 @@ export function OrdersView() {
               />
             </div>
 
-            <div className="date-picker" title="주문일자로 조회">
-              <CalendarIcon />
-              <input
-                type="date"
-                value={orderDate}
-                disabled={showAllDates}
-                onChange={(e) => setOrderDate(e.target.value)}
-                aria-label="주문일자 필터"
-              />
-            </div>
-
-            <label className="show-all-toggle">
-              <input
-                type="checkbox"
-                checked={showAllDates}
-                onChange={(e) => setShowAllDates(e.target.checked)}
-              />
-              전체 주문건 보기
-            </label>
-
             {productFilter ? (
               <button
                 type="button"
@@ -448,7 +448,7 @@ export function OrdersView() {
             </div>
           ) : null}
 
-          <div className="table-wrap">
+          <div className="table-wrap orders-table">
             <div className="table-controls">
               Show
               <select
@@ -484,23 +484,27 @@ export function OrdersView() {
                         }}
                       />
                     </th>
+                    <th>주문일자</th>
+                    <th>주문방식</th>
                     <th>주문번호</th>
                     <th>주문자명</th>
-                    <th>예식일</th>
+                    <th>연락처</th>
+                    <th>배송지</th>
+                    <th>배송요청사항</th>
                     <th>상품명</th>
                     <th>품목코드</th>
-                    <th>청첩장</th>
-                    <th className="num">수량</th>
-                    <th>결제</th>
-                    <th>진행상태</th>
+                    <th className="num">주문수량</th>
+                    <th className="num">인쇄수량</th>
+                    <th className="num">결제금액</th>
                     <th>첨부파일</th>
-                    <th />
+                    <th>결제상태</th>
+                    <th>진행상태</th>
                   </tr>
                 </thead>
                 <tbody>
                   {listError ? (
                     <tr>
-                      <td colSpan={12}>
+                      <td colSpan={16}>
                         <div className="empty">
                           <div className="big">목록을 불러오지 못했어요</div>
                           {listError}
@@ -509,25 +513,24 @@ export function OrdersView() {
                     </tr>
                   ) : loading && items.length === 0 ? (
                     <tr>
-                      <td colSpan={12}>
+                      <td colSpan={16}>
                         <div className="empty">불러오는 중…</div>
                       </td>
                     </tr>
                   ) : items.length === 0 ? (
                     <tr>
-                      <td colSpan={12}>
+                      <td colSpan={16}>
                         <div className="empty">
                           <div className="big">조건에 맞는 주문이 없어요</div>
-                          검색어나 필터를 조정해보세요. 주문일자 필터가 걸려 있다면 &lsquo;전체 주문건
-                          보기&rsquo;를 켜보세요.
+                          검색어나 필터를 조정해보세요. 날짜 범위가 좁다면 &lsquo;전체 주문건&rsquo;을
+                          체크해보세요.
                         </div>
                       </td>
                     </tr>
                   ) : (
                     items.map((o) => {
                       const checked = selectedSet.has(o.id);
-                      const diff = diffDays(o.weddingDate);
-                      const urgent = diff >= 0 && diff < URGENT_DAYS;
+                      const address = o.shippingAddress || o.customerAddress || "-";
                       return (
                         <tr
                           key={o.id}
@@ -559,6 +562,20 @@ export function OrdersView() {
                               }
                             />
                           </td>
+
+                          {/* 주문일자 */}
+                          <td className="mono">{fmtDate(o.orderDate)}</td>
+
+                          {/* 주문방식 */}
+                          <td>
+                            {o.withInvitation ? (
+                              <span className="pill inv-yes">청첩장 함께</span>
+                            ) : (
+                              <span className="pill inv-no">단독 주문</span>
+                            )}
+                          </td>
+
+                          {/* 주문번호 */}
                           <td onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
@@ -569,8 +586,9 @@ export function OrdersView() {
                             >
                               {o.orderNoShort}
                             </button>
-                            <div className="subrow mono">{fmtDate(o.orderDate)}</div>
                           </td>
+
+                          {/* 주문자명 */}
                           <td onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
@@ -579,18 +597,37 @@ export function OrdersView() {
                             >
                               {o.customerName}
                             </button>
-                            <div className="subrow">{o.customerPhone || "-"}</div>
                           </td>
-                          <td>
-                            <div className={`mono wed-date${urgent ? " urgent" : ""}`}>
-                              {fmtDate(o.weddingDate)}
-                            </div>
-                            <div className={`subrow${urgent ? " urgent" : ""}`}>{dday(diff)}</div>
+
+                          {/* 연락처 */}
+                          <td className="mono">{o.customerPhone || "-"}</td>
+
+                          {/* 배송지 */}
+                          <td className="col-l">
+                            <span className="clip-text" title={address}>
+                              {address}
+                            </span>
                           </td>
+
+                          {/* 배송요청사항 (아이콘 클릭 → 모달) */}
+                          <td onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              className={`icon-btn${o.memo ? " note-active" : ""}`}
+                              title={o.memo ? "배송요청사항 보기" : "배송요청사항 없음"}
+                              disabled={!o.memo}
+                              onClick={() => setNoteOrder(o)}
+                            >
+                              <NoteIcon />
+                            </button>
+                          </td>
+
+                          {/* 상품명 */}
                           <td>
                             <div className="product">
                               <ProductThumb
                                 name={o.productName}
+                                slug={o.productSlug}
                                 iconPath={o.productIconPath}
                                 linkUrl={o.productLinkUrl}
                               />
@@ -600,23 +637,22 @@ export function OrdersView() {
                               </div>
                             </div>
                           </td>
+
+                          {/* 품목코드 */}
                           <td>
                             <span className="item-code">{o.productCode}</span>
                           </td>
-                          <td>
-                            {o.withInvitation ? (
-                              <span className="pill inv-yes">함께주문</span>
-                            ) : (
-                              <span className="pill inv-no">단독 주문</span>
-                            )}
-                          </td>
+
+                          {/* 주문수량 */}
                           <td className="num mono">{num(o.quantity)}</td>
-                          <td>
-                            <span className={`pill pay-${o.paymentStatus}`}>{o.paymentStatus}</span>
-                          </td>
-                          <td>
-                            <span className={`pill st-${o.orderStatus}`}>{o.orderStatus}</span>
-                          </td>
+
+                          {/* 인쇄수량 */}
+                          <td className="num mono">{num(o.printQuantity ?? o.quantity)}</td>
+
+                          {/* 결제금액 */}
+                          <td className="num mono">{won(o.totalAmount)}</td>
+
+                          {/* 첨부파일 */}
                           <td onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
@@ -632,18 +668,20 @@ export function OrdersView() {
                               ) : null}
                             </button>
                           </td>
-                          <td onClick={(e) => e.stopPropagation()}>
-                            <div className="row-actions">
-                              <button
-                                type="button"
-                                className={`icon-btn${o.memo ? " note-active" : ""}`}
-                                title={o.memo ? "요청사항 보기" : "요청사항 없음"}
-                                disabled={!o.memo}
-                                onClick={() => setNoteOrder(o)}
-                              >
-                                <NoteIcon />
-                              </button>
-                            </div>
+
+                          {/* 결제상태 (작게, '결제' 접두어 제외) */}
+                          <td>
+                            <span
+                              className={`pill pill-sm pay-${o.paymentStatus}`}
+                              title={o.paymentStatus}
+                            >
+                              {o.paymentStatus.replace(/^결제/, "")}
+                            </span>
+                          </td>
+
+                          {/* 진행상태 */}
+                          <td>
+                            <span className={`pill st-${o.orderStatus}`}>{o.orderStatus}</span>
                           </td>
                         </tr>
                       );
@@ -762,8 +800,8 @@ export function OrdersView() {
         onPickProduct={(productId) => {
           if (statusDetail) {
             setStatus(statusDetail.status);
-            setOrderDate(statusDetail.date);
-            setShowAllDates(false);
+            setDateAnchor(statusDetail.date);
+            setDatePreset("day");
           }
           setProductFilter(productId);
           setStatusDetail(null);

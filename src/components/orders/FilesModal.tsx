@@ -2,11 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/Modal";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import { FolderIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { api } from "@/lib/client-api";
+import { apiUrl } from "@/lib/api";
 import { fmtDateTime, fmtFileSize } from "@/lib/format";
 import type { OrderFile, OrderFileKind } from "@/lib/types";
+
+const isImage = (f: OrderFile) => f.hasData && !!f.contentType?.startsWith("image/");
 
 type Props = {
   open: boolean;
@@ -35,6 +39,7 @@ export function FilesModal({
 }: Props) {
   const [busy, setBusy] = useState(false);
   const [localVersion, setLocalVersion] = useState(0);
+  const [zoom, setZoom] = useState<{ src: string; name: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const fetcher = useCallback(
@@ -57,12 +62,7 @@ export function FilesModal({
     setBusy(true);
     try {
       for (const f of Array.from(list)) {
-        await api.addFile(orderId, {
-          kind,
-          fileName: f.name,
-          fileSize: f.size,
-          contentType: f.type || undefined,
-        });
+        await api.addFile(orderId, kind, f);
       }
       setLocalVersion((v) => v + 1);
       onChanged();
@@ -116,7 +116,7 @@ export function FilesModal({
           onChange={(e) => handlePick(e.target.files)}
         />
         <span className="file-hint">
-          실제 파일은 전송하지 않고 파일명·크기만 기록합니다.
+          이미지는 미리보기로 표시됩니다. (최대 8MB)
         </span>
       </div>
 
@@ -131,9 +131,30 @@ export function FilesModal({
         <ul className="file-list">
           {files.map((f) => (
             <li key={f.id}>
-              <span className="file-icon">
-                <FolderIcon />
-              </span>
+              {isImage(f) ? (
+                <button
+                  type="button"
+                  className="file-thumb"
+                  onClick={() =>
+                    setZoom({
+                      src: apiUrl(`/api/orders/${orderId}/files/${f.id}/content`),
+                      name: f.fileName,
+                    })
+                  }
+                  title={`${f.fileName} 크게 보기`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={apiUrl(`/api/orders/${orderId}/files/${f.id}/content`)}
+                    alt={f.fileName}
+                    loading="lazy"
+                  />
+                </button>
+              ) : (
+                <span className="file-icon">
+                  <FolderIcon />
+                </span>
+              )}
               <span className="file-meta">
                 <b>{f.fileName}</b>
                 <small className="mono">
@@ -156,6 +177,9 @@ export function FilesModal({
           ))}
         </ul>
       )}
+      {zoom ? (
+        <ImageLightbox src={zoom.src} alt={zoom.name} onClose={() => setZoom(null)} />
+      ) : null}
     </Modal>
   );
 }

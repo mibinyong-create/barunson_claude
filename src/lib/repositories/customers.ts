@@ -17,6 +17,7 @@ function mapCustomer(r: Row): Customer {
     activeOrderCount: r.active_order_count as number,
     lastOrderDate: (r.last_order_date as string) ?? null,
     nearestWeddingDate: (r.nearest_wedding_date as string) ?? null,
+    orders: (r.orders as Customer["orders"]) ?? [],
   };
 }
 
@@ -34,13 +35,18 @@ export async function listCustomers(params: {
     const p = add(`%${search.trim()}%`);
     // coalesce 로 감싸면 trigram 인덱스를 타지 못한다.
     // 검색어가 비어있지 않으므로 NULL 은 어차피 '%X%' 에 매칭되지 않아 결과가 같다.
-    whereSql = `WHERE (name ILIKE ${p} OR phone ILIKE ${p} OR address ILIKE ${p})`;
+    // 주문번호 검색: 해당 문자열을 주문번호에 가진 주문이 하나라도 있는 고객을 포함한다
+    // (orders.order_no 에 trigram GIN 인덱스가 있어 부분일치가 빠르다).
+    whereSql = `WHERE (
+      v.name ILIKE ${p} OR v.phone ILIKE ${p} OR v.address ILIKE ${p}
+      OR EXISTS (SELECT 1 FROM orders ord WHERE ord.customer_id = v.id AND ord.order_no ILIKE ${p})
+    )`;
   }
 
-  // 검색 조건이 customers 컬럼만 쓰므로 전체 GROUP BY 를 유발하는 집계 뷰 대신
-  // 원본 테이블에서 센다. 결과는 동일하다.
+  // count·list 모두 관계에 별칭 v 를 붙여 whereSql 을 그대로 공유한다.
+  // (customers 와 customer_summary_view 는 name/phone/address/id 컬럼이 동일)
   const countRow = await queryOne<{ total: number }>(
-    `SELECT count(*)::int AS total FROM customers ${whereSql}`,
+    `SELECT count(*)::int AS total FROM customers v ${whereSql}`,
     values,
   );
   const total = countRow?.total ?? 0;
@@ -48,8 +54,24 @@ export async function listCustomers(params: {
   const safeSize = Math.min(Math.max(pageSize, 1), 200);
 
   const rows = await query<Row>(
-    `SELECT * FROM customer_summary_view ${whereSql}
-     ORDER BY order_count DESC, name
+    `SELECT v.*, coalesce(ol.orders, '[]'::json) AS orders
+       FROM customer_summary_view v
+       LEFT JOIN LATERAL (
+         SELECT json_agg(
+                  json_build_object(
+                    'orderNo',      o.order_no,
+                    'orderNoShort', right(o.order_no, 6),
+                    'productName',  p.name,
+                    'optionText',   o.option_text
+                  )
+                  ORDER BY o.order_date DESC, o.id DESC
+                ) AS orders
+           FROM orders o
+           JOIN products p ON p.id = o.product_id
+          WHERE o.customer_id = v.id
+       ) ol ON true
+       ${whereSql}
+     ORDER BY v.order_count DESC, v.name
      LIMIT ${add(safeSize)} OFFSET ${add((safePage - 1) * safeSize)}`,
     values,
   );

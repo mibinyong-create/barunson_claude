@@ -8,16 +8,21 @@ import { TODAY } from "@/lib/constants";
 import { fmtDate } from "@/lib/format";
 import {
   BellIcon,
+  ClipboardIcon,
   CustomersIcon,
   DashboardIcon,
+  LogoutIcon,
   OrdersIcon,
   ProductsIcon,
   SettingsIcon,
+  TruckIcon,
 } from "./icons";
 
 const NAV = [
   { href: "/dashboard", label: "대시보드", Icon: DashboardIcon },
   { href: "/", label: "주문관리", Icon: OrdersIcon },
+  { href: "/shipping", label: "출고관리", Icon: TruckIcon },
+  { href: "/purchasing", label: "발주관리", Icon: ClipboardIcon },
   { href: "/customers", label: "고객관리", Icon: CustomersIcon },
   { href: "/products", label: "상품관리", Icon: ProductsIcon },
   { href: "/settings", label: "설정", Icon: SettingsIcon },
@@ -50,55 +55,63 @@ export function AppShell({ title, breadcrumb, children, actions }: Props) {
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="sidebar-brand">
-          <span className="dot" />
-          커스텀
-        </div>
+        <Link href="/dashboard" className="sidebar-brand" aria-label="바른손 홈">
+          <span>바른손</span>
+        </Link>
+
         <nav className="sidebar-nav">
           {NAV.map(({ href, label, Icon }) => (
             <Link
               key={href}
               className={`nav-item${pathname === href ? " active" : ""}`}
               href={href}
+              title={label}
             >
-              <Icon />
-              <span>{label}</span>
+              <span className="nav-ico">
+                <Icon size={20} />
+              </span>
+              <span className="nav-label">{label}</span>
             </Link>
           ))}
         </nav>
+
+        <div className="sidebar-foot">
+          <Link href="/" className="nav-item" title="로그아웃">
+            <span className="nav-ico">
+              <LogoutIcon size={20} />
+            </span>
+            <span className="nav-label">로그아웃</span>
+          </Link>
+        </div>
       </aside>
 
       <div className="main">
-        <div className="topbar-new">
-          <div className="topbar-right">
-            <button type="button" className="bell-btn" title="오늘 신규 주문">
-              <BellIcon />
-              <span className="badge">{todayCount ?? 0}</span>
-            </button>
-            <div className="user-chip">
-              <div className="avatar">🎀</div>
-              <span className="uname">스튜디오</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="page-head">
-          <div>
+        <header className="app-header">
+          <div className="app-header-title">
             <h1>{title}</h1>
-            <div className="breadcrumb">
-              {breadcrumb.map((b, i) => (
-                <span key={b}>
-                  {i > 0 ? <span className="sep">›</span> : null}
-                  <span className={i === breadcrumb.length - 1 ? "current" : undefined}>{b}</span>
-                </span>
-              ))}
-            </div>
+            {breadcrumb.length > 1 ? (
+              <div className="breadcrumb">
+                {breadcrumb.map((b, i) => (
+                  <span key={b}>
+                    {i > 0 ? <span className="sep">›</span> : null}
+                    <span className={i === breadcrumb.length - 1 ? "current" : undefined}>
+                      {b}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
-          <div className="page-head-right">
+
+          <div className="app-header-actions">
             {actions}
-            <div className="today">{fmtDate(TODAY)} 기준</div>
+            <button type="button" className="hdr-bell" title="오늘 신규 주문" aria-label="오늘 신규 주문">
+              <BellIcon size={17} />
+              {todayCount ? <span className="badge">{todayCount}</span> : null}
+            </button>
+            <span className="hdr-today">{fmtDate(TODAY)} 기준</span>
           </div>
-        </div>
+        </header>
 
         <div className="app">{children}</div>
       </div>

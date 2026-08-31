@@ -24,3 +24,6 @@ export const PAGE_SIZES = [10, 25, 50] as const;
 
 /** 예식일이 이 일수 미만으로 남으면 목록에서 빨간색으로 강조 */
 export const URGENT_DAYS = 10;
+
+/** 초안/첨부 파일 1건의 최대 크기 (바이트). DB bytea 로 보관하므로 보수적으로 잡는다. */
+export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;

@@ -9,6 +9,7 @@ function mapProduct(r: Row): Product {
     name: r.name as string,
     slug: r.slug as string,
     defaultUnitPrice: r.default_unit_price as number,
+    purchasePrice: (r.purchase_price as number) ?? 0,
     iconPath: (r.icon_path as string) ?? null,
     linkUrl: (r.link_url as string) ?? null,
     sortOrder: r.sort_order as number,
@@ -36,17 +37,31 @@ export async function getProduct(id: number): Promise<Product | null> {
 
 export async function updateProduct(
   id: number,
-  data: { name?: string; defaultUnitPrice?: number; isActive?: boolean; linkUrl?: string | null },
+  data: {
+    name?: string;
+    defaultUnitPrice?: number;
+    purchasePrice?: number;
+    isActive?: boolean;
+    linkUrl?: string | null;
+  },
 ): Promise<Product | null> {
   const updated = await queryOne<Row>(
     `UPDATE products SET
        name               = coalesce($2, name),
        default_unit_price = coalesce($3, default_unit_price),
        is_active          = coalesce($4, is_active),
-       link_url           = coalesce($5, link_url)
+       link_url           = coalesce($5, link_url),
+       purchase_price     = coalesce($6, purchase_price)
      WHERE id = $1
      RETURNING id`,
-    [id, data.name ?? null, data.defaultUnitPrice ?? null, data.isActive ?? null, data.linkUrl ?? null],
+    [
+      id,
+      data.name ?? null,
+      data.defaultUnitPrice ?? null,
+      data.isActive ?? null,
+      data.linkUrl ?? null,
+      data.purchasePrice ?? null,
+    ],
   );
   if (!updated) return null;
   return getProduct(id);

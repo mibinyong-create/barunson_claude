@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * GET /api/orders
- * ?search= &status= &paymentStatus= &productId= &orderDate= &showAllDates=
+ * ?search= &status= &paymentStatus= &productId= &orderDate= &dateFrom= &dateTo= &showAllDates=
  * &sort=orderDateDesc|orderDateAsc|weddingDateAsc|amountDesc &page= &pageSize=
  */
 export async function GET(request: NextRequest) {

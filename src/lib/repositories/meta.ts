@@ -35,6 +35,7 @@ export async function getMeta(): Promise<Meta> {
       name: string;
       slug: string;
       default_unit_price: number;
+      purchase_price: number;
       icon_path: string | null;
       link_url: string | null;
       sort_order: number;
@@ -75,6 +76,7 @@ export async function getMeta(): Promise<Meta> {
       name: p.name,
       slug: p.slug,
       defaultUnitPrice: p.default_unit_price,
+      purchasePrice: p.purchase_price,
       iconPath: p.icon_path,
       linkUrl: p.link_url,
       sortOrder: p.sort_order,

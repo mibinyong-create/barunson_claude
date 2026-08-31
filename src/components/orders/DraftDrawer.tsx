@@ -2,10 +2,17 @@
 
 import { useRef, useState } from "react";
 import { Modal } from "@/components/Modal";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import { FolderIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { api } from "@/lib/client-api";
+import { apiUrl } from "@/lib/api";
 import { fmtDate, fmtDateTime, fmtFileSize, num, won } from "@/lib/format";
 import type { OrderDetail, OrderFile } from "@/lib/types";
+
+const fileContentUrl = (orderId: number, fileId: number) =>
+  apiUrl(`/api/orders/${orderId}/files/${fileId}/content`);
+
+const isImage = (f: OrderFile) => f.hasData && !!f.contentType?.startsWith("image/");
 
 /** 주문번호 클릭 → 하단 시트. 주문 요약 + 요청사항 + 초안 업로드 */
 export function DraftDrawer({
@@ -22,6 +29,7 @@ export function DraftDrawer({
   // 부모가 key={order.id} 로 리마운트시키므로 초기값 계산만으로 충분하다.
   const [drafts, setDrafts] = useState<OrderFile[]>(order?.drafts ?? []);
   const [busy, setBusy] = useState(false);
+  const [zoom, setZoom] = useState<{ src: string; name: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handlePick(list: FileList | null) {
@@ -29,12 +37,7 @@ export function DraftDrawer({
     setBusy(true);
     try {
       for (const f of Array.from(list)) {
-        const created = await api.addFile(order.id, {
-          kind: "draft",
-          fileName: f.name,
-          fileSize: f.size,
-          contentType: f.type || undefined,
-        });
+        const created = await api.addFile(order.id, "draft", f);
         setDrafts((prev) => [...prev, created]);
       }
       onChanged();
@@ -133,7 +136,7 @@ export function DraftDrawer({
               hidden
               onChange={(e) => handlePick(e.target.files)}
             />
-            <span className="file-hint">파일명·크기만 기록됩니다.</span>
+            <span className="file-hint">이미지는 미리보기로 표시됩니다. (최대 8MB)</span>
           </div>
 
           {drafts.length === 0 ? (
@@ -145,9 +148,23 @@ export function DraftDrawer({
             <ul className="file-list">
               {drafts.map((f) => (
                 <li key={f.id}>
-                  <span className="file-icon">
-                    <FolderIcon />
-                  </span>
+                  {isImage(f) ? (
+                    <button
+                      type="button"
+                      className="file-thumb"
+                      onClick={() =>
+                        setZoom({ src: fileContentUrl(order.id, f.id), name: f.fileName })
+                      }
+                      title={`${f.fileName} 크게 보기`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={fileContentUrl(order.id, f.id)} alt={f.fileName} loading="lazy" />
+                    </button>
+                  ) : (
+                    <span className="file-icon">
+                      <FolderIcon />
+                    </span>
+                  )}
                   <span className="file-meta">
                     <b>{f.fileName}</b>
                     <small className="mono">
@@ -184,6 +201,9 @@ export function DraftDrawer({
             ))}
           </ul>
         </>
+      ) : null}
+      {zoom ? (
+        <ImageLightbox src={zoom.src} alt={zoom.name} onClose={() => setZoom(null)} />
       ) : null}
     </Modal>
   );

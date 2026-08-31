@@ -9,7 +9,24 @@
  * 난수는 시드 고정(mulberry32)이라 몇 번을 돌려도 같은 데이터가 나옵니다.
  */
 import "dotenv/config";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { Client } from "pg";
+
+// public/products/<slug>.jpg — 상품별 대표 사진. 초안 이미지 시드에 재사용한다.
+const PHOTO_DIR = path.join(process.cwd(), "public", "products");
+const photoCache = new Map<string, Buffer | null>();
+function productPhoto(slug: string): Buffer | null {
+  if (!photoCache.has(slug)) {
+    try {
+      photoCache.set(slug, readFileSync(path.join(PHOTO_DIR, `${slug}.jpg`)));
+    } catch {
+      photoCache.set(slug, null);
+    }
+  }
+  return photoCache.get(slug) ?? null;
+}
+const isImageName = (name: string) => /\.(png|jpe?g)$/i.test(name);
 
 const parsedOrderCount = Number(process.env.SEED_ORDER_COUNT);
 const TOTAL_ORDERS =
@@ -125,7 +142,7 @@ const ATTACHMENT_NAMES = [
 ];
 const DRAFT_NAMES = [
   "초안_1차.pdf", "초안_2차_수정.pdf", "초안_최종.pdf", "교정지_v1.jpg",
-  "인쇄용_CMYK.pdf", "시안_A안.png", "시안_B안.png",
+  "인쇄용_CMYK.pdf", "시안_A안.jpg", "시안_B안.jpg",
 ];
 
 // ─── 원본 HTML 의 시드 26건 (그대로 재현) ──────────────────────────────────────
@@ -215,7 +232,7 @@ async function main() {
 
     console.log("▸ 기존 주문/고객 데이터 삭제…");
     await client.query(
-      `TRUNCATE order_status_history, order_files, orders, customers
+      `TRUNCATE order_status_history, order_files, purchase_orders, orders, customers
        RESTART IDENTITY CASCADE`,
     );
     await client.query(`TRUNCATE order_no_counters`);
@@ -300,7 +317,12 @@ async function main() {
       deliveredDate: o.deliveredDate ?? null,
       memo: o.memo ?? null,
       attachments: o.attachments ?? [],
-      drafts: [],
+      // 초안 등록 이후 단계인 원본 주문에는 초안 이미지 예시를 하나 붙인다.
+      // (기준일 2026-08-24 주문 13~16 이 여기 해당 → 첫 화면에서 바로 미리보기가 보인다)
+      drafts:
+        PIPELINE.indexOf(o.orderStatus as (typeof PIPELINE)[number]) >= 1
+          ? ["초안_시안.jpg"]
+          : [],
     }));
 
     // 원본 26건은 ORD-2026-000001~26 을 쓰므로 그 뒤부터 이어서 채번
@@ -397,21 +419,31 @@ async function main() {
       const values: unknown[] = [];
       const tuples = chunk.map((o) => {
         const p = (v: unknown) => `$${values.push(v)}`;
+        // 인쇄수량 = 주문수량 + 여분(약 5% + 2매). 소량 주문은 동일.
+        const printQty =
+          o.quantity < 10 ? o.quantity : o.quantity + Math.ceil(o.quantity * 0.05) + 2;
+        // 출고일: 배송완료면 배송일 2~3일 전, 배송중이면 주문일 + 6일
+        const dispatchedDate =
+          o.orderStatus === "배송완료" && o.deliveredDate
+            ? addDays(o.deliveredDate, -(2 + (o.quantity % 2)))
+            : o.orderStatus === "배송중"
+              ? addDays(o.orderDate, 6)
+              : null;
         return `(${p(o.orderNo)},${p(customerIds[o.customerIdx])},${p(
           productByName.get(o.productName)?.id ?? products[0].id,
-        )},${p(o.option)},${p(o.quantity)},${p(o.unitPrice)},${p(o.orderDate)},${p(
-          o.weddingDate,
-        )},${p(o.deliveryMethod)},${p(o.address)},${p(o.paymentStatus)},${p(
-          o.orderStatus,
-        )},${p(o.withInvitation)},${p(
+        )},${p(o.option)},${p(o.quantity)},${p(printQty)},${p(o.unitPrice)},${p(
+          o.orderDate,
+        )},${p(o.weddingDate)},${p(o.deliveryMethod)},${p(o.address)},${p(
+          dispatchedDate,
+        )},${p(o.paymentStatus)},${p(o.orderStatus)},${p(o.withInvitation)},${p(
           o.courierName ? (courierIdByName.get(o.courierName) ?? null) : null,
         )},${p(o.trackingNumber)},${p(o.deliveredDate)},${p(o.memo)})`;
       });
 
       const { rows } = await client.query<{ id: number }>(
         `INSERT INTO orders (
-           order_no, customer_id, product_id, option_text, quantity, unit_price,
-           order_date, wedding_date, delivery_method, shipping_address,
+           order_no, customer_id, product_id, option_text, quantity, print_quantity, unit_price,
+           order_date, wedding_date, delivery_method, shipping_address, dispatched_date,
            payment_status, order_status, with_invitation,
            courier_id, tracking_number, delivered_date, memo
          ) VALUES ${tuples.join(",")}
@@ -424,15 +456,33 @@ async function main() {
 
     // ── 3. 첨부/초안 파일 ────────────────────────────────────────────────────
     console.log("▸ 첨부·초안 파일 생성…");
-    type FileSeed = { orderId: number; kind: string; name: string };
+    // 이름이 이미지(.png/.jpg)인 초안에는 상품 대표 사진을 실제 바이너리로 넣어
+    // 화면에서 미리보기가 보이도록 한다. 그 외 파일은 메타데이터만.
+    type FileSeed = {
+      orderId: number;
+      kind: string;
+      name: string;
+      data: Buffer | null;
+    };
     const fileSeeds: FileSeed[] = [];
+    // 실제 이미지 바이너리는 DB 를 키우므로 표본만 채운다.
+    // 원본 26건의 초안은 항상, 그 외 생성분은 예산 한도 내에서만.
+    let imgBudget = 60;
     orderSeeds.forEach((o, idx) => {
+      const slug = productByName.get(o.productName)?.slug ?? "";
+      const isOriginal = idx < ORIGINAL.length;
       o.attachments.forEach((n) =>
-        fileSeeds.push({ orderId: orderIds[idx], kind: "attachment", name: n }),
+        fileSeeds.push({ orderId: orderIds[idx], kind: "attachment", name: n, data: null }),
       );
-      o.drafts.forEach((n) =>
-        fileSeeds.push({ orderId: orderIds[idx], kind: "draft", name: n }),
-      );
+      o.drafts.forEach((n) => {
+        const wantImg = isImageName(n) && (isOriginal || imgBudget-- > 0);
+        fileSeeds.push({
+          orderId: orderIds[idx],
+          kind: "draft",
+          name: n,
+          data: wantImg ? productPhoto(slug) : null,
+        });
+      });
     });
 
     for (let i = 0; i < fileSeeds.length; i += 300) {
@@ -440,17 +490,96 @@ async function main() {
       const values: unknown[] = [];
       const tuples = chunk.map((f) => {
         const p = (v: unknown) => `$${values.push(v)}`;
+        const size = f.data ? f.data.length : randInt(48_000, 5_400_000);
+        // 시드 초안 이미지는 항상 JPEG(상품 사진)이므로 실제 바이트에 맞춰 준다.
+        const mime = f.data ? "image/jpeg" : guessMime(f.name);
         return `(${p(f.orderId)},${p(f.kind)}::order_file_kind,${p(f.name)},${p(
-          randInt(48_000, 5_400_000),
-        )},${p(guessMime(f.name))})`;
+          size,
+        )},${p(mime)},${p(f.data)})`;
       });
       await client.query(
-        `INSERT INTO order_files (order_id, kind, file_name, file_size, content_type)
+        `INSERT INTO order_files (order_id, kind, file_name, file_size, content_type, data)
          VALUES ${tuples.join(",")}`,
         values,
       );
     }
-    console.log(`  파일 ${fileSeeds.length}건`);
+    const withImage = fileSeeds.filter((f) => f.data).length;
+    console.log(`  파일 ${fileSeeds.length}건 (초안 이미지 ${withImage}건)`);
+
+    // ── 3.5 외주 발주 기록 ───────────────────────────────────────────────────
+    console.log("▸ 외주 발주 기록 생성…");
+    const VENDORS = [
+      "아크릴공방 오브제",
+      "프린트팩토리 서울",
+      "우드메이트 공방",
+      "스탬프공작소",
+      "굿즈랩 판교",
+      "레터프레스 하우스",
+    ];
+    const PO_NOTES = [
+      "시안 최종본 전달, 규격 재확인 요청",
+      "펄 화이트 소재로 진행",
+      "모서리 라운드 3R, 홀 위치 상단 중앙",
+      "샘플 1개 선출고 요청",
+      "포장은 개별 OPP",
+      "납기 엄수 요청 (예식 임박)",
+    ];
+    const AFTER_OUTSOURCE = ["인쇄팀전달", "인쇄완료", "배송중", "배송완료"];
+    type PoSeed = {
+      orderId: number;
+      vendor: string;
+      poNo: string;
+      ordered: string;
+      expected: string | null;
+      received: string | null;
+      unitCost: number;
+      qty: number;
+      status: string;
+      note: string | null;
+    };
+    const poSeeds: PoSeed[] = [];
+    let poCounter = 1;
+    orderSeeds.forEach((o, idx) => {
+      // 외주발주 중 일부는 아직 발주 미등록 상태로 남겨 둔다.
+      const isOutsourceNow = o.orderStatus === "외주발주" && chance(0.6);
+      const wentThrough = AFTER_OUTSOURCE.includes(o.orderStatus) && chance(0.24);
+      if (!isOutsourceNow && !wentThrough) return;
+
+      const ordered = addDays(o.orderDate, randInt(1, 4));
+      const expected = addDays(ordered, randInt(7, 18));
+      const status = isOutsourceNow ? (chance(0.45) ? "제작중" : "발주") : "입고완료";
+      const received = status === "입고완료" ? addDays(ordered, randInt(8, 16)) : null;
+      poSeeds.push({
+        orderId: orderIds[idx],
+        vendor: pick(VENDORS),
+        poNo: `PO-${o.orderDate.slice(0, 4)}-${String(poCounter++).padStart(4, "0")}`,
+        ordered,
+        expected,
+        received,
+        unitCost: Math.round(o.unitPrice * (0.4 + rand() * 0.15)),
+        qty: o.quantity + (chance(0.4) ? randInt(2, 8) : 0),
+        status,
+        note: chance(0.6) ? pick(PO_NOTES) : null,
+      });
+    });
+    for (let i = 0; i < poSeeds.length; i += 200) {
+      const chunk = poSeeds.slice(i, i + 200);
+      const values: unknown[] = [];
+      const tuples = chunk.map((s) => {
+        const p = (v: unknown) => `$${values.push(v)}`;
+        return `(${p(s.orderId)},${p(s.vendor)},${p(s.poNo)},${p(s.ordered)},${p(
+          s.expected,
+        )},${p(s.received)},${p(s.unitCost)},${p(s.qty)},${p(s.status)},${p(s.note)})`;
+      });
+      await client.query(
+        `INSERT INTO purchase_orders
+           (order_id, vendor_name, po_number, ordered_date, expected_date, received_date,
+            unit_cost, quantity, status, note)
+         VALUES ${tuples.join(",")}`,
+        values,
+      );
+    }
+    console.log(`  발주 기록 ${poSeeds.length}건`);
 
     // ── 4. 상태 변경 이력 재구성 ──────────────────────────────────────────────
     // INSERT 트리거가 남긴 '주문 등록' 1건을 지우고, 현재 상태까지의 단계를
@@ -522,7 +651,7 @@ async function main() {
     // 대량 INSERT 직후에는 플래너 통계를 갱신해야 인덱스가 제대로 선택된다.
     console.log("▸ 통계 갱신(ANALYZE)…");
     await client.query(
-      "ANALYZE orders; ANALYZE customers; ANALYZE order_files; ANALYZE order_status_history;",
+      "ANALYZE orders; ANALYZE customers; ANALYZE order_files; ANALYZE order_status_history; ANALYZE purchase_orders;",
     );
 
     // ── 요약 출력 ────────────────────────────────────────────────────────────

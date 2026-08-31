@@ -43,6 +43,8 @@ export type ProductMeta = {
   name: string;
   slug: string;
   defaultUnitPrice: number;
+  /** 매입단가 (원가). 0 이면 미입력. */
+  purchasePrice: number;
   iconPath: string | null;
   linkUrl: string | null;
   sortOrder: number;
@@ -65,6 +67,8 @@ export type OrderFile = {
   fileName: string;
   fileSize: number | null;
   contentType: string | null;
+  /** 실제 바이너리가 DB 에 보관돼 있으면 true (미리보기·다운로드 가능) */
+  hasData: boolean;
   uploadedBy: string;
   uploadedAt: string;
 };
@@ -85,12 +89,16 @@ export type Order = {
   productCode: string;
   optionText: string | null;
   quantity: number;
+  /** 실제 인쇄 수량 (여분 포함). 미입력이면 null → 주문수량과 동일하게 취급 */
+  printQuantity: number | null;
   unitPrice: number;
   totalAmount: number;
   orderDate: string;
   weddingDate: string;
   deliveryMethod: DeliveryMethod;
   shippingAddress: string | null;
+  /** 출고일 (택배 발송 처리한 날). 미출고면 null */
+  dispatchedDate: string | null;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
   isActiveStage: boolean;
@@ -137,9 +145,14 @@ export type OrderSort =
 export type OrderListParams = {
   search?: string;
   status?: string;
+  /** 여러 상태를 한 번에 (출고관리 화면). status 와 함께 주면 둘 다 AND */
+  statuses?: string[];
   paymentStatus?: string;
   productId?: number;
   orderDate?: string;
+  /** 주문일자 범위 (from~to, 양끝 포함). 출고관리·주간 조회에서 사용 */
+  dateFrom?: string;
+  dateTo?: string;
   showAllDates?: boolean;
   sort?: OrderSort;
   page?: number;
@@ -181,6 +194,15 @@ export type Customer = {
   activeOrderCount: number;
   lastOrderDate: string | null;
   nearestWeddingDate: string | null;
+  /** 고객관리 목록에서 주문번호·품목을 모두 노출하기 위한 요약 (최신순) */
+  orders: CustomerOrderBrief[];
+};
+
+export type CustomerOrderBrief = {
+  orderNo: string;
+  orderNoShort: string;
+  productName: string;
+  optionText: string | null;
 };
 
 export type Product = ProductMeta & {
@@ -188,4 +210,54 @@ export type Product = ProductMeta & {
   totalQuantity: number;
   totalAmount: number;
   activeOrderCount: number;
+};
+
+// ── 외주 발주 (발주관리) ──────────────────────────────────────────────────────
+export type PurchaseOrderStatus = "발주" | "제작중" | "입고완료" | "취소";
+
+export type PurchaseOrder = {
+  id: number;
+  orderId: number;
+  vendorName: string;
+  poNumber: string | null;
+  orderedDate: string;
+  expectedDate: string | null;
+  receivedDate: string | null;
+  unitCost: number | null;
+  quantity: number | null;
+  status: PurchaseOrderStatus;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** 발주관리 목록 한 행: 외주발주 대상 주문 + (있으면) 발주 기록 */
+export type PurchasingRow = {
+  orderId: number;
+  orderNo: string;
+  orderNoShort: string;
+  orderStatus: OrderStatus;
+  orderDate: string;
+  orderQuantity: number;
+  customerName: string;
+  customerPhone: string | null;
+  productName: string;
+  productSlug: string;
+  productIconPath: string | null;
+  productLinkUrl: string | null;
+  productPurchasePrice: number;
+  optionText: string | null;
+  po: PurchaseOrder | null;
+};
+
+export type PurchaseOrderInput = {
+  vendorName: string;
+  poNumber?: string | null;
+  orderedDate: string;
+  expectedDate?: string | null;
+  receivedDate?: string | null;
+  unitCost?: number | null;
+  quantity?: number | null;
+  status: PurchaseOrderStatus;
+  note?: string | null;
 };

@@ -34,8 +34,8 @@ npm run dev            # http://localhost:3000
 > `.env` 를 먼저 만들어야 합니다. `docker-compose.yml` 이 `POSTGRES_PASSWORD` 를 `.env` 에서 읽고,
 > 앱과 스크립트도 `DATABASE_URL` 이 없으면 하드코딩 폴백 없이 즉시 실패합니다.
 
-첫 화면의 주문일자 필터는 기준일(`2026-08-24`)로 걸려 있습니다.
-전체 목록을 보려면 **"전체 주문건 보기"** 체크박스를 켜세요.
+첫 화면의 날짜 필터는 **"오늘 주문건"**(기준일 `2026-08-24`)으로 걸려 있습니다.
+**"전체 주문건"** 체크박스를 켜면 500건 전체가 나옵니다.
 
 > **개발 환경 참고 — Intel MacBook.** 이 프로젝트의 개발자는 Intel(x86_64) MacBook 을 사용하며,
 > **Docker Desktop 은 구동하지 않는 것을 전제로 합니다.** 위 2번(`npm run db:up`)은 Docker 가
@@ -281,10 +281,11 @@ couriers ───────┘            ├─ products
 | `delivery_methods` | 수령 방법 2종 | `select[name=deliveryMethod]` |
 | `couriers` | 택배사 5종 + 배송조회 URL 템플릿 | `select[name=courierCompany]` |
 | `customers` | 고객 (이름+연락처 유니크) | `customerName`, `phone`, `address` |
-| `products` | 상품 11종 + 슬러그 + 기본 단가 + SVG 아이콘 | `datalist#productList`, `PRODUCT_ICONS`, `PRODUCT_CODE_SLUGS` |
-| `orders` | 주문 본문 | order 객체 |
+| `products` | 상품 11종 + 슬러그 + 판매단가(`default_unit_price`)·매입단가(`purchase_price`) + SVG 아이콘 | `datalist#productList`, `PRODUCT_ICONS`, `PRODUCT_CODE_SLUGS` |
+| `orders` | 주문 본문 (`print_quantity` = 인쇄수량, `dispatched_date` = 출고일) | order 객체 |
 | `order_files` | 첨부(`attachment`)·초안(`draft`) 파일 메타데이터 | `attachments[]`, `drafts[]` 두 배열을 통합 |
 | `order_status_history` | 상태 변경 이력 | **신규** (원본에 없음) |
+| `purchase_orders` | 외주 발주 기록 (업체·발주일·단가·입고 상태, 주문 1건당 1건) | **신규** (원본에 없음) |
 | `order_no_counters` | 연도별 주문번호 채번 | `nextOrderNo()` |
 
 ### 주요 설계 포인트
@@ -321,8 +322,12 @@ couriers ───────┘            ├─ products
 | `PATCH` | `/api/orders/:id/status` | 진행 상태만 변경 |
 | `PATCH` | `/api/orders/:id/courier` | 택배 정보만 변경 |
 | `POST` | `/api/orders/bulk-delete` | 다중 삭제 `{ ids: number[] }` |
-| `GET`·`POST` | `/api/orders/:id/files` | 파일 목록 / 추가 (`kind=attachment\|draft`) |
+| `GET`·`POST` | `/api/orders/:id/files` | 파일 목록 / 추가 (`multipart/form-data`: `file`,`kind` — 바이너리 저장 / JSON: 메타데이터만) |
+| `GET` | `/api/orders/:id/files/:fileId/content` | 저장된 파일 원본 (이미지·PDF 는 인라인) |
 | `DELETE` | `/api/orders/:id/files/:fileId` | 파일 삭제 |
+| `GET` | `/api/shipping?stage=대기\|배송중\|배송완료\|전체` | 출고관리 목록 (해당 진행상태 주문만) |
+| `GET` | `/api/purchasing?stage=미등록\|발주\|입고완료\|전체` | 발주관리 목록 (`&withCounts=1` 로 집계 포함) |
+| `GET`·`PUT`·`DELETE` | `/api/orders/:id/purchase-order` | 주문의 외주 발주 기록 조회 / 저장(upsert) / 삭제 |
 
 `sort` 값: `orderDateDesc`(기본) · `orderDateAsc` · `weddingDateAsc` · `amountDesc`
 
@@ -370,30 +375,57 @@ curl -X PATCH http://localhost:3000/api/orders/1/status \
 
 원본의 모든 상호작용을 재현했습니다.
 
-- **필터** — 상태 칩(전체 + 9종, 건수 배지) · 결제 상태 · 검색(주문자명/주문번호/연락처/상품명,
-  300ms 디바운스) · 주문일자 · 전체 주문건 보기 · 품목 필터
+- **날짜 필터** (툴바 맨 앞) — 날짜 선택 시 그 주(월~일) 단위로 조회. 빠른 체크박스:
+  오늘 주문건 · 어제 주문건 · 3일치 주문건 · 전체 주문건. API 는 `?dateFrom=&dateTo=` (양끝 포함)
+- **필터** — 상태 칩(전체 + 9종, 건수 배지) · 결제 상태 · 정렬 · 검색(주문자명/주문번호/연락처/상품명,
+  300ms 디바운스) · 품목 필터
 - **정렬** 4종, **페이지네이션** 10/25/50건
 - **다중 선택** — 헤더 체크박스(부분 선택 시 indeterminate), 선택 삭제 + 확인 모달
-- **예식일 임박 강조** — D-Day 10일 미만이면 빨간색
+- **목록 컬럼** — 주문일자 · 주문방식(청첩장 함께/단독) · 주문번호 · 주문자명 · 연락처 · 배송지 ·
+  배송요청사항(아이콘) · 상품명 · 품목코드 · 주문수량 · **인쇄수량**(`orders.print_quantity`) ·
+  결제금액 · 첨부파일 · 결제상태(작게, `결제` 접두어 제외) · 진행상태 (컬럼이 많아 가로 스크롤)
 - **행 클릭 분기**
   | 클릭 위치 | 동작 |
   |---|---|
   | 주문번호 | 초안 업로드 드로어 (요약 + 요청사항 + 초안 + 상태 이력) |
   | 주문자명 | 고객 정보 모달 (해당 고객의 전체 주문) |
   | 상품 썸네일 | 바른손카드 상품 페이지 |
-  | 📁 | 첨부파일 모달 |
-  | 💬 | 고객 요청사항 모달 |
+  | 첨부파일 아이콘 | 첨부파일 모달 |
+  | 배송요청사항 아이콘 | 요청사항 모달 |
   | 그 외 | `배송완료` → 택배 정보 모달 / 그 외 → 주문 수정 모달 |
 - **요약 탭** — 통계 타일, 품목별 주문 현황(일일/주간), 진행상태별 건수 타일
   (타일 클릭 → 상세 모달 → 행 클릭 시 상태+품목 필터가 걸린 목록으로 이동)
 
 > 원본에서 **미구현이던 "신규 주문 등록" 버튼을 추가**했습니다. (원본은 폼만 있고 여는 버튼이 없었음)
 
+### 출고관리 (`/shipping`)
+
+출고·배송 단계 주문만 모아 처리하는 화면.
+
+- **집계 타일 / 탭** — 출고 대기(`인쇄완료`) · 배송중 · 배송완료 · 전체
+- **날짜 필터** — 주문관리와 동일 (주간 조회 + 오늘/어제/3일치/전체 체크박스, 기본 전체)
+- **행 작업** — 팝업에서
+  - `출고 확정` — 택배사·운송장번호 입력 → `dispatched_date`(출고일) 기록 + 진행상태 `배송중`
+  - `배송 완료` — `delivered_date` 기록 + 진행상태 `배송완료`
+  - `방문수령` 건은 `수령 완료`로 한 번에 처리
+  - 운송장번호 → 택배사 배송조회 URL 링크
+- 기존 `PATCH /api/orders/:id/courier` · `PATCH /api/orders/:id/status` 재사용, 목록은 `GET /api/shipping?stage=`
+
+### 발주관리 (`/purchasing`)
+
+외주발주(외부 업체 제작) 주문을 어디로·언제·얼마에 넘겼는지 기록하는 화면. (`purchase_orders` 테이블)
+
+- **집계 타일 / 탭** — 발주 미등록(`외주발주`인데 기록 없음) · 발주 진행(발주/제작중) · 입고완료 · 전체
+- **날짜 필터** — 주문관리와 동일
+- **발주 등록/수정 팝업** — 외주 업체명·발주서번호·발주일(주문 넘긴 날)·입고 예정/완료일·발주 단가·수량·상태(발주/제작중/입고완료/취소)·메모(전달 내용). 발주금액 = 단가 × 수량 자동 계산
+  - `입고완료` + 대상이 `외주발주` 상태면 체크박스로 주문 진행상태를 `인쇄팀전달`로 함께 이동
+- API: `GET /api/purchasing?stage=` · `PUT`/`DELETE /api/orders/:id/purchase-order`
+
 ### 그 외
 
 - `/dashboard` — 통계 타일, 월별 주문 추이 막대 차트, 진행 상태별 분포, 주문 많은 상품 TOP 6
-- `/customers` — 고객 목록/검색, 행 클릭 시 고객 상세 모달
-- `/products` — 상품별 주문 건수·수량·누적 금액
+- `/customers` — 고객 목록/검색(주문번호 포함). 한 줄 요약이고 주문품목은 `품목 N건` 탭을 눌러 아래로 펼침. 행 클릭 시 고객 상세 모달
+- `/products` — 상품별 매입·판매단가, 주문 건수·수량·누적 금액 (체크박스로 선택 → TSV 복사)
 - `/settings` — DB 연결 상태·응답시간·PostgreSQL 버전, 코드 테이블 정의
 
 ---
@@ -471,15 +503,18 @@ node .next/standalone/server.js
 | 개별 삭제 경로 없음 | `DELETE /api/orders/:id` 추가 (UI는 다중 선택 삭제 유지) |
 | `TODAY` 하드코딩 | `NEXT_PUBLIC_TODAY` 환경변수 |
 | 주문번호 연도 2026 고정 | 주문일자 연도 기준으로 채번 |
-| 첨부/초안이 문자열 배열 | `order_files` 테이블 (크기·MIME·업로드 시각 기록) |
+| 첨부/초안이 문자열 배열 | `order_files` 테이블 + 실제 바이너리(`data` bytea) 보관, 이미지 미리보기 |
 | 상태 이력 없음 | `order_status_history` + 자동 기록 트리거 |
 | 사이드바 메뉴 4종 미구현 | 대시보드·고객관리·상품관리·설정 화면 구현 |
-| 상품 링크 고정 | `products.link_url` 로 상품별 관리 |
+| 상품 링크가 카탈로그 페이지로 고정 | `products.link_url` 이 품목별 상세 페이지(`/Product/OptionDetail/…`)를 가리킴 |
 
 ### 남아 있는 제약
 
-- **파일은 메타데이터만 저장합니다.** 실제 바이너리 업로드/다운로드는 구현하지 않았습니다
-  (파일명·크기·MIME·업로드 시각만 기록). 원본과 동일한 범위입니다.
+- **파일 바이너리는 PostgreSQL `order_files.data`(bytea) 에 보관합니다.** 초안·첨부 업로드 시
+  실제 파일이 저장되고(`multipart/form-data`, 1건당 최대 8MB), 이미지는 화면에서 미리보기로
+  표시됩니다. `GET /api/orders/:id/files/:fileId/content` 로 원본을 내려받습니다.
+  별도 오브젝트 스토리지 없이 DB 에 담으므로 대용량·대량 파일에는 적합하지 않습니다.
+  구 방식(메타데이터만 등록하는 JSON 요청)도 호환됩니다.
 - **인증/권한이 없습니다.** 업로더는 `'스튜디오'` 로 고정되어 있습니다.
 
 ---

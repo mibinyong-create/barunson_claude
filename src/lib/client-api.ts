@@ -9,6 +9,9 @@ import type {
   OrderListParams,
   Paged,
   Product,
+  PurchaseOrder,
+  PurchaseOrderInput,
+  PurchasingRow,
   StatusCountRow,
   SummaryStats,
 } from "./types";
@@ -56,6 +59,20 @@ export const api = {
     apiFetch(`/api/orders${qs(params as Record<string, unknown>)}`, { signal })
       .then(unwrap<Paged<Order>>),
 
+  shipping: (
+    params: {
+      stage?: string;
+      search?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      pageSize?: number;
+    },
+    signal?: AbortSignal,
+  ) =>
+    apiFetch(`/api/shipping${qs(params as Record<string, unknown>)}`, { signal })
+      .then(unwrap<Paged<Order>>),
+
   getOrder: (id: number, signal?: AbortSignal) =>
     apiFetch(`/api/orders/${id}`, { signal }).then(unwrap<OrderDetail>),
 
@@ -73,6 +90,35 @@ export const api = {
     apiFetch(`/api/orders/${id}/courier`, jsonInit("PATCH", body))
       .then(unwrap<OrderDetail>),
 
+  // ── 발주관리 ──────────────────────────────────────────────────────────────
+  purchasing: (
+    params: {
+      stage?: string;
+      search?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      pageSize?: number;
+      withCounts?: 1;
+    },
+    signal?: AbortSignal,
+  ) =>
+    apiFetch(`/api/purchasing${qs(params as Record<string, unknown>)}`, { signal }).then(
+      unwrap<
+        Paged<PurchasingRow> & {
+          counts?: { unregistered: number; ordering: number; received: number };
+        }
+      >,
+    ),
+
+  savePurchaseOrder: (orderId: number, body: PurchaseOrderInput) =>
+    apiFetch(`/api/orders/${orderId}/purchase-order`, jsonInit("PUT", body))
+      .then(unwrap<PurchaseOrder>),
+
+  deletePurchaseOrder: (orderId: number) =>
+    apiFetch(`/api/orders/${orderId}/purchase-order`, { method: "DELETE" })
+      .then(unwrap<{ deleted: boolean }>),
+
   deleteOrder: (id: number) =>
     apiFetch(`/api/orders/${id}`, { method: "DELETE" }).then(unwrap<{ deleted: number }>),
 
@@ -84,11 +130,16 @@ export const api = {
     apiFetch(`/api/orders/${orderId}/files${qs({ kind })}`, { signal })
       .then(unwrap<OrderFile[]>),
 
-  addFile: (
-    orderId: number,
-    body: { kind: "attachment" | "draft"; fileName: string; fileSize?: number; contentType?: string },
-  ) =>
-    apiFetch(`/api/orders/${orderId}/files`, jsonInit("POST", body)).then(unwrap<OrderFile>),
+  /** 실제 파일 바이너리까지 업로드한다 (multipart/form-data). */
+  addFile: (orderId: number, kind: "attachment" | "draft", file: File) => {
+    const form = new FormData();
+    form.set("kind", kind);
+    form.set("file", file);
+    return apiFetch(`/api/orders/${orderId}/files`, {
+      method: "POST",
+      body: form,
+    }).then(unwrap<OrderFile>);
+  },
 
   deleteFile: (orderId: number, fileId: number) =>
     apiFetch(`/api/orders/${orderId}/files/${fileId}`, { method: "DELETE" })

@@ -28,12 +28,14 @@ export function mapOrder(r: OrderRow): Order {
     productCode: r.product_code as string,
     optionText: (r.option_text as string) ?? null,
     quantity: r.quantity as number,
+    printQuantity: (r.print_quantity as number) ?? null,
     unitPrice: r.unit_price as number,
     totalAmount: r.total_amount as number,
     orderDate: r.order_date as string,
     weddingDate: r.wedding_date as string,
     deliveryMethod: r.delivery_method as Order["deliveryMethod"],
     shippingAddress: (r.shipping_address as string) ?? null,
+    dispatchedDate: (r.dispatched_date as string) ?? null,
     paymentStatus: r.payment_status as Order["paymentStatus"],
     orderStatus: r.order_status as Order["orderStatus"],
     isActiveStage: r.is_active_stage as boolean,
@@ -51,6 +53,10 @@ export function mapOrder(r: OrderRow): Order {
   };
 }
 
+// data(bytea) 컬럼은 응답에 절대 싣지 않는다. 대신 존재 여부만 has_data 로 내려준다.
+const FILE_COLS =
+  "id, order_id, kind, file_name, file_size, content_type, uploaded_by, uploaded_at, (data IS NOT NULL) AS has_data";
+
 function mapFile(r: OrderRow): OrderFile {
   return {
     id: r.id as number,
@@ -59,6 +65,7 @@ function mapFile(r: OrderRow): OrderFile {
     fileName: r.file_name as string,
     fileSize: (r.file_size as number) ?? null,
     contentType: (r.content_type as string) ?? null,
+    hasData: (r.has_data as boolean) ?? false,
     uploadedBy: r.uploaded_by as string,
     uploadedAt: String(r.uploaded_at),
   };
@@ -83,9 +90,12 @@ export async function listOrders(params: OrderListParams): Promise<Paged<Order>>
   const {
     search,
     status,
+    statuses,
     paymentStatus,
     productId,
     orderDate,
+    dateFrom,
+    dateTo,
     showAllDates = false,
     sort = "orderDateDesc",
     page = 1,
@@ -114,10 +124,16 @@ export async function listOrders(params: OrderListParams): Promise<Paged<Order>>
     )`);
   }
   if (status && status !== "전체") where.push(`order_status = ${add(status)}`);
+  if (statuses && statuses.length > 0)
+    where.push(`order_status = ANY(${add(statuses)}::text[])`);
   if (paymentStatus && paymentStatus !== "전체")
     where.push(`payment_status = ${add(paymentStatus)}`);
   if (productId) where.push(`product_id = ${add(productId)}`);
-  if (!showAllDates && orderDate) where.push(`order_date = ${add(orderDate)}`);
+  if (!showAllDates) {
+    if (dateFrom) where.push(`order_date >= ${add(dateFrom)}`);
+    if (dateTo) where.push(`order_date <= ${add(dateTo)}`);
+    if (!dateFrom && !dateTo && orderDate) where.push(`order_date = ${add(orderDate)}`);
+  }
 
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const orderSql = SORT_SQL.get(sort) ?? DEFAULT_SORT_SQL;
@@ -161,7 +177,7 @@ export async function getOrder(id: number): Promise<OrderDetail | null> {
   // 서로 독립적이므로 직렬로 기다릴 이유가 없다.
   const [files, history] = await Promise.all([
     query<OrderRow>(
-      `SELECT * FROM order_files WHERE order_id = $1 ORDER BY uploaded_at, id`,
+      `SELECT ${FILE_COLS} FROM order_files WHERE order_id = $1 ORDER BY uploaded_at, id`,
       [id],
     ),
     query<OrderRow>(
@@ -378,6 +394,7 @@ export async function updateOrderCourier(
     courierName?: string | null;
     trackingNumber?: string | null;
     deliveredDate?: string | null;
+    dispatchedDate?: string | null;
     deliveryMethod?: string | null;
     shippingAddress?: string | null;
   },
@@ -390,7 +407,8 @@ export async function updateOrderCourier(
          tracking_number = $3,
          delivered_date = $4,
          delivery_method = coalesce($5, delivery_method),
-         shipping_address = $6
+         shipping_address = $6,
+         dispatched_date = coalesce($7, dispatched_date)
        WHERE id = $1
        RETURNING id`,
       [
@@ -400,6 +418,7 @@ export async function updateOrderCourier(
         data.deliveredDate ?? null,
         data.deliveryMethod ?? null,
         data.shippingAddress ?? null,
+        data.dispatchedDate ?? null,
       ],
     );
     return rows.length > 0;
@@ -424,11 +443,11 @@ export async function listOrderFiles(
 ): Promise<OrderFile[]> {
   const rows = kind
     ? await query<OrderRow>(
-        `SELECT * FROM order_files WHERE order_id = $1 AND kind = $2 ORDER BY uploaded_at, id`,
+        `SELECT ${FILE_COLS} FROM order_files WHERE order_id = $1 AND kind = $2 ORDER BY uploaded_at, id`,
         [orderId, kind],
       )
     : await query<OrderRow>(
-        `SELECT * FROM order_files WHERE order_id = $1 ORDER BY uploaded_at, id`,
+        `SELECT ${FILE_COLS} FROM order_files WHERE order_id = $1 ORDER BY uploaded_at, id`,
         [orderId],
       );
   return rows.map(mapFile);
@@ -440,18 +459,42 @@ export async function addOrderFile(
   fileName: string,
   fileSize?: number | null,
   contentType?: string | null,
+  data?: Buffer | null,
 ): Promise<OrderFile | null> {
   const owner = await queryOne<OrderRow>(`SELECT id FROM orders WHERE id = $1`, [
     orderId,
   ]);
   if (!owner) return null;
 
+  // 실제 바이너리를 받은 경우 크기는 버퍼 길이를 신뢰한다.
+  const size = data ? data.length : (fileSize ?? null);
+
   const row = await queryOne<OrderRow>(
-    `INSERT INTO order_files (order_id, kind, file_name, file_size, content_type)
-     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [orderId, kind, fileName, fileSize ?? null, contentType ?? null],
+    `INSERT INTO order_files (order_id, kind, file_name, file_size, content_type, data)
+     VALUES ($1,$2,$3,$4,$5,$6)
+     RETURNING ${FILE_COLS}`,
+    [orderId, kind, fileName, size, contentType ?? null, data ?? null],
   );
   return row ? mapFile(row) : null;
+}
+
+/** 파일 원본 바이트 (없으면 null). content 라우트에서만 사용한다. */
+export async function getOrderFileContent(
+  orderId: number,
+  fileId: number,
+): Promise<{ data: Buffer; contentType: string | null; fileName: string } | null> {
+  const row = await queryOne<OrderRow>(
+    `SELECT data, content_type, file_name
+       FROM order_files
+      WHERE id = $1 AND order_id = $2`,
+    [fileId, orderId],
+  );
+  if (!row || row.data == null) return null;
+  return {
+    data: row.data as Buffer,
+    contentType: (row.content_type as string) ?? null,
+    fileName: row.file_name as string,
+  };
 }
 
 export async function deleteOrderFile(

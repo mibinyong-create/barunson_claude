@@ -111,7 +111,12 @@ export function SummaryView({
                 onClick={() => onPickProduct(r.productId)}
               >
                 <span className="bd-thumb">
-                  <ProductThumb name={r.productName} iconPath={r.iconPath} linkUrl={null} />
+                  <ProductThumb
+                    name={r.productName}
+                    slug={r.productSlug}
+                    iconPath={r.iconPath}
+                    linkUrl={null}
+                  />
                 </span>
                 <span className="bd-name">{r.productName}</span>
                 <span className="bd-qty mono">{num(r.totalQuantity)}개</span>

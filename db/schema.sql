@@ -97,6 +97,8 @@ CREATE TABLE products (
   -- 품목코드 생성용 슬러그. 원본 PRODUCT_CODE_SLUGS 와 동일 (미등록 상품은 'item')
   slug               text        NOT NULL UNIQUE,
   default_unit_price integer     NOT NULL DEFAULT 0 CHECK (default_unit_price >= 0),
+  -- 매입단가 (원가). 마진 계산용. 0 이면 미입력.
+  purchase_price     integer     NOT NULL DEFAULT 0 CHECK (purchase_price >= 0),
   -- 원본 PRODUCT_ICONS 의 인라인 SVG path 문자열
   icon_path          text,
   link_url           text,
@@ -124,6 +126,8 @@ CREATE TABLE orders (
   product_id       integer     NOT NULL REFERENCES products(id)  ON DELETE RESTRICT,
   option_text      text,
   quantity         integer     NOT NULL CHECK (quantity >= 1),
+  -- 실제 인쇄 수량 (여분·불량 대비). 미입력이면 주문수량과 동일하게 본다.
+  print_quantity   integer     CHECK (print_quantity IS NULL OR print_quantity >= 0),
   unit_price       integer     NOT NULL CHECK (unit_price >= 0),
   -- 원본에서 quantity × unitPrice 로 매번 파생 계산하던 값 = 생성 컬럼
   total_amount     integer     GENERATED ALWAYS AS (quantity * unit_price) STORED,
@@ -131,6 +135,8 @@ CREATE TABLE orders (
   wedding_date     date        NOT NULL,
   delivery_method  text        NOT NULL REFERENCES delivery_methods(code),
   shipping_address text,
+  -- 출고일 (택배 접수/발송 처리한 날). 출고관리 화면에서 기록.
+  dispatched_date  date,
   payment_status   text        NOT NULL REFERENCES payment_statuses(code),
   order_status     text        NOT NULL REFERENCES order_statuses(code),
   with_invitation  boolean     NOT NULL DEFAULT false,
@@ -174,10 +180,13 @@ CREATE TABLE order_files (
   file_name    text            NOT NULL,
   file_size    bigint          CHECK (file_size IS NULL OR file_size >= 0),
   content_type text,
+  -- 초안/첨부의 실제 바이너리. NULL 이면 메타데이터만 등록된 파일(구 방식).
+  -- 애플리케이션에서 8MB 상한을 강제한다.
+  data         bytea,
   uploaded_by  text            NOT NULL DEFAULT '스튜디오',
   uploaded_at  timestamptz     NOT NULL DEFAULT now()
 );
-COMMENT ON TABLE order_files IS '주문별 첨부파일(attachment)·초안(draft) 메타데이터';
+COMMENT ON TABLE order_files IS '주문별 첨부파일(attachment)·초안(draft). data 가 있으면 실제 파일까지 보관';
 
 CREATE INDEX order_files_order_kind_idx ON order_files (order_id, kind);
 
@@ -213,6 +222,33 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER orders_log_status_change
   AFTER INSERT OR UPDATE OF order_status ON orders
   FOR EACH ROW EXECUTE FUNCTION log_order_status_change();
+
+
+-- 외주 발주 기록. 외주발주(외부 업체 제작) 주문을 언제 어디로 넘겼는지 남긴다.
+-- 주문 1건당 발주 1건 (order_id UNIQUE).
+CREATE TABLE purchase_orders (
+  id            serial      PRIMARY KEY,
+  order_id      integer     NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+  vendor_name   text        NOT NULL,
+  po_number     text,
+  ordered_date  date        NOT NULL,          -- 발주일 (주문을 업체에 넘긴 날)
+  expected_date date,                          -- 입고 예정일
+  received_date date,                          -- 입고 완료일
+  unit_cost     integer     CHECK (unit_cost IS NULL OR unit_cost >= 0),
+  quantity      integer     CHECK (quantity IS NULL OR quantity >= 0),
+  status        text        NOT NULL DEFAULT '발주'
+                            CHECK (status IN ('발주', '제작중', '입고완료', '취소')),
+  note          text,
+  created_by    text        NOT NULL DEFAULT '스튜디오',
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE purchase_orders IS '외주 발주 기록 (외주발주 주문의 업체·발주일·단가·입고 상태)';
+
+CREATE INDEX purchase_orders_status_idx ON purchase_orders (status, ordered_date DESC);
+
+CREATE TRIGGER purchase_orders_set_updated_at
+  BEFORE UPDATE ON purchase_orders FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 
 -- =============================================================================
@@ -262,12 +298,14 @@ SELECT
   extract(year FROM o.order_date)::int || '_' || p.slug || '_01' AS product_code,
   o.option_text,
   o.quantity,
+  o.print_quantity,
   o.unit_price,
   o.total_amount,
   o.order_date,
   o.wedding_date,
   o.delivery_method,
   o.shipping_address,
+  o.dispatched_date,
   o.payment_status,
   o.order_status,
   os.is_active_stage                              AS is_active_stage,
@@ -327,6 +365,7 @@ SELECT
   p.name,
   p.slug,
   p.default_unit_price,
+  p.purchase_price,
   p.icon_path,
   p.link_url,
   p.sort_order,

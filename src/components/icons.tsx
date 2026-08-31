@@ -1,5 +1,9 @@
 /** 원본 HTML 의 인라인 SVG 아이콘을 컴포넌트로 옮긴 것 */
-import type { SVGProps } from "react";
+"use client";
+
+import { useCallback, useEffect, useRef, useState, type SVGProps } from "react";
+import { createPortal } from "react-dom";
+import { basePath } from "@/lib/api";
 
 const base = (size: number): SVGProps<SVGSVGElement> => ({
   width: size,
@@ -105,6 +109,30 @@ export const TrashIcon = ({ size = 14 }: { size?: number }) => (
   </svg>
 );
 
+export const ClipboardIcon = ({ size = 16 }: { size?: number }) => (
+  <svg {...base(size)} aria-hidden>
+    <rect x="6" y="4" width="12" height="17" rx="2" />
+    <path d="M9 4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1H9V4Z" />
+    <path d="M9 11h6M9 15h6" />
+  </svg>
+);
+
+export const TruckIcon = ({ size = 16 }: { size?: number }) => (
+  <svg {...base(size)} aria-hidden>
+    <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7z" />
+    <circle cx="7" cy="18" r="1.6" />
+    <circle cx="17.5" cy="18" r="1.6" />
+  </svg>
+);
+
+export const LogoutIcon = ({ size = 16 }: { size?: number }) => (
+  <svg {...base(size)} aria-hidden>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <path d="M16 17l5-5-5-5" />
+    <path d="M21 12H9" />
+  </svg>
+);
+
 const FALLBACK_ICON_PATH =
   '<path d="M4 8l8-4 8 4v9l-8 4-8-4V8Z"/><path d="M4 8l8 4 8-4"/><path d="M12 12v9"/>';
 
@@ -123,16 +151,68 @@ function sanitizeIconPath(rawPath: string | null): string | null {
   return tags.every((t) => SAFE_SVG_TAG.test(t)) ? rawPath : null;
 }
 
-/** 상품 썸네일 (원본 productIcon) — DB 의 icon_path 문자열을 검증 후 그린다 */
+/** 슬러그별 상품 사진 (public/products/<slug>.jpg). 없으면 SVG 아이콘으로 폴백.
+ *  이미지 출처: barunsoncard.com 기념굿즈 카탈로그의 대표 상품컷을 축소해 동봉. */
+const PRODUCT_PHOTO_SLUGS = new Set([
+  "keyring",
+  "phonegrip",
+  "magnet",
+  "photo",
+  "stamp",
+  "newspaper",
+  "sticker",
+  "card",
+  "puzzle",
+  "postcard",
+]);
+
+/** 상품 썸네일 (원본 productIcon) — 상품 사진이 있으면 사진, 없으면 icon_path SVG */
 export function ProductThumb({
   name,
+  slug,
   iconPath,
   linkUrl,
 }: {
   name: string;
+  slug?: string | null;
   iconPath: string | null;
   linkUrl: string | null;
 }) {
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const showPhoto = !!slug && PRODUCT_PHOTO_SLUGS.has(slug) && !photoFailed;
+  const photoSrc = `${basePath}/products/${slug}.jpg`;
+
+  // 마우스 오버 시 큰 미리보기. 목록 테이블은 overflow 로 잘리므로 body 로 포탈한다.
+  const ZOOM_SIZE = 260;
+  const wrapRef = useRef<HTMLSpanElement>(null);
+  const [zoomAt, setZoomAt] = useState<{ top: number; left: number } | null>(null);
+
+  const openZoom = useCallback(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const gap = 12;
+    let left = r.right + gap;
+    if (left + ZOOM_SIZE > window.innerWidth - 8) left = r.left - gap - ZOOM_SIZE;
+    left = Math.max(8, left);
+    const top = Math.max(
+      8,
+      Math.min(r.top + r.height / 2 - ZOOM_SIZE / 2, window.innerHeight - ZOOM_SIZE - 8),
+    );
+    setZoomAt({ top, left });
+  }, []);
+  const closeZoom = useCallback(() => setZoomAt(null), []);
+
+  useEffect(() => {
+    if (!zoomAt) return;
+    window.addEventListener("scroll", closeZoom, true);
+    window.addEventListener("resize", closeZoom);
+    return () => {
+      window.removeEventListener("scroll", closeZoom, true);
+      window.removeEventListener("resize", closeZoom);
+    };
+  }, [zoomAt, closeZoom]);
+
   const svg = (
     <svg
       width="26"
@@ -148,9 +228,21 @@ export function ProductThumb({
     />
   );
 
-  if (!linkUrl) return <span className="product-thumb">{svg}</span>;
+  const inner = showPhoto ? (
+    // 46px 썸네일 + basePath 프리픽스가 필요해 next/image 대신 순수 img 사용
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className="product-thumb-img"
+      src={photoSrc}
+      alt=""
+      loading="lazy"
+      onError={() => setPhotoFailed(true)}
+    />
+  ) : (
+    svg
+  );
 
-  return (
+  const thumb = linkUrl ? (
     <a
       className="product-thumb"
       href={linkUrl}
@@ -159,7 +251,35 @@ export function ProductThumb({
       title={`바른손카드에서 ${name} 보기`}
       onClick={(e) => e.stopPropagation()}
     >
-      {svg}
+      {inner}
     </a>
+  ) : (
+    <span className="product-thumb">{inner}</span>
+  );
+
+  if (!showPhoto) return thumb;
+
+  return (
+    <span
+      ref={wrapRef}
+      className="product-thumb-wrap"
+      onMouseEnter={openZoom}
+      onMouseLeave={closeZoom}
+    >
+      {thumb}
+      {zoomAt && typeof document !== "undefined"
+        ? createPortal(
+            <span
+              className="product-thumb-zoom"
+              style={{ top: zoomAt.top, left: zoomAt.left, width: ZOOM_SIZE, height: ZOOM_SIZE }}
+              aria-hidden
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photoSrc} alt="" />
+            </span>,
+            document.body,
+          )
+        : null}
+    </span>
   );
 }

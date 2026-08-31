@@ -52,8 +52,21 @@ export const courierSchema = z.object({
   courierName: z.string().trim().max(60).nullish(),
   trackingNumber: z.string().trim().max(60).nullish(),
   deliveredDate: dateStr.nullish(),
+  dispatchedDate: dateStr.nullish(),
   deliveryMethod: z.enum(["택배배송", "방문수령"]).nullish(),
   shippingAddress: z.string().trim().max(300).nullish(),
+});
+
+export const purchaseOrderSchema = z.object({
+  vendorName: z.string().trim().min(1, "업체명은 필수입니다.").max(120),
+  poNumber: z.string().trim().max(60).nullish(),
+  orderedDate: dateStr,
+  expectedDate: dateStr.nullish(),
+  receivedDate: dateStr.nullish(),
+  unitCost: z.coerce.number().int().min(0).nullish(),
+  quantity: z.coerce.number().int().min(0).nullish(),
+  status: z.enum(["발주", "제작중", "입고완료", "취소"]),
+  note: z.string().trim().max(2000).nullish(),
 });
 
 export const fileInputSchema = z.object({
@@ -88,6 +101,7 @@ export const customerUpdateSchema = z.object({
 export const productUpdateSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   defaultUnitPrice: z.coerce.number().int().min(0).optional(),
+  purchasePrice: z.coerce.number().int().min(0).optional(),
   isActive: z.coerce.boolean().optional(),
   linkUrl: z
     .string()
@@ -103,6 +117,8 @@ export const orderListQuerySchema = z.object({
   paymentStatus: z.string().trim().optional(),
   productId: z.coerce.number().int().positive().optional(),
   orderDate: dateStr.optional(),
+  dateFrom: dateStr.optional(),
+  dateTo: dateStr.optional(),
   showAllDates: z
     .union([z.literal("true"), z.literal("false"), z.boolean()])
     .transform((v) => v === true || v === "true")
