@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { ProductThumb } from "@/components/icons";
+import { ProductThumb, SearchIcon } from "@/components/icons";
 import { ProductPrepModal } from "@/components/products/ProductPrepModal";
 import { useToast } from "@/components/Toast";
 import { useAsyncData } from "@/hooks/useAsyncData";
+import { useDebounced } from "@/hooks/useDebounced";
 import { api } from "@/lib/client-api";
 import { TODAY } from "@/lib/constants";
 import { num, won } from "@/lib/format";
@@ -14,8 +15,6 @@ import type { Product } from "@/lib/types";
 
 const YEAR = TODAY.slice(0, 4);
 const itemCode = (p: Product) => p.erpCode ?? `${YEAR}_${p.slug}_01`;
-
-const PROD_FILTERS = ["전체", "내부생산", "외부생산"] as const;
 
 const COPY_HEADERS = [
   "품목코드",
@@ -40,7 +39,10 @@ export default function ProductsPage() {
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const onError = useCallback((m: string) => toast(m, "error"), [toast]);
 
-  const [prodFilter, setProdFilter] = useState<(typeof PROD_FILTERS)[number]>("전체");
+  const [searchInput, setSearchInput] = useState("");
+  const search = useDebounced(searchInput.trim().toLowerCase(), 200);
+  const [internalOn, setInternalOn] = useState(false);
+  const [externalOn, setExternalOn] = useState(false);
 
   // 준비 단계 저장 결과는 로컬에 얹어 즉시 반영한다.
   const [overrides, setOverrides] = useState<Record<number, Product>>({});
@@ -48,13 +50,19 @@ export default function ProductsPage() {
     () =>
       products
         .map((p) => overrides[p.id] ?? p)
-        .filter(
-          (p) =>
-            prodFilter === "전체" ||
-            (prodFilter === "내부생산" && p.productionType === "내부") ||
-            (prodFilter === "외부생산" && p.productionType === "외부"),
-        ),
-    [products, overrides, prodFilter],
+        .filter((p) => {
+          // 생산 구분: 둘 다 꺼짐 or 둘 다 켜짐 → 전체
+          if (internalOn !== externalOn) {
+            if (internalOn && p.productionType !== "내부") return false;
+            if (externalOn && p.productionType !== "외부") return false;
+          }
+          if (search) {
+            const hay = `${p.name} ${itemCode(p)} ${p.slug} ${p.productionVendor ?? ""}`.toLowerCase();
+            if (!hay.includes(search)) return false;
+          }
+          return true;
+        }),
+    [products, overrides, internalOn, externalOn, search],
   );
   const [prepId, setPrepId] = useState<number | null>(null);
   const prepProduct = rows.find((p) => p.id === prepId) ?? null;
@@ -63,9 +71,10 @@ export default function ProductsPage() {
     if (error) toast(error, "error");
   }, [error, toast]);
 
-  const allIds = products.map((p) => p.id);
-  const allChecked = allIds.length > 0 && allIds.every((id) => selectedSet.has(id));
-  const someChecked = allIds.some((id) => selectedSet.has(id));
+  // 선택은 현재 필터로 보이는 행 기준
+  const visibleIds = rows.map((p) => p.id);
+  const allChecked = visibleIds.length > 0 && visibleIds.every((id) => selectedSet.has(id));
+  const someChecked = visibleIds.some((id) => selectedSet.has(id));
 
   const selectAllRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -112,26 +121,32 @@ export default function ProductsPage() {
       ) : null}
 
       <div className="toolbar">
-        <div className="chips">
-          {PROD_FILTERS.map((f) => {
-            const n =
-              f === "전체"
-                ? products.length
-                : products.filter(
-                    (p) => `${p.productionType}생산` === f,
-                  ).length;
-            return (
-              <button
-                key={f}
-                type="button"
-                className={`chip${prodFilter === f ? " active" : ""}`}
-                onClick={() => setProdFilter(f)}
-              >
-                {f} <span className="chip-count">{n}</span>
-              </button>
-            );
-          })}
+        <div className="toolbar-search">
+          <SearchIcon />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="상품명, 품목코드로 검색"
+            aria-label="상품 검색"
+          />
         </div>
+        <label className="date-check">
+          <input
+            type="checkbox"
+            checked={internalOn}
+            onChange={(e) => setInternalOn(e.target.checked)}
+          />
+          내부생산 {products.filter((p) => p.productionType === "내부").length}
+        </label>
+        <label className="date-check">
+          <input
+            type="checkbox"
+            checked={externalOn}
+            onChange={(e) => setExternalOn(e.target.checked)}
+          />
+          외부생산 {products.filter((p) => p.productionType === "외부").length}
+        </label>
       </div>
 
       <div className="table-wrap products-table">
@@ -146,7 +161,7 @@ export default function ProductsPage() {
                     aria-label="전체 선택"
                     checked={allChecked}
                     onChange={(e) =>
-                      setSelectedIds(e.target.checked ? allIds : [])
+                      setSelectedIds(e.target.checked ? visibleIds : [])
                     }
                   />
                 </th>
@@ -167,6 +182,14 @@ export default function ProductsPage() {
                 <tr>
                   <td colSpan={11}>
                     <div className="empty">불러오는 중…</div>
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={11}>
+                    <div className="empty">
+                      <div className="big">조건에 맞는 상품이 없어요</div>
+                    </div>
                   </td>
                 </tr>
               ) : (
