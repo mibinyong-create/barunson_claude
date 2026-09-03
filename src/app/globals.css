@@ -860,6 +860,8 @@
 
 /* 출고관리 */
 .ship-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.ship-tiles.cols-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:900px){ .ship-tiles.cols-4{grid-template-columns:repeat(2,1fr);} }
 .ship-tile{
   display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;
   background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);

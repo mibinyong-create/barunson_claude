@@ -12,7 +12,15 @@ import { api } from "@/lib/client-api";
 import { TODAY } from "@/lib/constants";
 import { resolveDateRange, type DatePreset } from "@/lib/date-range";
 import { fmtDate, num } from "@/lib/format";
-import type { Order, Paged } from "@/lib/types";
+import type { Order, Paged, StatusCountRow } from "@/lib/types";
+
+/** 요약 타일 = 진행상태 묶음. 클릭하면 그 묶음으로 상태 필터가 걸린다. */
+const TILES = [
+  { key: "초안 대기", statuses: ["주문완료", "초안등록"] },
+  { key: "고객확정 완료", statuses: ["고객확정완료"] },
+  { key: "외주 발주", statuses: ["외주발주"] },
+  { key: "인쇄팀 전달", statuses: ["인쇄팀전달"] },
+] as const;
 
 const STATUS_OPTIONS = [
   "주문완료",
@@ -51,8 +59,32 @@ export default function PrintPage() {
   const [selected, setSelected] = useState<number[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  const [chips, setChips] = useState<StatusCountRow[] | null>(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  useEffect(() => {
+    const c = new AbortController();
+    api
+      .chips(c.signal)
+      .then((r) => setChips(r.byStatus))
+      .catch(() => {});
+    return () => c.abort();
+  }, [refreshKey]);
+
+  const countOf = (list: readonly string[]) =>
+    list.reduce(
+      (sum, s) => sum + (chips?.find((c) => c.status === s)?.orderCount ?? 0),
+      0,
+    );
+
+  /** 타일 클릭 → 해당 상태 묶음으로 필터 (이미 그 묶음이면 해제) */
+  const pickTile = (group: readonly string[]) => {
+    const isActive =
+      statuses.size === group.length && group.every((s) => statuses.has(s));
+    setStatuses(isActive ? new Set() : new Set(group));
+    setPage(1);
+  };
 
   const toggleIn = (set: Set<string>, setter: (s: Set<string>) => void, v: string) => {
     const next = new Set(set);
@@ -121,6 +153,25 @@ export default function PrintPage() {
       <p className="page-sub">
         초안 미리보기 업로드 · 원본 작업 파일(구글 드라이브 링크) 등록 — 초안/인쇄 준비 통합 큐
       </p>
+
+      <div className="ship-tiles cols-4">
+        {TILES.map((t) => {
+          const active =
+            statuses.size === t.statuses.length &&
+            t.statuses.every((s) => statuses.has(s));
+          return (
+            <button
+              key={t.key}
+              type="button"
+              className={`ship-tile${active ? " active" : ""}`}
+              onClick={() => pickTile(t.statuses)}
+            >
+              <span className="label">{t.key}</span>
+              <span className="value mono">{num(countOf(t.statuses))}</span>
+            </button>
+          );
+        })}
+      </div>
 
       <div className="toolbar toolbar-col">
         <div className="tbrow">
