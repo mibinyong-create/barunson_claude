@@ -437,11 +437,16 @@ async function main() {
             : ["photo", "newspaper", "postcard", "card"].includes(slug)
               ? "5층인쇄"
               : "내부디지털";
-        // 원본 링크: 인쇄팀전달 이후 단계 일부에 구글 드라이브 링크 기록
-        const AFTER_DRAFT = ["인쇄팀전달", "인쇄완료", "배송중", "배송완료"];
-        const sourceLinks =
-          AFTER_DRAFT.includes(o.orderStatus) && chance(0.55)
-            ? `https://drive.google.com/drive/folders/1${o.orderNo.replace(/\D/g, "")}Ab\nhttps://drive.google.com/file/d/1${o.orderNo.replace(/\D/g, "")}Xz/view`
+        // 원본 작업 파일(구글 드라이브 링크): 고객 컨펌 후 등록 → 인쇄팀 전달.
+        //  - 인쇄팀전달 이후: 항상 등록됨(전달 조건)
+        //  - 고객확정완료/외주발주: 일부만 (컨펌은 됐지만 링크 정리 중)
+        const linkBody = `https://drive.google.com/drive/folders/1${o.orderNo.replace(/\D/g, "")}Ab\nhttps://drive.google.com/file/d/1${o.orderNo.replace(/\D/g, "")}Xz/view`;
+        const sourceLinks = ["인쇄팀전달", "인쇄완료", "배송중", "배송완료"].includes(
+          o.orderStatus,
+        )
+          ? linkBody
+          : ["고객확정완료", "외주발주"].includes(o.orderStatus) && chance(0.4)
+            ? linkBody
             : null;
         return `(${p(o.orderNo)},${p(customerIds[o.customerIdx])},${p(
           productByName.get(o.productName)?.id ?? products[0].id,
