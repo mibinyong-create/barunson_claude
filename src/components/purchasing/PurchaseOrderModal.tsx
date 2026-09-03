@@ -5,17 +5,21 @@ import { Modal } from "@/components/Modal";
 import { TODAY } from "@/lib/constants";
 import { num, won } from "@/lib/format";
 import type {
+  CourierMeta,
   PurchaseOrderInput,
   PurchaseOrderStatus,
+  PurchasePaymentMethod,
   PurchasingRow,
   VendorMeta,
 } from "@/lib/types";
 
 const STATUSES: PurchaseOrderStatus[] = ["발주", "제작중", "입고완료", "취소"];
+const PAYMENT_METHODS: PurchasePaymentMethod[] = ["카드", "현금", "계좌이체", "기타"];
 
 type Props = {
   row: PurchasingRow | null;
   vendors: VendorMeta[];
+  couriers: CourierMeta[];
   busy: boolean;
   onClose: () => void;
   /** true 를 돌려주면 모달을 닫는다 */
@@ -23,7 +27,15 @@ type Props = {
   onDelete: () => Promise<boolean>;
 };
 
-export function PurchaseOrderModal({ row, vendors, busy, onClose, onSave, onDelete }: Props) {
+export function PurchaseOrderModal({
+  row,
+  vendors,
+  couriers,
+  busy,
+  onClose,
+  onSave,
+  onDelete,
+}: Props) {
   const po = row?.po ?? null;
   const [vendorName, setVendorName] = useState(po?.vendorName ?? "");
   const [poNumber, setPoNumber] = useState(po?.poNumber ?? "");
@@ -37,6 +49,12 @@ export function PurchaseOrderModal({ row, vendors, busy, onClose, onSave, onDele
     String(po?.quantity ?? row?.orderQuantity ?? ""),
   );
   const [status, setStatus] = useState<PurchaseOrderStatus>(po?.status ?? "발주");
+  const [orderSite, setOrderSite] = useState(po?.orderSite ?? "");
+  const [paymentMethod, setPaymentMethod] = useState<string>(po?.paymentMethod ?? "");
+  const [courierId, setCourierId] = useState<string>(
+    po?.courierId != null ? String(po.courierId) : "",
+  );
+  const [trackingNumber, setTrackingNumber] = useState(po?.trackingNumber ?? "");
   const [note, setNote] = useState(po?.note ?? "");
   const [advance, setAdvance] = useState(false);
 
@@ -67,6 +85,10 @@ export function PurchaseOrderModal({ row, vendors, busy, onClose, onSave, onDele
         unitCost: unitCost.trim() === "" ? null : Number(unitCost),
         quantity: quantity.trim() === "" ? null : Number(quantity),
         status,
+        orderSite: blank(orderSite),
+        paymentMethod: (blank(paymentMethod) as PurchasePaymentMethod | null) ?? null,
+        courierId: courierId === "" ? null : Number(courierId),
+        trackingNumber: blank(trackingNumber),
         note: blank(note),
       },
       canAdvance && advance,
@@ -159,6 +181,30 @@ export function PurchaseOrderModal({ row, vendors, busy, onClose, onSave, onDele
           ) : null}
         </div>
         <div className="field">
+          <label htmlFor="po-site">주문 사이트</label>
+          <input
+            id="po-site"
+            value={orderSite}
+            onChange={(e) => setOrderSite(e.target.value)}
+            placeholder="업체 발주 포털 주소 또는 이름"
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="po-payment">주문 방법</label>
+          <select
+            id="po-payment"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+          >
+            <option value="">선택</option>
+            {PAYMENT_METHODS.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
           <label htmlFor="po-number">발주서 번호</label>
           <input id="po-number" value={poNumber} onChange={(e) => setPoNumber(e.target.value)} />
         </div>
@@ -219,6 +265,31 @@ export function PurchaseOrderModal({ row, vendors, busy, onClose, onSave, onDele
             type="date"
             value={receivedDate}
             onChange={(e) => setReceivedDate(e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="po-courier">입고 택배사</label>
+          <select
+            id="po-courier"
+            value={courierId}
+            onChange={(e) => setCourierId(e.target.value)}
+          >
+            <option value="">선택</option>
+            {couriers.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="po-tracking">운송장번호</label>
+          <input
+            id="po-tracking"
+            inputMode="numeric"
+            value={trackingNumber}
+            onChange={(e) => setTrackingNumber(e.target.value)}
+            placeholder="숫자만 입력"
           />
         </div>
         <div className="field-total">

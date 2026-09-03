@@ -21,6 +21,12 @@ function mapPurchaseOrder(r: Row): PurchaseOrder {
     unitCost: (r.unit_cost as number) ?? null,
     quantity: (r.po_quantity as number) ?? null,
     status: r.po_status as PurchaseOrderStatus,
+    orderSite: (r.order_site as string) ?? null,
+    paymentMethod: (r.payment_method as PurchaseOrder["paymentMethod"]) ?? null,
+    courierId: (r.inbound_courier_id as number) ?? null,
+    courierName: (r.inbound_courier_name as string) ?? null,
+    trackingUrlTemplate: (r.inbound_tracking_url_template as string) ?? null,
+    trackingNumber: (r.tracking_number as string) ?? null,
     note: (r.po_note as string) ?? null,
     createdAt: String(r.po_created_at),
     updatedAt: String(r.po_updated_at),
@@ -71,6 +77,12 @@ const SELECT_COLS = `
   po.unit_cost,
   po.quantity              AS po_quantity,
   po.status                AS po_status,
+  po.order_site,
+  po.payment_method,
+  po.inbound_courier_id,
+  pcr.name                 AS inbound_courier_name,
+  pcr.tracking_url_template AS inbound_tracking_url_template,
+  po.tracking_number,
   po.note                  AS po_note,
   po.created_at            AS po_created_at,
   po.updated_at            AS po_updated_at`;
@@ -79,7 +91,8 @@ const FROM_JOIN = `
 FROM orders o
 JOIN customers c ON c.id = o.customer_id
 JOIN products  p ON p.id = o.product_id
-LEFT JOIN purchase_orders po ON po.order_id = o.id`;
+LEFT JOIN purchase_orders po ON po.order_id = o.id
+LEFT JOIN couriers pcr ON pcr.id = po.inbound_courier_id`;
 
 /** 발주관리 화면 탭 → WHERE 조건 */
 function stageWhere(stage: string): string {
@@ -172,9 +185,14 @@ export async function getPurchaseOrder(orderId: number): Promise<PurchaseOrder |
     `SELECT
        po.id AS po_id, po.order_id, po.vendor_name, po.po_number, po.ordered_date,
        po.expected_date, po.received_date, po.unit_cost, po.quantity AS po_quantity,
-       po.status AS po_status, po.note AS po_note,
+       po.status AS po_status, po.order_site, po.payment_method,
+       po.inbound_courier_id, pcr.name AS inbound_courier_name,
+       pcr.tracking_url_template AS inbound_tracking_url_template,
+       po.tracking_number, po.note AS po_note,
        po.created_at AS po_created_at, po.updated_at AS po_updated_at
-     FROM purchase_orders po WHERE po.order_id = $1`,
+     FROM purchase_orders po
+     LEFT JOIN couriers pcr ON pcr.id = po.inbound_courier_id
+     WHERE po.order_id = $1`,
     [orderId],
   );
   return row ? mapPurchaseOrder(row) : null;
@@ -191,8 +209,9 @@ export async function upsertPurchaseOrder(
   await query(
     `INSERT INTO purchase_orders
        (order_id, vendor_name, po_number, ordered_date, expected_date, received_date,
-        unit_cost, quantity, status, note)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        unit_cost, quantity, status, order_site, payment_method, inbound_courier_id,
+        tracking_number, note)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
      ON CONFLICT (order_id) DO UPDATE SET
        vendor_name = EXCLUDED.vendor_name,
        po_number = EXCLUDED.po_number,
@@ -202,6 +221,10 @@ export async function upsertPurchaseOrder(
        unit_cost = EXCLUDED.unit_cost,
        quantity = EXCLUDED.quantity,
        status = EXCLUDED.status,
+       order_site = EXCLUDED.order_site,
+       payment_method = EXCLUDED.payment_method,
+       inbound_courier_id = EXCLUDED.inbound_courier_id,
+       tracking_number = EXCLUDED.tracking_number,
        note = EXCLUDED.note`,
     [
       orderId,
@@ -213,6 +236,10 @@ export async function upsertPurchaseOrder(
       data.unitCost ?? null,
       data.quantity ?? null,
       data.status,
+      data.orderSite ?? null,
+      data.paymentMethod ?? null,
+      data.courierId ?? null,
+      data.trackingNumber ?? null,
       data.note ?? null,
     ],
   );

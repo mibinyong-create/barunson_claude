@@ -75,6 +75,10 @@ export const purchaseOrderSchema = z.object({
   unitCost: z.coerce.number().int().min(0).nullish(),
   quantity: z.coerce.number().int().min(0).nullish(),
   status: z.enum(["발주", "제작중", "입고완료", "취소"]),
+  orderSite: z.string().trim().max(300).nullish(),
+  paymentMethod: z.enum(["카드", "현금", "계좌이체", "기타"]).nullish(),
+  courierId: z.coerce.number().int().positive().nullish(),
+  trackingNumber: z.string().trim().max(60).nullish(),
   note: z.string().trim().max(2000).nullish(),
 });
 

@@ -255,6 +255,10 @@ CREATE TABLE purchase_orders (
   quantity      integer     CHECK (quantity IS NULL OR quantity >= 0),
   status        text        NOT NULL DEFAULT '발주'
                             CHECK (status IN ('발주', '제작중', '입고완료', '취소')),
+  order_site       text,                       -- 발주한 주문 사이트 (업체 발주 포털 URL·명칭)
+  payment_method   text        CHECK (payment_method IS NULL OR payment_method IN ('카드', '현금', '계좌이체', '기타')),
+  inbound_courier_id integer   REFERENCES couriers(id) ON DELETE SET NULL,  -- 업체 → 스튜디오 입고 택배사
+  tracking_number  text,                       -- 입고 운송장번호
   note          text,
   created_by    text        NOT NULL DEFAULT '스튜디오',
   created_at    timestamptz NOT NULL DEFAULT now(),

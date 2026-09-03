@@ -574,6 +574,17 @@ async function main() {
     const vendorNames = vendors.map((v) => v.name);
     const pickVendor = (slug: string) =>
       chance(0.15) ? pick(vendorNames) : (VENDOR_BY_SLUG[slug] ?? pick(vendorNames));
+    // 업체별 발주(주문) 사이트
+    const ORDER_SITE_BY_VENDOR: Record<string, string> = {
+      "오브제 아크릴": "https://order.objet-acryl.co.kr",
+      "우드메이트 공방": "https://woodmate.imweb.me/order",
+      스탬프공작소: "https://stampworks.kr/b2b",
+      "프린트팩토리 서울": "https://print-factory.co.kr/proof",
+      "굿즈랩 판교": "https://goodslab.io/partner",
+      "즉석프린팅 랩": "https://instant-printing.co.kr",
+    };
+    const PAY_METHODS = ["카드", "카드", "계좌이체", "계좌이체", "현금", "기타"];
+    const courierIds = couriers.map((c) => c.id);
     const PO_NOTES = [
       "시안 최종본 전달, 규격 재확인 요청",
       "펄 화이트 소재로 진행",
@@ -595,6 +606,10 @@ async function main() {
       unitCost: number;
       qty: number;
       status: string;
+      orderSite: string | null;
+      payMethod: string;
+      inCourierId: number | null;
+      inTracking: string | null;
       note: string | null;
     };
     const poSeeds: PoSeed[] = [];
@@ -621,9 +636,12 @@ async function main() {
       const ordered = addDays(o.orderDate, randInt(1, 4));
       const expected = addDays(ordered, randInt(7, 18));
       const received = status === "입고완료" ? addDays(ordered, randInt(8, 16)) : null;
+      const vendor = pickVendor(slug);
+      // 입고 운송장: 입고완료면 항상, 제작중이면 절반 정도(선적 완료)
+      const hasInbound = status === "입고완료" || (status === "제작중" && chance(0.5));
       poSeeds.push({
         orderId: orderIds[idx],
-        vendor: pickVendor(slug),
+        vendor,
         poNo: `PO-${o.orderDate.slice(0, 4)}-${String(poCounter++).padStart(4, "0")}`,
         ordered,
         expected,
@@ -631,6 +649,10 @@ async function main() {
         unitCost: Math.round(o.unitPrice * (0.4 + rand() * 0.15)),
         qty: o.quantity + (chance(0.4) ? randInt(2, 8) : 0),
         status,
+        orderSite: ORDER_SITE_BY_VENDOR[vendor] ?? null,
+        payMethod: pick(PAY_METHODS),
+        inCourierId: hasInbound ? pick(courierIds) : null,
+        inTracking: hasInbound ? String(randInt(100000000000, 999999999999)) : null,
         note: chance(0.65) ? pick(PO_NOTES) : null,
       });
     });
@@ -641,12 +663,15 @@ async function main() {
         const p = (v: unknown) => `$${values.push(v)}`;
         return `(${p(s.orderId)},${p(s.vendor)},${p(s.poNo)},${p(s.ordered)},${p(
           s.expected,
-        )},${p(s.received)},${p(s.unitCost)},${p(s.qty)},${p(s.status)},${p(s.note)})`;
+        )},${p(s.received)},${p(s.unitCost)},${p(s.qty)},${p(s.status)},${p(
+          s.orderSite,
+        )},${p(s.payMethod)},${p(s.inCourierId)},${p(s.inTracking)},${p(s.note)})`;
       });
       await client.query(
         `INSERT INTO purchase_orders
            (order_id, vendor_name, po_number, ordered_date, expected_date, received_date,
-            unit_cost, quantity, status, note)
+            unit_cost, quantity, status, order_site, payment_method, inbound_courier_id,
+            tracking_number, note)
          VALUES ${tuples.join(",")}`,
         values,
       );

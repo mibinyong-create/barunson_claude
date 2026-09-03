@@ -234,6 +234,7 @@ export type Product = ProductMeta & {
 
 // ── 외주 발주 (발주관리) ──────────────────────────────────────────────────────
 export type PurchaseOrderStatus = "발주" | "제작중" | "입고완료" | "취소";
+export type PurchasePaymentMethod = "카드" | "현금" | "계좌이체" | "기타";
 
 export type PurchaseOrder = {
   id: number;
@@ -246,6 +247,15 @@ export type PurchaseOrder = {
   unitCost: number | null;
   quantity: number | null;
   status: PurchaseOrderStatus;
+  /** 발주한 주문 사이트 (업체 발주 포털 URL·명칭) */
+  orderSite: string | null;
+  /** 결제 방법 (카드 / 현금 / 계좌이체 / 기타) */
+  paymentMethod: PurchasePaymentMethod | null;
+  /** 업체 → 스튜디오 입고 택배사 */
+  courierId: number | null;
+  courierName: string | null;
+  trackingUrlTemplate: string | null;
+  trackingNumber: string | null;
   note: string | null;
   createdAt: string;
   updatedAt: string;
@@ -279,5 +289,9 @@ export type PurchaseOrderInput = {
   unitCost?: number | null;
   quantity?: number | null;
   status: PurchaseOrderStatus;
+  orderSite?: string | null;
+  paymentMethod?: PurchasePaymentMethod | null;
+  courierId?: number | null;
+  trackingNumber?: string | null;
   note?: string | null;
 };

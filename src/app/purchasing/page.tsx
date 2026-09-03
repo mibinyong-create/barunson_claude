@@ -5,14 +5,21 @@ import { AppShell } from "@/components/AppShell";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
 import { ProductThumb, SearchIcon } from "@/components/icons";
 import { PurchaseOrderModal } from "@/components/purchasing/PurchaseOrderModal";
+import { VendorInfoModal } from "@/components/purchasing/VendorInfoModal";
 import { useToast } from "@/components/Toast";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { useDebounced } from "@/hooks/useDebounced";
 import { api } from "@/lib/client-api";
 import { TODAY } from "@/lib/constants";
 import { resolveDateRange, type DatePreset } from "@/lib/date-range";
-import { fmtDate, num, won } from "@/lib/format";
-import type { Paged, PurchaseOrderInput, PurchasingRow, VendorMeta } from "@/lib/types";
+import { fmtDate, num, trackingUrl, won } from "@/lib/format";
+import type {
+  CourierMeta,
+  Paged,
+  PurchaseOrderInput,
+  PurchasingRow,
+  VendorMeta,
+} from "@/lib/types";
 
 const STAGES = [
   { key: "미등록", label: "미등록" },
@@ -39,9 +46,11 @@ export default function PurchasingPage() {
   const [page, setPage] = useState(1);
   const [refreshKey, setRefreshKey] = useState(0);
   const [active, setActive] = useState<PurchasingRow | null>(null);
+  const [vendorInfo, setVendorInfo] = useState<PurchasingRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [counts, setCounts] = useState<ListResp["counts"] | null>(null);
   const [vendors, setVendors] = useState<VendorMeta[]>([]);
+  const [couriers, setCouriers] = useState<CourierMeta[]>([]);
 
   const onError = useCallback((m: string) => toast(m, "error"), [toast]);
 
@@ -49,7 +58,10 @@ export default function PurchasingPage() {
     const c = new AbortController();
     api
       .meta(c.signal)
-      .then((m) => setVendors(m.vendors))
+      .then((m) => {
+        setVendors(m.vendors);
+        setCouriers(m.couriers);
+      })
       .catch(() => {});
     return () => c.abort();
   }, []);
@@ -202,6 +214,8 @@ export default function PurchasingPage() {
                 <th>발주일</th>
                 <th>입고 예정</th>
                 <th>입고 완료</th>
+                <th>입고 택배사</th>
+                <th>운송장번호</th>
                 <th className="num">발주 금액</th>
                 <th>발주 상태</th>
                 <th>메모</th>
@@ -211,13 +225,13 @@ export default function PurchasingPage() {
             <tbody>
               {loading && items.length === 0 ? (
                 <tr>
-                  <td colSpan={12}>
+                  <td colSpan={14}>
                     <div className="empty">불러오는 중…</div>
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={12}>
+                  <td colSpan={14}>
                     <div className="empty">
                       <div className="big">해당하는 발주건이 없어요</div>
                     </div>
@@ -230,6 +244,7 @@ export default function PurchasingPage() {
                     po && po.unitCost != null && po.quantity != null
                       ? po.unitCost * po.quantity
                       : null;
+                  const inUrl = trackingUrl(po?.trackingUrlTemplate, po?.trackingNumber);
                   return (
                     <tr key={r.orderId}>
                       <td className="mono">{r.orderNoShort}</td>
@@ -249,10 +264,39 @@ export default function PurchasingPage() {
                         </div>
                       </td>
                       <td className="num mono">{num(r.orderQuantity)}</td>
-                      <td>{po?.vendorName ?? <span className="req-empty">미등록</span>}</td>
+                      <td>
+                        {po ? (
+                          <button
+                            type="button"
+                            className="order-link"
+                            onClick={() => setVendorInfo(r)}
+                          >
+                            {po.vendorName}
+                          </button>
+                        ) : (
+                          <span className="req-empty">미등록</span>
+                        )}
+                      </td>
                       <td className="mono">{fmtDate(po?.orderedDate ?? null)}</td>
                       <td className="mono">{fmtDate(po?.expectedDate ?? null)}</td>
                       <td className="mono">{fmtDate(po?.receivedDate ?? null)}</td>
+                      <td>{po?.courierName || <span className="req-empty">-</span>}</td>
+                      <td className="mono">
+                        {inUrl ? (
+                          <a
+                            href={inUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="order-link"
+                          >
+                            {po?.trackingNumber}
+                          </a>
+                        ) : po?.trackingNumber ? (
+                          po.trackingNumber
+                        ) : (
+                          <span className="req-empty">-</span>
+                        )}
+                      </td>
                       <td className="num mono">{amount != null ? won(amount) : "-"}</td>
                       <td>
                         {po ? (
@@ -311,10 +355,17 @@ export default function PurchasingPage() {
         key={active?.orderId ?? "none"}
         row={active}
         vendors={vendors}
+        couriers={couriers}
         busy={busy}
         onClose={() => setActive(null)}
         onSave={handleSave}
         onDelete={handleDelete}
+      />
+
+      <VendorInfoModal
+        row={vendorInfo}
+        vendors={vendors}
+        onClose={() => setVendorInfo(null)}
       />
     </AppShell>
   );
