@@ -27,6 +27,7 @@
 
     --st-received-ink:#3E5D78; --st-received-bg:#E7F0F8;
     --st-draft-ink:#5B6472; --st-draft-bg:#EDF0F4;
+    --st-revision-ink:#B23B5E; --st-revision-bg:#F9E2EA;
     --st-production-ink:#8A6410; --st-production-bg:#FBF0D8;
     --st-ready-ink:#5B4C96; --st-ready-bg:#EEEAF8;
     --st-outsource-ink:#B4551E; --st-outsource-bg:#FBE9D8;
@@ -448,6 +449,7 @@
   /* 진행상태 pill — 파이프라인이 한눈에 보이도록 쨍한 원색으로 */
   .pill.st-주문완료,
   .pill.st-초안등록,
+  .pill.st-수정요청,
   .pill.st-고객확정완료,
   .pill.st-외주발주,
   .pill.st-인쇄팀전달,
@@ -460,6 +462,7 @@
   }
   .pill.st-주문완료{background:#2563EB;}     /* 파랑 */
   .pill.st-초안등록{background:#0891B2;}     /* 청록 */
+  .pill.st-수정요청{background:#E11D48;}     /* 로즈(수정 요청) */
   .pill.st-고객확정완료{background:#7C3AED;} /* 보라 */
   .pill.st-외주발주{background:#DB2777;}     /* 자홍 */
   .pill.st-인쇄팀전달{background:#EA580C;}   /* 주황 */

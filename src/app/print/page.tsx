@@ -16,7 +16,7 @@ import type { Order, Paged, StatusCountRow } from "@/lib/types";
 
 /** 요약 타일 = 진행상태 묶음. 클릭하면 그 묶음으로 상태 필터가 걸린다. */
 const TILES = [
-  { key: "초안 대기", statuses: ["주문완료", "초안등록"] },
+  { key: "초안 대기", statuses: ["주문완료", "초안등록", "수정요청"] },
   { key: "고객확정 완료", statuses: ["고객확정완료"] },
   { key: "외주 발주", statuses: ["외주발주"] },
   { key: "인쇄팀 전달", statuses: ["인쇄팀전달"] },
@@ -25,6 +25,7 @@ const TILES = [
 const STATUS_OPTIONS = [
   "주문완료",
   "초안등록",
+  "수정요청",
   "고객확정완료",
   "외주발주",
   "인쇄팀전달",

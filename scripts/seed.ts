@@ -173,8 +173,8 @@ const ORIGINAL: SeedOrder[] = [
   {orderNo:"ORD-2026-000015",customerName:"오지훈",phone:"010-2020-3030",weddingDate:"2026-09-01",productName:"웨딩스탬프",option:"사각 4cm / 각인 성함",quantity:1,unitPrice:36000,orderDate:"2026-08-24",deliveryMethod:"택배배송",address:"광주시 남구 봉선로 88",paymentStatus:"결제대기",orderStatus:"고객확정완료",withInvitation:false},
   {orderNo:"ORD-2026-000016",customerName:"배소연",phone:"010-3030-4040",weddingDate:"2026-09-18",productName:"커스텀 스티커",option:"사각 5cm / 20매 시트",quantity:150,unitPrice:1500,orderDate:"2026-08-24",deliveryMethod:"택배배송",address:"수원시 영통구 광교로 12",paymentStatus:"결제완료",orderStatus:"외주발주",withInvitation:true,attachments:["스티커시안_v2.ai"]},
   {orderNo:"ORD-2026-000017",customerName:"최윤서",phone:"010-4040-5050",weddingDate:"2026-10-02",productName:"아크릴 마그넷",option:"원형 6cm / 시안 E",quantity:120,unitPrice:2400,orderDate:"2026-08-25",deliveryMethod:"택배배송",address:"창원시 성산구 창이대로 88",paymentStatus:"결제대기",orderStatus:"초안등록",withInvitation:false},
-  {orderNo:"ORD-2026-000018",customerName:"장하늘",phone:"010-5050-6060",weddingDate:"2026-09-27",productName:"메시지카드",option:"은박 레터링 / 4x6",quantity:140,unitPrice:2100,orderDate:"2026-08-25",deliveryMethod:"택배배송",address:"수원시 팔달구 권광로 264",paymentStatus:"결제완료",orderStatus:"초안등록",withInvitation:true},
-  {orderNo:"ORD-2026-000019",customerName:"심유진",phone:"010-6060-7070",weddingDate:"2026-10-10",productName:"아크릴 키링",option:"하트형 4cm / 시안 F",quantity:110,unitPrice:2800,orderDate:"2026-08-26",deliveryMethod:"택배배송",address:"전주시 완산구 홍산로 5",paymentStatus:"결제대기",orderStatus:"초안등록",withInvitation:false},
+  {orderNo:"ORD-2026-000018",customerName:"장하늘",phone:"010-5050-6060",weddingDate:"2026-09-27",productName:"메시지카드",option:"은박 레터링 / 4x6",quantity:140,unitPrice:2100,orderDate:"2026-08-25",deliveryMethod:"택배배송",address:"수원시 팔달구 권광로 264",paymentStatus:"결제완료",orderStatus:"수정요청",withInvitation:true},
+  {orderNo:"ORD-2026-000019",customerName:"심유진",phone:"010-6060-7070",weddingDate:"2026-10-10",productName:"아크릴 키링",option:"하트형 4cm / 시안 F",quantity:110,unitPrice:2800,orderDate:"2026-08-26",deliveryMethod:"택배배송",address:"전주시 완산구 홍산로 5",paymentStatus:"결제대기",orderStatus:"수정요청",withInvitation:false},
   {orderNo:"ORD-2026-000020",customerName:"노태양",phone:"010-7070-8080",weddingDate:"2026-09-14",productName:"웨딩신문",option:"타블로이드 / 25부",quantity:25,unitPrice:12000,orderDate:"2026-08-26",deliveryMethod:"택배배송",address:"청주시 흥덕구 사직대로 20",paymentStatus:"결제완료",orderStatus:"초안등록",withInvitation:false},
   {orderNo:"ORD-2026-000021",customerName:"구민서",phone:"010-8080-9090",weddingDate:"2026-09-30",productName:"즉석 포토프린팅",option:"2x6 필름 / 프레임 없음",quantity:100,unitPrice:1900,orderDate:"2026-08-27",deliveryMethod:"택배배송",address:"용인시 기흥구 동백중앙로 191",paymentStatus:"결제대기",orderStatus:"초안등록",withInvitation:true},
   {orderNo:"ORD-2026-000022",customerName:"홍서준",phone:"010-9090-0101",weddingDate:"2026-10-15",productName:"퍼즐액자",option:"300pcs / 8x10 프레임",quantity:130,unitPrice:6200,orderDate:"2026-08-27",deliveryMethod:"택배배송",address:"천안시 서북구 불당대로 30",paymentStatus:"결제취소",orderStatus:"주문완료",withInvitation:false,memo:"고객 카드 결제 취소로 재결제 안내 필요"},
@@ -185,9 +185,15 @@ const ORIGINAL: SeedOrder[] = [
 ];
 
 // ─── 진행 상태 결정 로직 ─────────────────────────────────────────────────────
+// 수정요청(초안 반려)은 선택 단계라 PIPELINE 에는 넣지 않고 초안등록의 일부를 치환한다.
 const PIPELINE = [
   "주문완료", "초안등록", "고객확정완료", "외주발주", "인쇄팀전달", "인쇄완료", "배송중", "배송완료",
 ] as const;
+
+/** 초안 이미지가 붙어 있어야 하는 단계인지 (초안등록 이후 + 수정요청) */
+const hasDraftStage = (status: string) =>
+  status === "수정요청" ||
+  PIPELINE.indexOf(status as (typeof PIPELINE)[number]) >= 1;
 
 /** 주문일로부터 기준일까지 흐른 시간에 따라 자연스러운 진행 상태를 고른다. */
 function decideStatus(orderDate: string, weddingDate: string): string {
@@ -203,13 +209,17 @@ function decideStatus(orderDate: string, weddingDate: string): string {
   // 대략 5~7일에 한 단계씩 진행
   const step = Math.min(Math.floor(elapsed / 6), PIPELINE.length - 1);
   const jitter = chance(0.25) ? -1 : 0;
-  return PIPELINE[Math.max(0, Math.min(step + jitter, PIPELINE.length - 1))];
+  const picked = PIPELINE[Math.max(0, Math.min(step + jitter, PIPELINE.length - 1))];
+  // 초안 단계 중 일부는 고객이 수정을 요청해 '수정요청' 으로 되돌아가 있다
+  if (picked === "초안등록" && chance(0.35)) return "수정요청";
+  return picked;
 }
 
 function decidePayment(status: string): string {
   if (status === "취소") return chance(0.6) ? "결제취소" : "결제완료";
   if (status === "주문완료") return chance(0.55) ? "결제대기" : "결제완료";
-  if (status === "초안등록") return chance(0.4) ? "결제대기" : "결제완료";
+  if (status === "초안등록" || status === "수정요청")
+    return chance(0.4) ? "결제대기" : "결제완료";
   if (status === "고객확정완료") return chance(0.3) ? "결제대기" : "결제완료";
   return chance(0.06) ? "결제대기" : "결제완료";
 }
@@ -340,10 +350,7 @@ async function main() {
       attachments: o.attachments ?? [],
       // 초안 등록 이후 단계인 원본 주문에는 초안 이미지 예시를 하나 붙인다.
       // (기준일 2026-08-24 주문 13~16 이 여기 해당 → 첫 화면에서 바로 미리보기가 보인다)
-      drafts:
-        PIPELINE.indexOf(o.orderStatus as (typeof PIPELINE)[number]) >= 1
-          ? ["초안_시안.jpg"]
-          : [],
+      drafts: hasDraftStage(o.orderStatus) ? ["초안_시안.jpg"] : [],
     }));
 
     // 원본 26건은 ORD-2026-000001~26 을 쓰므로 그 뒤부터 이어서 채번
@@ -403,14 +410,13 @@ async function main() {
         orderStatus === "취소" ? pick(CANCEL_MEMOS) : chance(0.28) ? pick(MEMOS) : null;
 
       // 진행 단계가 올라갈수록 파일이 붙어 있을 확률이 높다
-      const stageIdx = PIPELINE.indexOf(orderStatus as (typeof PIPELINE)[number]);
       const attachments: string[] = [];
       if (chance(0.32)) {
         const n = randInt(1, 3);
         for (let k = 0; k < n; k++) attachments.push(pick(ATTACHMENT_NAMES));
       }
       const drafts: string[] = [];
-      if (stageIdx >= 1 && chance(0.55)) {
+      if (hasDraftStage(orderStatus) && chance(0.55)) {
         const n = randInt(1, 3);
         for (let k = 0; k < n; k++) drafts.push(pick(DRAFT_NAMES));
       }
@@ -704,7 +710,9 @@ async function main() {
                OR
                (o.order_status <> '취소'
                 AND os.sort_order <= (SELECT sort_order FROM order_statuses WHERE code = o.order_status)
-                AND os.code <> '취소')
+                AND os.code <> '취소'
+                -- 수정요청은 선택 단계 → 현재 상태가 수정요청인 주문만 이력에 포함
+                AND (os.code <> '수정요청' OR o.order_status = '수정요청'))
              )
       )
       INSERT INTO order_status_history (order_id, from_status, to_status, note, changed_by, changed_at)

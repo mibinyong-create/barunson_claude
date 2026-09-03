@@ -19,6 +19,7 @@ export const orderInputSchema = z.object({
   orderStatus: z.enum([
     "주문완료",
     "초안등록",
+    "수정요청",
     "고객확정완료",
     "외주발주",
     "인쇄팀전달",
@@ -38,6 +39,7 @@ export const orderStatusSchema = z.object({
   orderStatus: z.enum([
     "주문완료",
     "초안등록",
+    "수정요청",
     "고객확정완료",
     "외주발주",
     "인쇄팀전달",

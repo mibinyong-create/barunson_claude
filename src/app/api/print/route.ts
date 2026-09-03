@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const isDate = (v: string | null): v is string => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
 
 /** 인쇄작업 큐의 기본 대상 상태 (초안·인쇄 준비 단계) */
-const DEFAULT_STATUSES = ["주문완료", "초안등록", "고객확정완료", "외주발주", "인쇄팀전달"];
+const DEFAULT_STATUSES = ["주문완료", "초안등록", "수정요청", "고객확정완료", "외주발주", "인쇄팀전달"];
 const ALLOWED_STATUSES = new Set([...DEFAULT_STATUSES, "인쇄완료", "취소"]);
 const ALLOWED_METHODS = new Set(["내부디지털", "5층인쇄", "외부생산"]);
 

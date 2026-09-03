@@ -4,17 +4,18 @@
 --  PRODUCT_CODE_SLUGS, 택배사 select)를 그대로 옮긴 것입니다.
 -- =============================================================================
 
--- 진행 상태 9종 ---------------------------------------------------------------
+-- 진행 상태 10종 --------------------------------------------------------------
 INSERT INTO order_statuses (code, sort_order, is_active_stage, is_quick_tile, css_class, ink_color, bg_color) VALUES
   ('주문완료',     1, true,  true,  'st-received',  '#3E5D78', '#E6EDF3'),
   ('초안등록',     2, true,  true,  'st-draft',     '#5B6472', '#E9ECEF'),
-  ('고객확정완료', 3, true,  true,  'st-ready',     '#5B4C96', '#EAE5F5'),
-  ('외주발주',     4, true,  false, 'st-outsource', '#B4551E', '#F7E3CE'),
-  ('인쇄팀전달',   5, true,  true,  'st-production','#93691F', '#F4EAD3'),
-  ('인쇄완료',     6, true,  false, 'st-printed',   '#9C4B6B', '#F6E3EC'),
-  ('배송중',       7, true,  false, 'st-shipping',  '#256F5D', '#DFEEE9'),
-  ('배송완료',     8, false, false, 'st-done',      '#3B7A45', '#E1F0E3'),
-  ('취소',         9, false, false, 'st-cancelled', '#8C4A4A', '#F3E3E3');
+  ('수정요청',     3, true,  true,  'st-revision',  '#B23B5E', '#F7E0E8'),
+  ('고객확정완료', 4, true,  true,  'st-ready',     '#5B4C96', '#EAE5F5'),
+  ('외주발주',     5, true,  false, 'st-outsource', '#B4551E', '#F7E3CE'),
+  ('인쇄팀전달',   6, true,  true,  'st-production','#93691F', '#F4EAD3'),
+  ('인쇄완료',     7, true,  false, 'st-printed',   '#9C4B6B', '#F6E3EC'),
+  ('배송중',       8, true,  false, 'st-shipping',  '#256F5D', '#DFEEE9'),
+  ('배송완료',     9, false, false, 'st-done',      '#3B7A45', '#E1F0E3'),
+  ('취소',        10, false, false, 'st-cancelled', '#8C4A4A', '#F3E3E3');
 
 -- 결제 상태 3종 ---------------------------------------------------------------
 INSERT INTO payment_statuses (code, sort_order, css_class, ink_color, bg_color) VALUES

@@ -26,7 +26,7 @@ $$ LANGUAGE plpgsql;
 -- 1. 코드 테이블 (화면의 칩 / 셀렉트 박스 원본)
 -- =============================================================================
 
--- 진행 상태 9종. 색상 토큰까지 DB 에서 관리해 프론트 칩 색을 그대로 재현합니다.
+-- 진행 상태 10종. 색상 토큰까지 DB 에서 관리해 프론트 칩 색을 그대로 재현합니다.
 CREATE TABLE order_statuses (
   code            text    PRIMARY KEY,
   sort_order      smallint NOT NULL,
