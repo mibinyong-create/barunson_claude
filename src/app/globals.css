@@ -394,6 +394,12 @@
   tbody tr.row-done .product-text .name,
   tbody tr.row-done .order-link{color:var(--ink-muted);}
   tbody tr.row-done .pill{opacity:.72;}
+  /* 취소건 — 분홍으로 눈에 띄게 (완료 회색과 구분) */
+  tbody tr.row-cancelled{background:var(--st-cancelled-bg);}
+  tbody tr.row-cancelled td{color:var(--st-cancelled-ink);}
+  tbody tr.row-cancelled:hover{background:#F9DADA;}
+  tbody tr.row-cancelled .product-text .name,
+  tbody tr.row-cancelled .order-link{color:var(--st-cancelled-ink);}
   tbody .checkbox-col, tbody .row-actions{cursor:default;}
   td.mono, .mono{font-family:var(--font-sans);font-variant-numeric:tabular-nums;}
   /* 헤더 정렬을 셀 정렬과 맞춘다: 숫자 컬럼은 우측, 텍스트(목록형) 컬럼은 좌측 */

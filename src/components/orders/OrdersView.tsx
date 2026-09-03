@@ -518,7 +518,13 @@ export function OrdersView() {
                       return (
                         <tr
                           key={o.id}
-                          className={checked ? "is-selected" : undefined}
+                          className={
+                            checked
+                              ? "is-selected"
+                              : o.orderStatus === "취소"
+                                ? "row-cancelled"
+                                : undefined
+                          }
                           tabIndex={0}
                           aria-label={`${o.orderNo} 상세 열기`}
                           onClick={() => handleRowClick(o)}

@@ -236,10 +236,15 @@ export default function ShippingPage() {
               ) : (
                 items.map((o) => {
                   const url = trackingUrl(o.trackingUrlTemplate, o.trackingNumber);
-                  // 출고 처리가 끝난 건(배송중·배송완료) → 회색 완료 행
-                  const done = o.dispatchedDate != null;
+                  // 취소건 → 분홍 / 출고 처리가 끝난 건(배송중·배송완료) → 회색 완료 행
+                  const rowClass =
+                    o.orderStatus === "취소"
+                      ? "row-cancelled"
+                      : o.dispatchedDate != null
+                        ? "row-done"
+                        : undefined;
                   return (
-                    <tr key={o.id} className={done ? "row-done" : undefined}>
+                    <tr key={o.id} className={rowClass}>
                       <td className="mono">{o.orderNoShort}</td>
                       <td>{o.customerName}</td>
                       <td className="mono">{o.customerPhone || "-"}</td>
