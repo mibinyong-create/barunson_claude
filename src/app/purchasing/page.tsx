@@ -212,8 +212,7 @@ export default function PurchasingPage() {
                 <th className="num">주문수량</th>
                 <th>외주 업체</th>
                 <th>발주일</th>
-                <th>입고 예정</th>
-                <th>입고 완료</th>
+                <th>업체 출고일</th>
                 <th>입고 택배사</th>
                 <th>운송장번호</th>
                 <th className="num">발주 금액</th>
@@ -225,13 +224,13 @@ export default function PurchasingPage() {
             <tbody>
               {loading && items.length === 0 ? (
                 <tr>
-                  <td colSpan={14}>
+                  <td colSpan={13}>
                     <div className="empty">불러오는 중…</div>
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={14}>
+                  <td colSpan={13}>
                     <div className="empty">
                       <div className="big">해당하는 발주건이 없어요</div>
                     </div>
@@ -278,8 +277,7 @@ export default function PurchasingPage() {
                         )}
                       </td>
                       <td className="mono">{fmtDate(po?.orderedDate ?? null)}</td>
-                      <td className="mono">{fmtDate(po?.expectedDate ?? null)}</td>
-                      <td className="mono">{fmtDate(po?.receivedDate ?? null)}</td>
+                      <td className="mono">{fmtDate(po?.vendorShippedDate ?? null)}</td>
                       <td>{po?.courierName || <span className="req-empty">-</span>}</td>
                       <td className="mono">
                         {inUrl ? (

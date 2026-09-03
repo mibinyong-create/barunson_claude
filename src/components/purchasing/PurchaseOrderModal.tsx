@@ -40,8 +40,7 @@ export function PurchaseOrderModal({
   const [vendorName, setVendorName] = useState(po?.vendorName ?? "");
   const [poNumber, setPoNumber] = useState(po?.poNumber ?? "");
   const [orderedDate, setOrderedDate] = useState(po?.orderedDate ?? TODAY);
-  const [expectedDate, setExpectedDate] = useState(po?.expectedDate ?? "");
-  const [receivedDate, setReceivedDate] = useState(po?.receivedDate ?? "");
+  const [vendorShippedDate, setVendorShippedDate] = useState(po?.vendorShippedDate ?? "");
   const [unitCost, setUnitCost] = useState(
     String(po?.unitCost ?? row?.productPurchasePrice ?? ""),
   );
@@ -80,8 +79,7 @@ export function PurchaseOrderModal({
         vendorName: vendorName.trim(),
         poNumber: blank(poNumber),
         orderedDate,
-        expectedDate: blank(expectedDate),
-        receivedDate: blank(receivedDate),
+        vendorShippedDate: blank(vendorShippedDate),
         unitCost: unitCost.trim() === "" ? null : Number(unitCost),
         quantity: quantity.trim() === "" ? null : Number(quantity),
         status,
@@ -232,12 +230,12 @@ export function PurchaseOrderModal({
           />
         </div>
         <div className="field">
-          <label htmlFor="po-expected">입고 예정일</label>
+          <label htmlFor="po-shipped">업체 출고일</label>
           <input
-            id="po-expected"
+            id="po-shipped"
             type="date"
-            value={expectedDate}
-            onChange={(e) => setExpectedDate(e.target.value)}
+            value={vendorShippedDate}
+            onChange={(e) => setVendorShippedDate(e.target.value)}
           />
         </div>
         <div className="field">
@@ -256,15 +254,6 @@ export function PurchaseOrderModal({
             inputMode="numeric"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="po-received">입고 완료일</label>
-          <input
-            id="po-received"
-            type="date"
-            value={receivedDate}
-            onChange={(e) => setReceivedDate(e.target.value)}
           />
         </div>
         <div className="field">

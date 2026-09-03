@@ -16,8 +16,7 @@ function mapPurchaseOrder(r: Row): PurchaseOrder {
     vendorName: r.vendor_name as string,
     poNumber: (r.po_number as string) ?? null,
     orderedDate: r.ordered_date as string,
-    expectedDate: (r.expected_date as string) ?? null,
-    receivedDate: (r.received_date as string) ?? null,
+    vendorShippedDate: (r.vendor_shipped_date as string) ?? null,
     unitCost: (r.unit_cost as number) ?? null,
     quantity: (r.po_quantity as number) ?? null,
     status: r.po_status as PurchaseOrderStatus,
@@ -72,8 +71,7 @@ const SELECT_COLS = `
   po.vendor_name,
   po.po_number,
   po.ordered_date,
-  po.expected_date,
-  po.received_date,
+  po.vendor_shipped_date,
   po.unit_cost,
   po.quantity              AS po_quantity,
   po.status                AS po_status,
@@ -184,7 +182,7 @@ export async function getPurchaseOrder(orderId: number): Promise<PurchaseOrder |
   const row = await queryOne<Row>(
     `SELECT
        po.id AS po_id, po.order_id, po.vendor_name, po.po_number, po.ordered_date,
-       po.expected_date, po.received_date, po.unit_cost, po.quantity AS po_quantity,
+       po.vendor_shipped_date, po.unit_cost, po.quantity AS po_quantity,
        po.status AS po_status, po.order_site, po.payment_method,
        po.inbound_courier_id, pcr.name AS inbound_courier_name,
        pcr.tracking_url_template AS inbound_tracking_url_template,
@@ -208,16 +206,15 @@ export async function upsertPurchaseOrder(
 
   await query(
     `INSERT INTO purchase_orders
-       (order_id, vendor_name, po_number, ordered_date, expected_date, received_date,
+       (order_id, vendor_name, po_number, ordered_date, vendor_shipped_date,
         unit_cost, quantity, status, order_site, payment_method, inbound_courier_id,
         tracking_number, note)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      ON CONFLICT (order_id) DO UPDATE SET
        vendor_name = EXCLUDED.vendor_name,
        po_number = EXCLUDED.po_number,
        ordered_date = EXCLUDED.ordered_date,
-       expected_date = EXCLUDED.expected_date,
-       received_date = EXCLUDED.received_date,
+       vendor_shipped_date = EXCLUDED.vendor_shipped_date,
        unit_cost = EXCLUDED.unit_cost,
        quantity = EXCLUDED.quantity,
        status = EXCLUDED.status,
@@ -231,8 +228,7 @@ export async function upsertPurchaseOrder(
       data.vendorName,
       data.poNumber ?? null,
       data.orderedDate,
-      data.expectedDate ?? null,
-      data.receivedDate ?? null,
+      data.vendorShippedDate ?? null,
       data.unitCost ?? null,
       data.quantity ?? null,
       data.status,

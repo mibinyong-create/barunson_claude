@@ -249,8 +249,7 @@ CREATE TABLE purchase_orders (
   vendor_name   text        NOT NULL,
   po_number     text,
   ordered_date  date        NOT NULL,          -- 발주일 (주문을 업체에 넘긴 날)
-  expected_date date,                          -- 입고 예정일
-  received_date date,                          -- 입고 완료일
+  vendor_shipped_date date,                    -- 업체 출고일 (업체가 완제품을 발송한 날)
   unit_cost     integer     CHECK (unit_cost IS NULL OR unit_cost >= 0),
   quantity      integer     CHECK (quantity IS NULL OR quantity >= 0),
   status        text        NOT NULL DEFAULT '발주'

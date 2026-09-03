@@ -601,8 +601,7 @@ async function main() {
       vendor: string;
       poNo: string;
       ordered: string;
-      expected: string | null;
-      received: string | null;
+      shipped: string | null;
       unitCost: number;
       qty: number;
       status: string;
@@ -634,18 +633,16 @@ async function main() {
       if (!status) return;
 
       const ordered = addDays(o.orderDate, randInt(1, 4));
-      const expected = addDays(ordered, randInt(7, 18));
-      const received = status === "입고완료" ? addDays(ordered, randInt(8, 16)) : null;
       const vendor = pickVendor(slug);
-      // 입고 운송장: 입고완료면 항상, 제작중이면 절반 정도(선적 완료)
+      // 업체 출고 = 입고 운송장 발급: 입고완료면 항상, 제작중이면 절반 정도(선적 완료)
       const hasInbound = status === "입고완료" || (status === "제작중" && chance(0.5));
+      const shipped = hasInbound ? addDays(ordered, randInt(6, 14)) : null;
       poSeeds.push({
         orderId: orderIds[idx],
         vendor,
         poNo: `PO-${o.orderDate.slice(0, 4)}-${String(poCounter++).padStart(4, "0")}`,
         ordered,
-        expected,
-        received,
+        shipped,
         unitCost: Math.round(o.unitPrice * (0.4 + rand() * 0.15)),
         qty: o.quantity + (chance(0.4) ? randInt(2, 8) : 0),
         status,
@@ -662,14 +659,14 @@ async function main() {
       const tuples = chunk.map((s) => {
         const p = (v: unknown) => `$${values.push(v)}`;
         return `(${p(s.orderId)},${p(s.vendor)},${p(s.poNo)},${p(s.ordered)},${p(
-          s.expected,
-        )},${p(s.received)},${p(s.unitCost)},${p(s.qty)},${p(s.status)},${p(
+          s.shipped,
+        )},${p(s.unitCost)},${p(s.qty)},${p(s.status)},${p(
           s.orderSite,
         )},${p(s.payMethod)},${p(s.inCourierId)},${p(s.inTracking)},${p(s.note)})`;
       });
       await client.query(
         `INSERT INTO purchase_orders
-           (order_id, vendor_name, po_number, ordered_date, expected_date, received_date,
+           (order_id, vendor_name, po_number, ordered_date, vendor_shipped_date,
             unit_cost, quantity, status, order_site, payment_method, inbound_courier_id,
             tracking_number, note)
          VALUES ${tuples.join(",")}`,

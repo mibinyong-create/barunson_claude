@@ -242,8 +242,8 @@ export type PurchaseOrder = {
   vendorName: string;
   poNumber: string | null;
   orderedDate: string;
-  expectedDate: string | null;
-  receivedDate: string | null;
+  /** 업체 출고일 (업체가 완제품을 발송한 날) */
+  vendorShippedDate: string | null;
   unitCost: number | null;
   quantity: number | null;
   status: PurchaseOrderStatus;
@@ -284,8 +284,7 @@ export type PurchaseOrderInput = {
   vendorName: string;
   poNumber?: string | null;
   orderedDate: string;
-  expectedDate?: string | null;
-  receivedDate?: string | null;
+  vendorShippedDate?: string | null;
   unitCost?: number | null;
   quantity?: number | null;
   status: PurchaseOrderStatus;
