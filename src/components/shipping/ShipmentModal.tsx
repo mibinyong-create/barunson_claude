@@ -36,11 +36,10 @@ export function ShipmentModal({ order, meta, busy, onClose, onAction }: Props) {
     );
   }
 
-  const isPickup = order.deliveryMethod === "방문수령";
   const status = order.orderStatus;
   const courier = meta.couriers.find((c) => c.name === courierName);
   const url = trackingUrl(courier?.trackingUrlTemplate ?? order.trackingUrlTemplate, trackingNumber);
-  const canDispatch = isPickup || (!!courierName && trackingNumber.trim().length > 0);
+  const canDispatch = !!courierName && trackingNumber.trim().length > 0;
 
   async function run(action: ShipAction) {
     const ok = await onAction(action);
@@ -71,7 +70,7 @@ export function ShipmentModal({ order, meta, busy, onClose, onAction }: Props) {
                 })
               }
             >
-              <TruckIcon size={14} /> {isPickup ? "수령 완료" : "출고 확정"}
+              <TruckIcon size={14} /> 출고 확정
             </button>
           ) : null}
           {status === "배송중" ? (
@@ -136,54 +135,43 @@ export function ShipmentModal({ order, meta, busy, onClose, onAction }: Props) {
         </div>
         <div className="info-full">
           <dt>배송지</dt>
-          <dd>{order.shippingAddress || order.customerAddress || "방문수령 (주소 없음)"}</dd>
+          <dd>{order.shippingAddress || order.customerAddress || "주소 미입력"}</dd>
         </div>
       </dl>
 
-      {!isPickup ? (
-        <>
-          <h3 className="section-title">택배 정보</h3>
-          <div className="form-grid">
-            <div className="field">
-              <label htmlFor="ship-courier">택배사</label>
-              <select
-                id="ship-courier"
-                value={courierName}
-                onChange={(e) => setCourierName(e.target.value)}
-              >
-                <option value="">선택</option>
-                {meta.couriers.map((c) => (
-                  <option key={c.id} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="ship-tracking">운송장번호</label>
-              <input
-                id="ship-tracking"
-                value={trackingNumber}
-                inputMode="numeric"
-                onChange={(e) => setTrackingNumber(e.target.value)}
-                placeholder="숫자만 입력"
-              />
-            </div>
-          </div>
-          {url ? (
-            <a
-              className="ship-track-link"
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              배송조회 열기 ↗
-            </a>
-          ) : null}
-        </>
-      ) : (
-        <p className="note-text">방문수령 건입니다. 고객이 수령하면 &lsquo;수령 완료&rsquo;로 처리하세요.</p>
-      )}
+      <h3 className="section-title">택배 정보</h3>
+      <div className="form-grid">
+        <div className="field">
+          <label htmlFor="ship-courier">택배사</label>
+          <select
+            id="ship-courier"
+            value={courierName}
+            onChange={(e) => setCourierName(e.target.value)}
+          >
+            <option value="">선택</option>
+            {meta.couriers.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="ship-tracking">운송장번호</label>
+          <input
+            id="ship-tracking"
+            value={trackingNumber}
+            inputMode="numeric"
+            onChange={(e) => setTrackingNumber(e.target.value)}
+            placeholder="숫자만 입력"
+          />
+        </div>
+      </div>
+      {url ? (
+        <a className="ship-track-link" href={url} target="_blank" rel="noopener noreferrer">
+          배송조회 열기 ↗
+        </a>
+      ) : null}
     </Modal>
   );
 }

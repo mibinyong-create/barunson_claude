@@ -13,7 +13,7 @@ export const orderInputSchema = z.object({
   unitPrice: z.coerce.number().int().min(0, "단가는 0 이상이어야 합니다."),
   orderDate: dateStr,
   weddingDate: dateStr,
-  deliveryMethod: z.enum(["택배배송", "방문수령"]),
+  deliveryMethod: z.enum(["택배배송"]),
   shippingAddress: z.string().trim().max(300).nullish(),
   paymentStatus: z.enum(["결제대기", "결제완료", "결제취소"]),
   orderStatus: z.enum([
@@ -53,7 +53,7 @@ export const courierSchema = z.object({
   trackingNumber: z.string().trim().max(60).nullish(),
   deliveredDate: dateStr.nullish(),
   dispatchedDate: dateStr.nullish(),
-  deliveryMethod: z.enum(["택배배송", "방문수령"]).nullish(),
+  deliveryMethod: z.enum(["택배배송"]).nullish(),
   shippingAddress: z.string().trim().max(300).nullish(),
 });
 

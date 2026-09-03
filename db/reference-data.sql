@@ -23,9 +23,9 @@ INSERT INTO payment_statuses (code, sort_order, css_class, ink_color, bg_color) 
   ('결제취소', 3, 'pay-cancelled', '#8C4A4A', '#F3E3E3');
 
 -- 수령 방법 -------------------------------------------------------------------
+-- 방문수령은 운영상 폐지 → 택배배송 단일.
 INSERT INTO delivery_methods (code, sort_order, requires_address) VALUES
-  ('택배배송', 1, true),
-  ('방문수령', 2, false);
+  ('택배배송', 1, true);
 
 -- 택배사 ----------------------------------------------------------------------
 INSERT INTO couriers (name, tracking_url_template, sort_order) VALUES

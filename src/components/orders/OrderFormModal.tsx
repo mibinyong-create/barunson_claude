@@ -271,7 +271,7 @@ export function OrderFormModal({
               id="f-address"
               value={values.shippingAddress}
               onChange={(e) => set("shippingAddress", e.target.value)}
-              placeholder="방문수령인 경우 비워두세요"
+              placeholder="도로명 주소를 입력하세요"
             />
           </div>
 

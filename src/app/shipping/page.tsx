@@ -121,16 +121,13 @@ export default function ShippingPage() {
         await api.updateCourier(active.id, {
           courierName: action.courierName,
           trackingNumber: action.trackingNumber,
-          deliveredDate: active.deliveryMethod === "방문수령" ? shipDate : active.deliveredDate,
+          deliveredDate: active.deliveredDate,
           dispatchedDate: shipDate,
           deliveryMethod: active.deliveryMethod,
           shippingAddress: active.shippingAddress,
         });
-        await api.updateStatus(
-          active.id,
-          active.deliveryMethod === "방문수령" ? "배송완료" : "배송중",
-        );
-        toast(active.deliveryMethod === "방문수령" ? "수령 완료로 처리했어요" : "출고 처리했어요");
+        await api.updateStatus(active.id, "배송중");
+        toast("출고 처리했어요");
       } else {
         await api.updateCourier(active.id, {
           courierName: action.courierName,
@@ -247,9 +244,7 @@ export default function ShippingPage() {
                       <td className="mono">{o.customerPhone || "-"}</td>
                       <td className="col-l">
                         <span className="clip-text" title={o.shippingAddress ?? ""}>
-                          {o.deliveryMethod === "방문수령"
-                            ? "방문수령"
-                            : o.shippingAddress || o.customerAddress || "-"}
+                          {o.shippingAddress || o.customerAddress || "-"}
                         </span>
                       </td>
                       <td>
@@ -267,13 +262,7 @@ export default function ShippingPage() {
                         </div>
                       </td>
                       <td className="num mono">{num(o.quantity)}</td>
-                      <td>
-                        {o.deliveryMethod === "방문수령" ? (
-                          <span className="req-empty">방문수령</span>
-                        ) : (
-                          o.courierName || <span className="req-empty">미지정</span>
-                        )}
-                      </td>
+                      <td>{o.courierName || <span className="req-empty">미지정</span>}</td>
                       <td className="mono">
                         {url ? (
                           <a href={url} target="_blank" rel="noopener noreferrer" className="order-link">
@@ -282,9 +271,7 @@ export default function ShippingPage() {
                         ) : o.trackingNumber ? (
                           o.trackingNumber
                         ) : (
-                          <span className="req-empty">
-                            {o.deliveryMethod === "방문수령" ? "—" : "출고 전"}
-                          </span>
+                          <span className="req-empty">출고 전</span>
                         )}
                       </td>
                       <td className="mono">
@@ -311,9 +298,7 @@ export default function ShippingPage() {
                           onClick={() => setActive(o)}
                         >
                           {o.orderStatus === "인쇄완료"
-                            ? o.deliveryMethod === "방문수령"
-                              ? "수령 처리"
-                              : "출고"
+                            ? "출고"
                             : o.orderStatus === "배송중"
                               ? "배송완료"
                               : "상세"}

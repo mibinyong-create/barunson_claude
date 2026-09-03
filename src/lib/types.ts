@@ -10,7 +10,8 @@ export type OrderStatus =
   | "취소";
 
 export type PaymentStatus = "결제대기" | "결제완료" | "결제취소";
-export type DeliveryMethod = "택배배송" | "방문수령";
+// 방문수령은 폐지 → 택배배송 단일.
+export type DeliveryMethod = "택배배송";
 export type OrderFileKind = "attachment" | "draft";
 
 export type OrderStatusMeta = {

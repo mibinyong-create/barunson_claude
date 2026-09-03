@@ -156,30 +156,30 @@ type SeedOrder = {
 };
 
 const ORIGINAL: SeedOrder[] = [
-  {orderNo:"ORD-2026-000001",customerName:"한지민",phone:"010-1111-2222",weddingDate:"2026-05-02",productName:"웨딩스탬프",option:"원형 3cm / 각인 이니셜",quantity:1,unitPrice:35000,orderDate:"2026-04-14",deliveryMethod:"방문수령",address:"",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:true,deliveredDate:"2026-04-16"},
+  {orderNo:"ORD-2026-000001",customerName:"한지민",phone:"010-1111-2222",weddingDate:"2026-05-02",productName:"웨딩스탬프",option:"원형 3cm / 각인 이니셜",quantity:1,unitPrice:35000,orderDate:"2026-04-14",deliveryMethod:"택배배송",address:"서울시 강남구 도곡로 34",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:true,courierCompany:"CJ대한통운",trackingNumber:"731205468190",deliveredDate:"2026-04-16"},
   {orderNo:"ORD-2026-000002",customerName:"오승훈",phone:"010-2323-4545",weddingDate:"2026-05-24",productName:"웨딩신문",option:"타블로이드 / 20부",quantity:20,unitPrice:12000,orderDate:"2026-05-06",deliveryMethod:"택배배송",address:"서울시 강남구 테헤란로 101",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:false,courierCompany:"CJ대한통운",trackingNumber:"654321098765",deliveredDate:"2026-05-12"},
   {orderNo:"ORD-2026-000003",customerName:"김나연",phone:"010-3434-5656",weddingDate:"2026-06-20",productName:"메시지카드",option:"금박 레터링 / 5x7",quantity:150,unitPrice:2100,orderDate:"2026-05-29",deliveryMethod:"택배배송",address:"대구시 수성구 동대구로 55",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:true,courierCompany:"롯데택배",trackingNumber:"402198765432",deliveredDate:"2026-06-03"},
   {orderNo:"ORD-2026-000004",customerName:"이준혁",phone:"010-4545-6767",weddingDate:"2026-07-11",productName:"엽서 세트",option:"6매입 / 시안 A",quantity:130,unitPrice:2000,orderDate:"2026-06-12",deliveryMethod:"택배배송",address:"대전시 서구 둔산로 20",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:false,courierCompany:"한진택배",trackingNumber:"588213467890",deliveredDate:"2026-06-17"},
-  {orderNo:"ORD-2026-000005",customerName:"박지영",phone:"010-5656-7878",weddingDate:"2026-08-15",productName:"커스텀 스티커",option:"원형 4cm / 30매 시트",quantity:200,unitPrice:1500,orderDate:"2026-06-30",deliveryMethod:"방문수령",address:"",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:true,deliveredDate:"2026-07-03"},
+  {orderNo:"ORD-2026-000005",customerName:"박지영",phone:"010-5656-7878",weddingDate:"2026-08-15",productName:"커스텀 스티커",option:"원형 4cm / 30매 시트",quantity:200,unitPrice:1500,orderDate:"2026-06-30",deliveryMethod:"택배배송",address:"부산시 해운대구 마린시티2로 38",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:true,courierCompany:"롯데택배",trackingNumber:"905318274610",deliveredDate:"2026-07-03"},
   {orderNo:"ORD-2026-000006",customerName:"서준혁",phone:"010-6262-3535",weddingDate:"2026-07-30",productName:"테이블 캘린더",option:"탁상형 / 커플 사진 인쇄",quantity:110,unitPrice:2900,orderDate:"2026-07-01",deliveryMethod:"택배배송",address:"광주시 서구 상무대로 21",paymentStatus:"결제완료",orderStatus:"취소",withInvitation:false,memo:"고객 요청으로 주문 취소"},
-  {orderNo:"ORD-2026-000007",customerName:"윤지호",phone:"010-7777-9090",weddingDate:"2026-08-24",productName:"아크릴 마그넷",option:"하트형 / 시안 C",quantity:100,unitPrice:2400,orderDate:"2026-07-28",deliveryMethod:"방문수령",address:"",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:false,deliveredDate:"2026-08-01"},
+  {orderNo:"ORD-2026-000007",customerName:"윤지호",phone:"010-7777-9090",weddingDate:"2026-08-24",productName:"아크릴 마그넷",option:"하트형 / 시안 C",quantity:100,unitPrice:2400,orderDate:"2026-07-28",deliveryMethod:"택배배송",address:"인천시 남동구 예술로 152",paymentStatus:"결제완료",orderStatus:"배송완료",withInvitation:false,courierCompany:"한진택배",trackingNumber:"612480935217",deliveredDate:"2026-08-01"},
   {orderNo:"ORD-2026-000008",customerName:"임현우",phone:"010-3131-8282",weddingDate:"2026-08-27",productName:"아크릴 폰그립",option:"미니 캐릭터 시안 / 골드 링",quantity:90,unitPrice:5200,orderDate:"2026-08-01",deliveryMethod:"택배배송",address:"대전시 유성구 대학로 55",paymentStatus:"결제완료",orderStatus:"인쇄완료",withInvitation:true},
-  {orderNo:"ORD-2026-000009",customerName:"박서준",phone:"010-2222-3333",weddingDate:"2026-08-29",productName:"즉석 포토프린팅",option:"2x6 필름 / 프레임 포함",quantity:120,unitPrice:1900,orderDate:"2026-08-05",deliveryMethod:"방문수령",address:"",paymentStatus:"결제완료",orderStatus:"배송중",withInvitation:false},
+  {orderNo:"ORD-2026-000009",customerName:"박서준",phone:"010-2222-3333",weddingDate:"2026-08-29",productName:"즉석 포토프린팅",option:"2x6 필름 / 프레임 포함",quantity:120,unitPrice:1900,orderDate:"2026-08-05",deliveryMethod:"택배배송",address:"서울시 성동구 왕십리로 115",paymentStatus:"결제완료",orderStatus:"배송중",withInvitation:false,courierCompany:"CJ대한통운",trackingNumber:"448120763095",deliveredDate:"2026-08-19"},
   {orderNo:"ORD-2026-000010",customerName:"김도윤",phone:"010-1234-5678",weddingDate:"2026-09-12",productName:"아크릴 키링",option:"원형 5cm / 시안 A",quantity:120,unitPrice:2800,orderDate:"2026-08-10",deliveryMethod:"택배배송",address:"서울시 마포구 양화로 12",paymentStatus:"결제완료",orderStatus:"인쇄팀전달",withInvitation:true,memo:"9/5까지 제작 완료 요청",attachments:["시안_최종확인.jpg","각인문구.txt"]},
   {orderNo:"ORD-2026-000011",customerName:"정우진",phone:"010-4444-1212",weddingDate:"2026-10-03",productName:"퍼즐액자",option:"200pcs / 6x8 프레임",quantity:150,unitPrice:6200,orderDate:"2026-08-18",deliveryMethod:"택배배송",address:"인천시 연수구 송도과학로 32",paymentStatus:"결제대기",orderStatus:"고객확정완료",withInvitation:false},
   {orderNo:"ORD-2026-000012",customerName:"강민재",phone:"010-5555-6161",weddingDate:"2026-09-20",productName:"커스텀 스티커",option:"하트형 / 20매 시트",quantity:200,unitPrice:1600,orderDate:"2026-08-22",deliveryMethod:"택배배송",address:"부산시 해운대구 센텀로 8",paymentStatus:"결제대기",orderStatus:"고객확정완료",withInvitation:true},
-  {orderNo:"ORD-2026-000013",customerName:"조성민",phone:"010-9090-1414",weddingDate:"2026-11-08",productName:"메시지카드",option:"금박 레터링 / 5x7",quantity:130,unitPrice:2100,orderDate:"2026-08-24",deliveryMethod:"방문수령",address:"",paymentStatus:"결제대기",orderStatus:"고객확정완료",withInvitation:false},
+  {orderNo:"ORD-2026-000013",customerName:"조성민",phone:"010-9090-1414",weddingDate:"2026-11-08",productName:"메시지카드",option:"금박 레터링 / 5x7",quantity:130,unitPrice:2100,orderDate:"2026-08-24",deliveryMethod:"택배배송",address:"대전시 서구 대덕대로 210",paymentStatus:"결제대기",orderStatus:"고객확정완료",withInvitation:false},
   {orderNo:"ORD-2026-000014",customerName:"한다인",phone:"010-1010-2020",weddingDate:"2026-09-05",productName:"아크릴 키링",option:"원형 5cm / 시안 D",quantity:100,unitPrice:2800,orderDate:"2026-08-24",deliveryMethod:"택배배송",address:"서울시 송파구 올림픽로 45",paymentStatus:"결제완료",orderStatus:"고객확정완료",withInvitation:true},
-  {orderNo:"ORD-2026-000015",customerName:"오지훈",phone:"010-2020-3030",weddingDate:"2026-09-01",productName:"웨딩스탬프",option:"사각 4cm / 각인 성함",quantity:1,unitPrice:36000,orderDate:"2026-08-24",deliveryMethod:"방문수령",address:"",paymentStatus:"결제대기",orderStatus:"고객확정완료",withInvitation:false},
+  {orderNo:"ORD-2026-000015",customerName:"오지훈",phone:"010-2020-3030",weddingDate:"2026-09-01",productName:"웨딩스탬프",option:"사각 4cm / 각인 성함",quantity:1,unitPrice:36000,orderDate:"2026-08-24",deliveryMethod:"택배배송",address:"광주시 남구 봉선로 88",paymentStatus:"결제대기",orderStatus:"고객확정완료",withInvitation:false},
   {orderNo:"ORD-2026-000016",customerName:"배소연",phone:"010-3030-4040",weddingDate:"2026-09-18",productName:"커스텀 스티커",option:"사각 5cm / 20매 시트",quantity:150,unitPrice:1500,orderDate:"2026-08-24",deliveryMethod:"택배배송",address:"수원시 영통구 광교로 12",paymentStatus:"결제완료",orderStatus:"외주발주",withInvitation:true,attachments:["스티커시안_v2.ai"]},
   {orderNo:"ORD-2026-000017",customerName:"최윤서",phone:"010-4040-5050",weddingDate:"2026-10-02",productName:"아크릴 마그넷",option:"원형 6cm / 시안 E",quantity:120,unitPrice:2400,orderDate:"2026-08-25",deliveryMethod:"택배배송",address:"창원시 성산구 창이대로 88",paymentStatus:"결제대기",orderStatus:"초안등록",withInvitation:false},
-  {orderNo:"ORD-2026-000018",customerName:"장하늘",phone:"010-5050-6060",weddingDate:"2026-09-27",productName:"메시지카드",option:"은박 레터링 / 4x6",quantity:140,unitPrice:2100,orderDate:"2026-08-25",deliveryMethod:"방문수령",address:"",paymentStatus:"결제완료",orderStatus:"초안등록",withInvitation:true},
+  {orderNo:"ORD-2026-000018",customerName:"장하늘",phone:"010-5050-6060",weddingDate:"2026-09-27",productName:"메시지카드",option:"은박 레터링 / 4x6",quantity:140,unitPrice:2100,orderDate:"2026-08-25",deliveryMethod:"택배배송",address:"수원시 팔달구 권광로 264",paymentStatus:"결제완료",orderStatus:"초안등록",withInvitation:true},
   {orderNo:"ORD-2026-000019",customerName:"심유진",phone:"010-6060-7070",weddingDate:"2026-10-10",productName:"아크릴 키링",option:"하트형 4cm / 시안 F",quantity:110,unitPrice:2800,orderDate:"2026-08-26",deliveryMethod:"택배배송",address:"전주시 완산구 홍산로 5",paymentStatus:"결제대기",orderStatus:"초안등록",withInvitation:false},
   {orderNo:"ORD-2026-000020",customerName:"노태양",phone:"010-7070-8080",weddingDate:"2026-09-14",productName:"웨딩신문",option:"타블로이드 / 25부",quantity:25,unitPrice:12000,orderDate:"2026-08-26",deliveryMethod:"택배배송",address:"청주시 흥덕구 사직대로 20",paymentStatus:"결제완료",orderStatus:"초안등록",withInvitation:false},
-  {orderNo:"ORD-2026-000021",customerName:"구민서",phone:"010-8080-9090",weddingDate:"2026-09-30",productName:"즉석 포토프린팅",option:"2x6 필름 / 프레임 없음",quantity:100,unitPrice:1900,orderDate:"2026-08-27",deliveryMethod:"방문수령",address:"",paymentStatus:"결제대기",orderStatus:"초안등록",withInvitation:true},
+  {orderNo:"ORD-2026-000021",customerName:"구민서",phone:"010-8080-9090",weddingDate:"2026-09-30",productName:"즉석 포토프린팅",option:"2x6 필름 / 프레임 없음",quantity:100,unitPrice:1900,orderDate:"2026-08-27",deliveryMethod:"택배배송",address:"용인시 기흥구 동백중앙로 191",paymentStatus:"결제대기",orderStatus:"초안등록",withInvitation:true},
   {orderNo:"ORD-2026-000022",customerName:"홍서준",phone:"010-9090-0101",weddingDate:"2026-10-15",productName:"퍼즐액자",option:"300pcs / 8x10 프레임",quantity:130,unitPrice:6200,orderDate:"2026-08-27",deliveryMethod:"택배배송",address:"천안시 서북구 불당대로 30",paymentStatus:"결제취소",orderStatus:"주문완료",withInvitation:false,memo:"고객 카드 결제 취소로 재결제 안내 필요"},
   {orderNo:"ORD-2026-000023",customerName:"권나윤",phone:"010-0101-1212",weddingDate:"2026-09-22",productName:"엽서 세트",option:"8매입 / 시안 B",quantity:100,unitPrice:2000,orderDate:"2026-08-28",deliveryMethod:"택배배송",address:"울산시 남구 삼산로 15",paymentStatus:"결제대기",orderStatus:"주문완료",withInvitation:true},
-  {orderNo:"ORD-2026-000024",customerName:"안도현",phone:"010-1212-2323",weddingDate:"2026-10-20",productName:"테이블 캘린더",option:"탁상형 / 웨딩 사진 인쇄",quantity:90,unitPrice:2900,orderDate:"2026-08-29",deliveryMethod:"방문수령",address:"",paymentStatus:"결제완료",orderStatus:"주문완료",withInvitation:false},
+  {orderNo:"ORD-2026-000024",customerName:"안도현",phone:"010-1212-2323",weddingDate:"2026-10-20",productName:"테이블 캘린더",option:"탁상형 / 웨딩 사진 인쇄",quantity:90,unitPrice:2900,orderDate:"2026-08-29",deliveryMethod:"택배배송",address:"성남시 수정구 산성대로 553",paymentStatus:"결제완료",orderStatus:"주문완료",withInvitation:false},
   {orderNo:"ORD-2026-000025",customerName:"문서영",phone:"010-2323-3434",weddingDate:"2026-11-01",productName:"아크릴 키링",option:"원형 5cm / 시안 G",quantity:130,unitPrice:2800,orderDate:"2026-08-30",deliveryMethod:"택배배송",address:"성남시 분당구 판교로 22",paymentStatus:"결제대기",orderStatus:"주문완료",withInvitation:true},
   {orderNo:"ORD-2026-000026",customerName:"윤하람",phone:"010-3434-4545",weddingDate:"2026-09-25",productName:"아크릴 폰그립",option:"미니 캐릭터 시안 / 실버 링",quantity:95,unitPrice:5200,orderDate:"2026-08-30",deliveryMethod:"택배배송",address:"광주시 북구 무등로 60",paymentStatus:"결제완료",orderStatus:"주문완료",withInvitation:false},
 ];
@@ -310,24 +310,32 @@ async function main() {
       unitPrice: o.unitPrice,
       orderDate: o.orderDate,
       weddingDate: o.weddingDate,
-      deliveryMethod: o.deliveryMethod,
-      address: o.address || null,
+      // 방문수령은 폐지 → 전 주문 택배배송. 원본에 배송지가 없으면 임의 주소를 채운다.
+      deliveryMethod: "택배배송",
+      address: o.address && o.address.trim() !== "" ? o.address : makeAddress(),
       paymentStatus: o.paymentStatus,
       orderStatus: o.orderStatus,
       withInvitation: o.withInvitation,
-      // 원본에 택배사가 없어도 인쇄완료 이후 택배배송 건은 배정 택배사를 채운다.
+      // 원본에 택배사가 없어도 인쇄완료 이후 건은 배정 택배사를 채운다.
       courierName:
         o.courierCompany ??
-        (o.deliveryMethod === "택배배송" &&
-        ["인쇄완료", "배송중", "배송완료"].includes(o.orderStatus)
+        (["인쇄완료", "배송중", "배송완료"].includes(o.orderStatus)
           ? pick(couriers).name
           : null),
       trackingNumber:
         o.trackingNumber ??
-        (["배송중", "배송완료"].includes(o.orderStatus) && o.deliveryMethod === "택배배송"
+        (["배송중", "배송완료"].includes(o.orderStatus)
           ? String(randInt(100000000000, 999999999999))
           : null),
-      deliveredDate: o.deliveredDate ?? null,
+      // 배송완료일: 원본 값이 있으면 그대로, 없으면 배송중/배송완료 건에 가라 날짜를 채운다.
+      deliveredDate:
+        o.deliveredDate ??
+        (["배송중", "배송완료"].includes(o.orderStatus)
+          ? (() => {
+              const base = addDays(o.orderDate, randInt(9, 20));
+              return base > TODAY && o.orderStatus === "배송완료" ? TODAY : base;
+            })()
+          : null),
       memo: o.memo ?? null,
       attachments: o.attachments ?? [],
       // 초안 등록 이후 단계인 원본 주문에는 초안 이미지 예시를 하나 붙인다.
@@ -370,24 +378,25 @@ async function main() {
 
       const orderStatus = decideStatus(orderDate, weddingDate);
       const paymentStatus = decidePayment(orderStatus);
-      const deliveryMethod = chance(0.68) ? "택배배송" : "방문수령";
-      const address = deliveryMethod === "택배배송" ? makeAddress() : null;
+      const deliveryMethod = "택배배송";
+      const address = makeAddress();
 
       const shipped = orderStatus === "배송중" || orderStatus === "배송완료";
       // 인쇄완료(출고 대기)부터 배정 택배사가 잡힌다. 운송장은 실제 출고 시점(배송중~)에 발급.
-      const courierName =
-        deliveryMethod === "택배배송" &&
-        ["인쇄완료", "배송중", "배송완료"].includes(orderStatus)
-          ? pick(couriers).name
-          : null;
+      const courierName = ["인쇄완료", "배송중", "배송완료"].includes(orderStatus)
+        ? pick(couriers).name
+        : null;
       const trackingNumber =
         shipped && courierName ? String(randInt(100000000000, 999999999999)) : null;
 
+      // 배송완료일: 배송완료면 실제 완료일, 배송중이면 도착 예정(가라)일을 미리 채워 둔다.
       let deliveredDate: string | null = null;
       if (orderStatus === "배송완료") {
         const base = addDays(orderDate, randInt(5, 30));
         deliveredDate = base > TODAY ? TODAY : base;
         if (deliveredDate < orderDate) deliveredDate = orderDate;
+      } else if (orderStatus === "배송중") {
+        deliveredDate = addDays(orderDate, randInt(9, 20));
       }
 
       const memo =
