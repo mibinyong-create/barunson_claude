@@ -208,7 +208,7 @@ export default function PurchasingPage() {
               <tr>
                 <th>주문번호</th>
                 <th>주문자</th>
-                <th>상품</th>
+                <th className="col-l">상품</th>
                 <th className="num">주문수량</th>
                 <th>외주 업체</th>
                 <th>발주일</th>
@@ -217,7 +217,7 @@ export default function PurchasingPage() {
                 <th>운송장번호</th>
                 <th className="num">발주 금액</th>
                 <th>발주 상태</th>
-                <th>메모</th>
+                <th className="col-l">메모</th>
                 <th>작업</th>
               </tr>
             </thead>

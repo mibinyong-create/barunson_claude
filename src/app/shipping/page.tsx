@@ -208,8 +208,8 @@ export default function ShippingPage() {
                 <th>주문번호</th>
                 <th>주문자</th>
                 <th>연락처</th>
-                <th>배송지</th>
-                <th>상품</th>
+                <th className="col-l">배송지</th>
+                <th className="col-l">상품</th>
                 <th className="num">수량</th>
                 <th>택배사</th>
                 <th>운송장번호</th>

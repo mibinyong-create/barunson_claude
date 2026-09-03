@@ -278,12 +278,12 @@ export default function PrintPage() {
                 <th>구분</th>
                 <th>주문번호</th>
                 <th>품목코드</th>
-                <th>상품명</th>
+                <th className="col-l">상품명</th>
                 <th className="num">수량</th>
                 <th>인쇄구분</th>
                 <th>주문자</th>
                 <th>주문일</th>
-                <th>초안</th>
+                <th className="num">초안</th>
                 <th>상태</th>
                 <th>원본링크</th>
                 <th>작업</th>

@@ -99,7 +99,7 @@ export default function ProductsPage() {
                     }
                   />
                 </th>
-                <th>상품</th>
+                <th className="col-l">상품</th>
                 <th>품목코드</th>
                 <th className="num">매입단가</th>
                 <th className="num">판매단가</th>

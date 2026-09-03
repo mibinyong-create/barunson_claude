@@ -67,7 +67,7 @@ export default function CustomersPage() {
                 <th>고객명</th>
                 <th>연락처</th>
                 <th>주소</th>
-                <th>주문품목</th>
+                <th className="col-l">주문품목</th>
                 <th className="num">주문 건수</th>
                 <th className="num">진행중</th>
                 <th className="num">누적 금액</th>

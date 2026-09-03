@@ -489,9 +489,9 @@ export function OrdersView() {
                     <th>주문번호</th>
                     <th>주문자명</th>
                     <th>연락처</th>
-                    <th>배송지</th>
+                    <th className="col-l">배송지</th>
                     <th>배송요청사항</th>
-                    <th>상품명</th>
+                    <th className="col-l">상품명</th>
                     <th>품목코드</th>
                     <th className="num">주문수량</th>
                     <th className="num">인쇄수량</th>
