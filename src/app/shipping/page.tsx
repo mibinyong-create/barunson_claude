@@ -237,8 +237,10 @@ export default function ShippingPage() {
               ) : (
                 items.map((o) => {
                   const url = trackingUrl(o.trackingUrlTemplate, o.trackingNumber);
+                  // 출고 처리가 끝난 건(배송중·배송완료) → 회색 완료 행
+                  const done = o.dispatchedDate != null;
                   return (
-                    <tr key={o.id}>
+                    <tr key={o.id} className={done ? "row-done" : undefined}>
                       <td className="mono">{o.orderNoShort}</td>
                       <td>{o.customerName}</td>
                       <td className="mono">{o.customerPhone || "-"}</td>

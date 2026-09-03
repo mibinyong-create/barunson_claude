@@ -365,6 +365,13 @@
   tbody tr{transition:background .1s;cursor:pointer;}
   tbody tr:hover{background:var(--surface-sunken);}
   tbody tr.is-selected{background:var(--selected-bg);}
+  /* 출고/입고가 끝난 건 — 회색으로 가라앉혀 '완료' 느낌을 준다 */
+  tbody tr.row-done{background:var(--surface-sunken);}
+  tbody tr.row-done td{color:var(--ink-faint);}
+  tbody tr.row-done:hover{background:var(--table-head-bg);}
+  tbody tr.row-done .product-text .name,
+  tbody tr.row-done .order-link{color:var(--ink-muted);}
+  tbody tr.row-done .pill{opacity:.72;}
   tbody .checkbox-col, tbody .row-actions{cursor:default;}
   td.mono, .mono{font-family:var(--font-sans);font-variant-numeric:tabular-nums;}
   td.num{text-align:right;}

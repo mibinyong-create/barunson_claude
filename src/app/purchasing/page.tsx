@@ -244,8 +244,10 @@ export default function PurchasingPage() {
                       ? po.unitCost * po.quantity
                       : null;
                   const inUrl = trackingUrl(po?.trackingUrlTemplate, po?.trackingNumber);
+                  // 업체 출고가 끝난 건 → 회색 완료 행
+                  const done = po?.vendorShippedDate != null;
                   return (
-                    <tr key={r.orderId}>
+                    <tr key={r.orderId} className={done ? "row-done" : undefined}>
                       <td className="mono">{r.orderNoShort}</td>
                       <td>{r.customerName}</td>
                       <td>
