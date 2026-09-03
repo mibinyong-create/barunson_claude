@@ -280,6 +280,7 @@ couriers ───────┘            ├─ products
 | `payment_statuses` | 결제 상태 3종 + 색상 | `.pill.pay-*` |
 | `delivery_methods` | 수령 방법 2종 | `select[name=deliveryMethod]` |
 | `couriers` | 택배사 5종 + 배송조회 URL 템플릿 | `select[name=courierCompany]` |
+| `vendors` | 외주 제작 업체 8종 (취급 품목·담당자·연락처·비고) | **신규** (원본에 없음) |
 | `customers` | 고객 (이름+연락처 유니크) | `customerName`, `phone`, `address` |
 | `products` | 상품 11종 + 슬러그 + 판매단가(`default_unit_price`)·매입단가(`purchase_price`) + SVG 아이콘 | `datalist#productList`, `PRODUCT_ICONS`, `PRODUCT_CODE_SLUGS` |
 | `orders` | 주문 본문 (`print_quantity` 인쇄수량, `dispatched_date` 출고일, `print_method` 인쇄구분, `source_links` 원본 파일 링크) | order 객체 |
@@ -434,7 +435,7 @@ curl -X PATCH http://localhost:3000/api/orders/1/status \
 
 - **집계 타일 / 탭** — 발주 미등록(`외주발주`인데 기록 없음) · 발주 진행(발주/제작중) · 입고완료 · 전체
 - **날짜 필터** — 주문관리와 동일
-- **발주 등록/수정 팝업** — 외주 업체명·발주서번호·발주일(주문 넘긴 날)·입고 예정/완료일·발주 단가·수량·상태(발주/제작중/입고완료/취소)·메모(전달 내용). 발주금액 = 단가 × 수량 자동 계산
+- **발주 등록/수정 팝업** — 외주 업체(`vendors` 마스터에서 선택 또는 직접 입력, 선택 시 담당자·연락처·비고 표시)·발주서번호·발주일(주문 넘긴 날)·입고 예정/완료일·발주 단가·수량·상태(발주/제작중/입고완료/취소)·메모. 발주금액 = 단가 × 수량 자동 계산
   - `입고완료` + 대상이 `외주발주` 상태면 체크박스로 주문 진행상태를 `인쇄팀전달`로 함께 이동
 - API: `GET /api/purchasing?stage=` · `PUT`/`DELETE /api/orders/:id/purchase-order`
 

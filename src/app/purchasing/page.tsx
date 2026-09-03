@@ -12,7 +12,7 @@ import { api } from "@/lib/client-api";
 import { TODAY } from "@/lib/constants";
 import { resolveDateRange, type DatePreset } from "@/lib/date-range";
 import { fmtDate, num, won } from "@/lib/format";
-import type { Paged, PurchaseOrderInput, PurchasingRow } from "@/lib/types";
+import type { Paged, PurchaseOrderInput, PurchasingRow, VendorMeta } from "@/lib/types";
 
 const STAGES = [
   { key: "미등록", label: "미등록" },
@@ -41,8 +41,18 @@ export default function PurchasingPage() {
   const [active, setActive] = useState<PurchasingRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [counts, setCounts] = useState<ListResp["counts"] | null>(null);
+  const [vendors, setVendors] = useState<VendorMeta[]>([]);
 
   const onError = useCallback((m: string) => toast(m, "error"), [toast]);
+
+  useEffect(() => {
+    const c = new AbortController();
+    api
+      .meta(c.signal)
+      .then((m) => setVendors(m.vendors))
+      .catch(() => {});
+    return () => c.abort();
+  }, []);
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   const pickStage = useCallback((s: string) => {
@@ -298,7 +308,9 @@ export default function PurchasingPage() {
       </div>
 
       <PurchaseOrderModal
+        key={active?.orderId ?? "none"}
         row={active}
+        vendors={vendors}
         busy={busy}
         onClose={() => setActive(null)}
         onSave={handleSave}

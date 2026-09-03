@@ -66,6 +66,19 @@ CREATE TABLE couriers (
 COMMENT ON TABLE couriers IS '택배사';
 COMMENT ON COLUMN couriers.tracking_url_template IS '{{no}} 자리에 운송장번호를 치환';
 
+-- 외주 제작 업체. 발주관리에서 발주처로 선택한다.
+CREATE TABLE vendors (
+  id         serial   PRIMARY KEY,
+  name       text     NOT NULL UNIQUE,
+  category   text,                          -- 취급 품목 (아크릴 / 인쇄 / 스탬프 등)
+  contact    text,                          -- 담당자
+  phone      text,
+  memo       text,
+  sort_order smallint NOT NULL DEFAULT 0,
+  is_active  boolean  NOT NULL DEFAULT true
+);
+COMMENT ON TABLE vendors IS '외주 제작 업체 (발주처)';
+
 
 -- =============================================================================
 -- 2. 마스터 테이블

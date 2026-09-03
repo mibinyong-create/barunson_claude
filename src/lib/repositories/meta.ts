@@ -4,7 +4,7 @@ import type { Meta } from "@/lib/types";
 
 /** 화면이 필요로 하는 코드 테이블 일체를 한 번에 내려준다. */
 export async function getMeta(): Promise<Meta> {
-  const [statuses, payments, deliveries, couriers, products] = await Promise.all([
+  const [statuses, payments, deliveries, couriers, vendors, products] = await Promise.all([
     query<{
       code: string;
       sort_order: number;
@@ -30,6 +30,15 @@ export async function getMeta(): Promise<Meta> {
       tracking_url_template: string | null;
       sort_order: number;
     }>(`SELECT * FROM couriers WHERE is_active ORDER BY sort_order`),
+    query<{
+      id: number;
+      name: string;
+      category: string | null;
+      contact: string | null;
+      phone: string | null;
+      memo: string | null;
+      sort_order: number;
+    }>(`SELECT * FROM vendors WHERE is_active ORDER BY sort_order, name`),
     query<{
       id: number;
       name: string;
@@ -70,6 +79,15 @@ export async function getMeta(): Promise<Meta> {
       name: c.name,
       trackingUrlTemplate: c.tracking_url_template,
       sortOrder: c.sort_order,
+    })),
+    vendors: vendors.map((v) => ({
+      id: v.id,
+      name: v.name,
+      category: v.category,
+      contact: v.contact,
+      phone: v.phone,
+      memo: v.memo,
+      sortOrder: v.sort_order,
     })),
     products: products.map((p) => ({
       id: p.id,

@@ -244,6 +244,9 @@ async function main() {
     const { rows: couriers } = await client.query<{ id: number; name: string }>(
       `SELECT id, name FROM couriers ORDER BY sort_order`,
     );
+    const { rows: vendors } = await client.query<{ name: string; category: string | null }>(
+      `SELECT name, category FROM vendors WHERE is_active ORDER BY sort_order`,
+    );
 
     // ── 1. 고객 ──────────────────────────────────────────────────────────────
     console.log("▸ 고객 생성…");
@@ -530,21 +533,32 @@ async function main() {
 
     // ── 3.5 외주 발주 기록 ───────────────────────────────────────────────────
     console.log("▸ 외주 발주 기록 생성…");
-    const VENDORS = [
-      "아크릴공방 오브제",
-      "프린트팩토리 서울",
-      "우드메이트 공방",
-      "스탬프공작소",
-      "굿즈랩 판교",
-      "레터프레스 하우스",
-    ];
+    // 상품 슬러그 → 주 발주처 (vendors 마스터의 name 과 일치)
+    const VENDOR_BY_SLUG: Record<string, string> = {
+      keyring: "오브제 아크릴",
+      phonegrip: "오브제 아크릴",
+      magnet: "오브제 아크릴",
+      puzzle: "우드메이트 공방",
+      calendar: "우드메이트 공방",
+      stamp: "스탬프공작소",
+      newspaper: "프린트팩토리 서울",
+      postcard: "프린트팩토리 서울",
+      card: "프린트팩토리 서울",
+      sticker: "굿즈랩 판교",
+      photo: "즉석프린팅 랩",
+    };
+    const vendorNames = vendors.map((v) => v.name);
+    const pickVendor = (slug: string) =>
+      chance(0.15) ? pick(vendorNames) : (VENDOR_BY_SLUG[slug] ?? pick(vendorNames));
     const PO_NOTES = [
       "시안 최종본 전달, 규격 재확인 요청",
       "펄 화이트 소재로 진행",
       "모서리 라운드 3R, 홀 위치 상단 중앙",
       "샘플 1개 선출고 요청",
-      "포장은 개별 OPP",
+      "포장은 개별 OPP, 완충재 필수",
       "납기 엄수 요청 (예식 임박)",
+      "색상 교정본 1회 확인 후 본생산",
+      "각인 문구 오탈자 재검수 요망",
     ];
     const AFTER_OUTSOURCE = ["인쇄팀전달", "인쇄완료", "배송중", "배송완료"];
     type PoSeed = {
@@ -562,18 +576,29 @@ async function main() {
     const poSeeds: PoSeed[] = [];
     let poCounter = 1;
     orderSeeds.forEach((o, idx) => {
-      // 외주발주 중 일부는 아직 발주 미등록 상태로 남겨 둔다.
-      const isOutsourceNow = o.orderStatus === "외주발주" && chance(0.6);
-      const wentThrough = AFTER_OUTSOURCE.includes(o.orderStatus) && chance(0.24);
-      if (!isOutsourceNow && !wentThrough) return;
+      const slug = productByName.get(o.productName)?.slug ?? "";
+      // 발주 상태를 결정: 외주발주면 발주/제작중, 고객확정완료(외주 품목)면 일부만,
+      // 인쇄팀전달 이후면 입고완료. 외주발주 중 15% 는 아직 미등록으로 남긴다.
+      let status: string | null = null;
+      if (o.orderStatus === "외주발주") {
+        status = chance(0.35) ? null : chance(0.45) ? "제작중" : "발주";
+      } else if (
+        o.orderStatus === "고객확정완료" &&
+        VENDOR_BY_SLUG[slug] &&
+        chance(0.4)
+      ) {
+        status = chance(0.5) ? "제작중" : "발주";
+      } else if (AFTER_OUTSOURCE.includes(o.orderStatus) && chance(0.24)) {
+        status = "입고완료";
+      }
+      if (!status) return;
 
       const ordered = addDays(o.orderDate, randInt(1, 4));
       const expected = addDays(ordered, randInt(7, 18));
-      const status = isOutsourceNow ? (chance(0.45) ? "제작중" : "발주") : "입고완료";
       const received = status === "입고완료" ? addDays(ordered, randInt(8, 16)) : null;
       poSeeds.push({
         orderId: orderIds[idx],
-        vendor: pick(VENDORS),
+        vendor: pickVendor(slug),
         poNo: `PO-${o.orderDate.slice(0, 4)}-${String(poCounter++).padStart(4, "0")}`,
         ordered,
         expected,
@@ -581,7 +606,7 @@ async function main() {
         unitCost: Math.round(o.unitPrice * (0.4 + rand() * 0.15)),
         qty: o.quantity + (chance(0.4) ? randInt(2, 8) : 0),
         status,
-        note: chance(0.6) ? pick(PO_NOTES) : null,
+        note: chance(0.65) ? pick(PO_NOTES) : null,
       });
     });
     for (let i = 0; i < poSeeds.length; i += 200) {

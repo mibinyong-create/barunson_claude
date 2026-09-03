@@ -38,6 +38,16 @@ export type CourierMeta = {
   sortOrder: number;
 };
 
+export type VendorMeta = {
+  id: number;
+  name: string;
+  category: string | null;
+  contact: string | null;
+  phone: string | null;
+  memo: string | null;
+  sortOrder: number;
+};
+
 export type ProductMeta = {
   id: number;
   name: string;
@@ -56,6 +66,7 @@ export type Meta = {
   paymentStatuses: PaymentStatusMeta[];
   deliveryMethods: { code: DeliveryMethod; sortOrder: number; requiresAddress: boolean }[];
   couriers: CourierMeta[];
+  vendors: VendorMeta[];
   products: ProductMeta[];
   today: string;
 };

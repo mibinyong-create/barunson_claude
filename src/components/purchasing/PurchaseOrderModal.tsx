@@ -4,12 +4,18 @@ import { useState } from "react";
 import { Modal } from "@/components/Modal";
 import { TODAY } from "@/lib/constants";
 import { num, won } from "@/lib/format";
-import type { PurchaseOrderInput, PurchaseOrderStatus, PurchasingRow } from "@/lib/types";
+import type {
+  PurchaseOrderInput,
+  PurchaseOrderStatus,
+  PurchasingRow,
+  VendorMeta,
+} from "@/lib/types";
 
 const STATUSES: PurchaseOrderStatus[] = ["발주", "제작중", "입고완료", "취소"];
 
 type Props = {
   row: PurchasingRow | null;
+  vendors: VendorMeta[];
   busy: boolean;
   onClose: () => void;
   /** true 를 돌려주면 모달을 닫는다 */
@@ -17,7 +23,7 @@ type Props = {
   onDelete: () => Promise<boolean>;
 };
 
-export function PurchaseOrderModal({ row, busy, onClose, onSave, onDelete }: Props) {
+export function PurchaseOrderModal({ row, vendors, busy, onClose, onSave, onDelete }: Props) {
   const po = row?.po ?? null;
   const [vendorName, setVendorName] = useState(po?.vendorName ?? "");
   const [poNumber, setPoNumber] = useState(po?.poNumber ?? "");
@@ -45,6 +51,7 @@ export function PurchaseOrderModal({ row, busy, onClose, onSave, onDelete }: Pro
   const canAdvance = status === "입고완료" && row.orderStatus === "외주발주";
   const costNum = Number(unitCost) || 0;
   const qtyNum = Number(quantity) || 0;
+  const matchedVendor = vendors.find((v) => v.name === vendorName.trim());
 
   const blank = (s: string) => (s.trim() === "" ? null : s.trim());
 
@@ -126,14 +133,30 @@ export function PurchaseOrderModal({ row, busy, onClose, onSave, onDelete }: Pro
       <div className="form-grid">
         <div className="field full">
           <label htmlFor="po-vendor">
-            외주 업체명 <span className="req">*</span>
+            외주 업체 <span className="req">*</span>
           </label>
           <input
             id="po-vendor"
+            list="po-vendor-list"
             value={vendorName}
             onChange={(e) => setVendorName(e.target.value)}
-            placeholder="예: 아크릴공방 오브제"
+            placeholder="등록된 업체를 선택하거나 직접 입력"
           />
+          <datalist id="po-vendor-list">
+            {vendors.map((v) => (
+              <option key={v.id} value={v.name}>
+                {v.category ?? ""}
+              </option>
+            ))}
+          </datalist>
+          {matchedVendor ? (
+            <span className="hint">
+              {matchedVendor.category ? `${matchedVendor.category} · ` : ""}
+              {matchedVendor.contact ?? ""}
+              {matchedVendor.phone ? ` (${matchedVendor.phone})` : ""}
+              {matchedVendor.memo ? ` — ${matchedVendor.memo}` : ""}
+            </span>
+          ) : null}
         </div>
         <div className="field">
           <label htmlFor="po-number">발주서 번호</label>

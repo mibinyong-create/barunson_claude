@@ -120,6 +120,20 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
+          <div>
+            <h4>외주 제작 업체 ({meta?.vendors.length ?? 0})</h4>
+            <div className="chips">
+              {meta?.vendors.map((v) => (
+                <span
+                  key={v.id}
+                  className="pill inv-no"
+                  title={[v.category, v.contact, v.phone].filter(Boolean).join(" · ")}
+                >
+                  {v.name}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </AppShell>
