@@ -135,7 +135,7 @@
   }
   .toolbar-search input:focus{outline:none;border-color:var(--accent);}
 
-  .app{width:100%;max-width:1600px;padding:6px 30px 60px;}
+  .app{width:100%;max-width:none;padding:6px 30px 60px;}
 
   /* view tabs */
   .view-tabs{display:flex;align-items:center;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px;}
@@ -904,9 +904,9 @@
 /* 토스트 에러 변형 */
 .toast.toast-error{background:var(--urgent);}
 
-/* 헤더와 본문의 좌우 정렬·최대 폭을 맞춘다. */
+/* 헤더·본문 모두 화면 폭을 꽉 채운다 (좌우 여백만 유지). */
 .app-header,
-.app{max-width:1600px;}
+.app{max-width:none;}
 
 /* 통계 타일을 4종(전체/진행중/오늘신규/총금액)으로 늘렸으므로 4열로 */
 .stats{grid-template-columns:repeat(4,minmax(0,1fr));}
