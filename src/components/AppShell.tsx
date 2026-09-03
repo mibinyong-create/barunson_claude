@@ -13,6 +13,7 @@ import {
   DashboardIcon,
   LogoutIcon,
   OrdersIcon,
+  PrinterIcon,
   ProductsIcon,
   SettingsIcon,
   TruckIcon,
@@ -21,6 +22,7 @@ import {
 const NAV = [
   { href: "/dashboard", label: "대시보드", Icon: DashboardIcon },
   { href: "/", label: "주문관리", Icon: OrdersIcon },
+  { href: "/print", label: "인쇄작업", Icon: PrinterIcon },
   { href: "/shipping", label: "출고관리", Icon: TruckIcon },
   { href: "/purchasing", label: "발주관리", Icon: ClipboardIcon },
   { href: "/customers", label: "고객관리", Icon: CustomersIcon },

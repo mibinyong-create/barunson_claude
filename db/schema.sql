@@ -137,6 +137,10 @@ CREATE TABLE orders (
   shipping_address text,
   -- 출고일 (택배 접수/발송 처리한 날). 출고관리 화면에서 기록.
   dispatched_date  date,
+  -- 인쇄구분 (인쇄작업 화면). NULL 이면 내부디지털로 본다.
+  print_method     text        CHECK (print_method IN ('내부디지털', '5층인쇄', '외부생산')),
+  -- 원본 작업 파일 (구글 드라이브 링크, 줄바꿈으로 여러 개). 인쇄팀 전달 전 등록.
+  source_links     text,
   payment_status   text        NOT NULL REFERENCES payment_statuses(code),
   order_status     text        NOT NULL REFERENCES order_statuses(code),
   with_invitation  boolean     NOT NULL DEFAULT false,
@@ -306,6 +310,8 @@ SELECT
   o.delivery_method,
   o.shipping_address,
   o.dispatched_date,
+  o.print_method,
+  o.source_links,
   o.payment_status,
   o.order_status,
   os.is_active_stage                              AS is_active_stage,

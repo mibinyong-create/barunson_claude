@@ -99,6 +99,10 @@ export type Order = {
   shippingAddress: string | null;
   /** 출고일 (택배 발송 처리한 날). 미출고면 null */
   dispatchedDate: string | null;
+  /** 인쇄구분 (내부디지털 / 5층인쇄 / 외부생산). null 이면 내부디지털 */
+  printMethod: string | null;
+  /** 원본 작업 파일 링크 (구글 드라이브, 줄바꿈 구분). 미등록이면 null */
+  sourceLinks: string | null;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
   isActiveStage: boolean;
@@ -147,6 +151,10 @@ export type OrderListParams = {
   status?: string;
   /** 여러 상태를 한 번에 (출고관리 화면). status 와 함께 주면 둘 다 AND */
   statuses?: string[];
+  /** 인쇄구분 필터 (인쇄작업 화면). null(내부디지털) 포함 처리 */
+  printMethods?: string[];
+  /** 검색 대상 한정 (미지정 시 전체) */
+  searchType?: "order_no" | "member" | "phone" | "product";
   paymentStatus?: string;
   productId?: number;
   orderDate?: string;

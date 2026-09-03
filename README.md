@@ -282,7 +282,7 @@ couriers ───────┘            ├─ products
 | `couriers` | 택배사 5종 + 배송조회 URL 템플릿 | `select[name=courierCompany]` |
 | `customers` | 고객 (이름+연락처 유니크) | `customerName`, `phone`, `address` |
 | `products` | 상품 11종 + 슬러그 + 판매단가(`default_unit_price`)·매입단가(`purchase_price`) + SVG 아이콘 | `datalist#productList`, `PRODUCT_ICONS`, `PRODUCT_CODE_SLUGS` |
-| `orders` | 주문 본문 (`print_quantity` = 인쇄수량, `dispatched_date` = 출고일) | order 객체 |
+| `orders` | 주문 본문 (`print_quantity` 인쇄수량, `dispatched_date` 출고일, `print_method` 인쇄구분, `source_links` 원본 파일 링크) | order 객체 |
 | `order_files` | 첨부(`attachment`)·초안(`draft`) 파일 메타데이터 | `attachments[]`, `drafts[]` 두 배열을 통합 |
 | `order_status_history` | 상태 변경 이력 | **신규** (원본에 없음) |
 | `purchase_orders` | 외주 발주 기록 (업체·발주일·단가·입고 상태, 주문 1건당 1건) | **신규** (원본에 없음) |
@@ -326,6 +326,8 @@ couriers ───────┘            ├─ products
 | `GET` | `/api/orders/:id/files/:fileId/content` | 저장된 파일 원본 (이미지·PDF 는 인라인) |
 | `DELETE` | `/api/orders/:id/files/:fileId` | 파일 삭제 |
 | `GET` | `/api/shipping?stage=대기\|배송중\|배송완료\|전체` | 출고관리 목록 (해당 진행상태 주문만) |
+| `GET` | `/api/print?statuses=&methods=&search=&searchType=` | 인쇄작업 큐 (초안·인쇄 준비 단계 주문) |
+| `PATCH` | `/api/orders/:id/print-info` | 인쇄구분 · 원본 작업 파일 링크 갱신 |
 | `GET` | `/api/purchasing?stage=미등록\|발주\|입고완료\|전체` | 발주관리 목록 (`&withCounts=1` 로 집계 포함) |
 | `GET`·`PUT`·`DELETE` | `/api/orders/:id/purchase-order` | 주문의 외주 발주 기록 조회 / 저장(upsert) / 삭제 |
 
@@ -397,6 +399,21 @@ curl -X PATCH http://localhost:3000/api/orders/1/status \
   (타일 클릭 → 상세 모달 → 행 클릭 시 상태+품목 필터가 걸린 목록으로 이동)
 
 > 원본에서 **미구현이던 "신규 주문 등록" 버튼을 추가**했습니다. (원본은 폼만 있고 여는 버튼이 없었음)
+
+### 인쇄작업 (`/print`)
+
+초안·인쇄 준비 단계 주문을 모아 처리하는 커스텀팀 통합 큐.
+
+- **필터** — 날짜(주문관리와 동일) · 진행상태 체크박스(주문완료~인쇄완료, 취소) ·
+  인쇄구분 체크박스(내부디지털/5층인쇄/외부생산) · 검색(주문번호·회원ID·전화번호·상품명 중 선택)
+- **작업 큐** — 구분(청첩장주문/부가상품) · 품목코드 · 상품 · 인쇄구분 · 초안 수 · 상태 · 원본링크 등록 여부
+  - 체크 후 **선택 항목 인쇄완료 처리** (일괄 진행상태 `인쇄완료`)
+- **작업 팝업** (`PrintWorkModal`)
+  - 초안 미리보기 업로드/삭제 (이미지 라이트박스, `order_files`)
+  - 인쇄구분 선택 (`orders.print_method`)
+  - **원본 작업 파일 링크** — 구글 드라이브 링크를 줄바꿈으로 여러 개 저장 (`orders.source_links`, 저장 시 전체 교체)
+  - **인쇄팀 전달** — 원본 링크 등록 후에만 활성, 진행상태 `인쇄팀전달`로 이동
+- API: `GET /api/print` · `PATCH /api/orders/:id/print-info`
 
 ### 출고관리 (`/shipping`)
 

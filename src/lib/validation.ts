@@ -57,6 +57,15 @@ export const courierSchema = z.object({
   shippingAddress: z.string().trim().max(300).nullish(),
 });
 
+export const printInfoSchema = z
+  .object({
+    printMethod: z.enum(["내부디지털", "5층인쇄", "외부생산"]).nullish(),
+    sourceLinks: z.string().trim().max(4000).nullish(),
+  })
+  .refine((v) => v.printMethod != null || (v.sourceLinks != null && v.sourceLinks !== ""), {
+    message: "변경할 내용이 없습니다.",
+  });
+
 export const purchaseOrderSchema = z.object({
   vendorName: z.string().trim().min(1, "업체명은 필수입니다.").max(120),
   poNumber: z.string().trim().max(60).nullish(),

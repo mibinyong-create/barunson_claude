@@ -429,13 +429,29 @@ async function main() {
             : o.orderStatus === "배송중"
               ? addDays(o.orderDate, 6)
               : null;
+        // 인쇄구분: 5층인쇄가 필요한 지류 상품 / 그 외 내부디지털 (외주발주 건은 후처리로 외부생산)
+        const slug = productByName.get(o.productName)?.slug ?? "";
+        const printMethod =
+          o.orderStatus === "외주발주"
+            ? "외부생산"
+            : ["photo", "newspaper", "postcard", "card"].includes(slug)
+              ? "5층인쇄"
+              : "내부디지털";
+        // 원본 링크: 인쇄팀전달 이후 단계 일부에 구글 드라이브 링크 기록
+        const AFTER_DRAFT = ["인쇄팀전달", "인쇄완료", "배송중", "배송완료"];
+        const sourceLinks =
+          AFTER_DRAFT.includes(o.orderStatus) && chance(0.55)
+            ? `https://drive.google.com/drive/folders/1${o.orderNo.replace(/\D/g, "")}Ab\nhttps://drive.google.com/file/d/1${o.orderNo.replace(/\D/g, "")}Xz/view`
+            : null;
         return `(${p(o.orderNo)},${p(customerIds[o.customerIdx])},${p(
           productByName.get(o.productName)?.id ?? products[0].id,
         )},${p(o.option)},${p(o.quantity)},${p(printQty)},${p(o.unitPrice)},${p(
           o.orderDate,
         )},${p(o.weddingDate)},${p(o.deliveryMethod)},${p(o.address)},${p(
           dispatchedDate,
-        )},${p(o.paymentStatus)},${p(o.orderStatus)},${p(o.withInvitation)},${p(
+        )},${p(printMethod)},${p(sourceLinks)},${p(o.paymentStatus)},${p(
+          o.orderStatus,
+        )},${p(o.withInvitation)},${p(
           o.courierName ? (courierIdByName.get(o.courierName) ?? null) : null,
         )},${p(o.trackingNumber)},${p(o.deliveredDate)},${p(o.memo)})`;
       });
@@ -444,6 +460,7 @@ async function main() {
         `INSERT INTO orders (
            order_no, customer_id, product_id, option_text, quantity, print_quantity, unit_price,
            order_date, wedding_date, delivery_method, shipping_address, dispatched_date,
+           print_method, source_links,
            payment_status, order_status, with_invitation,
            courier_id, tracking_number, delivered_date, memo
          ) VALUES ${tuples.join(",")}
@@ -580,6 +597,12 @@ async function main() {
       );
     }
     console.log(`  발주 기록 ${poSeeds.length}건`);
+
+    // 발주 기록이 있으면 인쇄구분을 외부생산으로 맞춘다.
+    await client.query(
+      `UPDATE orders o SET print_method = '외부생산'
+       WHERE EXISTS (SELECT 1 FROM purchase_orders po WHERE po.order_id = o.id)`,
+    );
 
     // ── 4. 상태 변경 이력 재구성 ──────────────────────────────────────────────
     // INSERT 트리거가 남긴 '주문 등록' 1건을 지우고, 현재 상태까지의 단계를

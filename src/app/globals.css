@@ -830,6 +830,34 @@
   .table-foot{justify-content:space-between;}
 }
 
+/* 인쇄작업 */
+.page-sub{margin:-4px 0 16px;font-size:13px;color:var(--ink-muted);}
+.toolbar.toolbar-col{flex-direction:column;align-items:stretch;gap:10px;}
+.toolbar-col .tbrow{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;}
+.tbrow-label{
+  font-size:11.5px;font-weight:800;color:var(--ink-faint);letter-spacing:.02em;
+  min-width:52px;flex:none;
+}
+.tb-select{
+  padding:7px 10px;border-radius:8px;border:1px solid var(--line-strong);
+  background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:700;flex:none;
+}
+.queue-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:4px 0 10px;flex-wrap:wrap;
+}
+.queue-head .section-title{margin:0;}
+.draft-count{display:inline-flex;align-items:center;gap:5px;color:var(--ink-muted);}
+.draft-count svg{color:var(--ink-faint);}
+/* 인쇄구분 pill */
+.pill.pm-내부디지털{background:var(--surface-sunken);color:var(--ink-muted);font-weight:700;}
+.pill.pm-5층인쇄{background:#1F2937;color:#fff;font-weight:800;}
+.pill.pm-외부생산{background:#0F766E;color:#fff;font-weight:800;}
+/* 인쇄작업 모달 2단 */
+.print-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.print-note{margin:10px 0 0;font-size:12.5px;color:var(--ink-faint);}
+@media (max-width:820px){ .print-grid{grid-template-columns:1fr;} }
+
 /* 출고관리 */
 .ship-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
 .ship-tile{

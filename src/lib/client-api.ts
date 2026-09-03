@@ -73,6 +73,29 @@ export const api = {
     apiFetch(`/api/shipping${qs(params as Record<string, unknown>)}`, { signal })
       .then(unwrap<Paged<Order>>),
 
+  print: (
+    params: {
+      statuses?: string;
+      methods?: string;
+      search?: string;
+      searchType?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      pageSize?: number;
+    },
+    signal?: AbortSignal,
+  ) =>
+    apiFetch(`/api/print${qs(params as Record<string, unknown>)}`, { signal })
+      .then(unwrap<Paged<Order>>),
+
+  updatePrintInfo: (
+    id: number,
+    body: { printMethod?: string | null; sourceLinks?: string | null },
+  ) =>
+    apiFetch(`/api/orders/${id}/print-info`, jsonInit("PATCH", body))
+      .then(unwrap<OrderDetail>),
+
   getOrder: (id: number, signal?: AbortSignal) =>
     apiFetch(`/api/orders/${id}`, { signal }).then(unwrap<OrderDetail>),
 

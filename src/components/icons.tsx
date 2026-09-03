@@ -109,6 +109,14 @@ export const TrashIcon = ({ size = 14 }: { size?: number }) => (
   </svg>
 );
 
+export const PrinterIcon = ({ size = 16 }: { size?: number }) => (
+  <svg {...base(size)} aria-hidden>
+    <path d="M6 9V3h12v6" />
+    <rect x="6" y="13" width="12" height="8" rx="1" />
+    <path d="M6 17H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2" />
+  </svg>
+);
+
 export const ClipboardIcon = ({ size = 16 }: { size?: number }) => (
   <svg {...base(size)} aria-hidden>
     <rect x="6" y="4" width="12" height="17" rx="2" />

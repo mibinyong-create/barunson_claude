@@ -36,6 +36,8 @@ export function mapOrder(r: OrderRow): Order {
     deliveryMethod: r.delivery_method as Order["deliveryMethod"],
     shippingAddress: (r.shipping_address as string) ?? null,
     dispatchedDate: (r.dispatched_date as string) ?? null,
+    printMethod: (r.print_method as string) ?? null,
+    sourceLinks: (r.source_links as string) ?? null,
     paymentStatus: r.payment_status as Order["paymentStatus"],
     orderStatus: r.order_status as Order["orderStatus"],
     isActiveStage: r.is_active_stage as boolean,
@@ -89,8 +91,10 @@ const DEFAULT_SORT_SQL = SORT_SQL.get("orderDateDesc")!;
 export async function listOrders(params: OrderListParams): Promise<Paged<Order>> {
   const {
     search,
+    searchType,
     status,
     statuses,
+    printMethods,
     paymentStatus,
     productId,
     orderDate,
@@ -109,23 +113,29 @@ export async function listOrders(params: OrderListParams): Promise<Paged<Order>>
   if (search && search.trim()) {
     // 서로 다른 테이블 컬럼을 OR 로 묶으면 어떤 인덱스도 타지 못하고 조인 결과 전체를
     // Join Filter 로 훑는다. 테이블별로 분해해 각자의 trigram 인덱스를 쓰게 한다.
-    // 검색어는 trim() 후 비어있지 않으므로 coalesce(phone,'') 와 phone 은 결과가 같다.
     const p = add(`%${search.trim()}%`);
-    where.push(`id IN (
-      SELECT o2.id FROM orders o2 WHERE o2.order_no ILIKE ${p}
-      UNION
-      SELECT o2.id FROM orders o2
-        JOIN customers c2 ON c2.id = o2.customer_id
-       WHERE c2.name ILIKE ${p} OR c2.phone ILIKE ${p}
-      UNION
-      SELECT o2.id FROM orders o2
-        JOIN products p2 ON p2.id = o2.product_id
-       WHERE p2.name ILIKE ${p}
-    )`);
+    const parts: string[] = [];
+    if (!searchType || searchType === "order_no")
+      parts.push(`SELECT o2.id FROM orders o2 WHERE o2.order_no ILIKE ${p}`);
+    if (!searchType || searchType === "member")
+      parts.push(
+        `SELECT o2.id FROM orders o2 WHERE o2.customer_id::text ILIKE ${p}`,
+      );
+    if (!searchType || searchType === "phone")
+      parts.push(
+        `SELECT o2.id FROM orders o2 JOIN customers c2 ON c2.id = o2.customer_id WHERE c2.name ILIKE ${p} OR c2.phone ILIKE ${p}`,
+      );
+    if (!searchType || searchType === "product")
+      parts.push(
+        `SELECT o2.id FROM orders o2 JOIN products p2 ON p2.id = o2.product_id WHERE p2.name ILIKE ${p}`,
+      );
+    where.push(`id IN (${parts.join(" UNION ")})`);
   }
   if (status && status !== "전체") where.push(`order_status = ${add(status)}`);
   if (statuses && statuses.length > 0)
     where.push(`order_status = ANY(${add(statuses)}::text[])`);
+  if (printMethods && printMethods.length > 0)
+    where.push(`coalesce(print_method, '내부디지털') = ANY(${add(printMethods)}::text[])`);
   if (paymentStatus && paymentStatus !== "전체")
     where.push(`payment_status = ${add(paymentStatus)}`);
   if (productId) where.push(`product_id = ${add(productId)}`);
@@ -382,6 +392,22 @@ export async function updateOrderStatus(
   const updated = await queryOne<OrderRow>(
     `UPDATE orders SET order_status = $2 WHERE id = $1 RETURNING id`,
     [id, status],
+  );
+  if (!updated) return null;
+  return getOrder(id);
+}
+
+/** 인쇄작업 정보 (인쇄구분 · 원본 작업 파일 링크) 갱신 */
+export async function updatePrintInfo(
+  id: number,
+  data: { printMethod?: string | null; sourceLinks?: string | null },
+): Promise<OrderDetail | null> {
+  const updated = await queryOne<OrderRow>(
+    `UPDATE orders SET
+       print_method = coalesce($2, print_method),
+       source_links = coalesce($3, source_links)
+     WHERE id = $1 RETURNING id`,
+    [id, data.printMethod ?? null, data.sourceLinks ?? null],
   );
   if (!updated) return null;
   return getOrder(id);
