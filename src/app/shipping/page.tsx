@@ -262,7 +262,7 @@ export default function ShippingPage() {
                             linkUrl={o.productLinkUrl}
                           />
                           <div className="product-text">
-                            <span className="name">{o.productName}</span>
+                            <span className="name" title={o.productName}>{o.productName}</span>
                             {o.optionText ? <span className="opt">{o.optionText}</span> : null}
                           </div>
                         </div>

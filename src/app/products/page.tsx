@@ -198,7 +198,7 @@ export default function ProductsPage() {
                             linkUrl={p.linkUrl}
                           />
                           <div className="product-text">
-                            <span className="name">{p.name}</span>
+                            <span className="name" title={p.name}>{p.name}</span>
                           </div>
                         </div>
                       </td>

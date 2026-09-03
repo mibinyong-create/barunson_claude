@@ -263,7 +263,7 @@ export default function PurchasingPage() {
                             linkUrl={r.productLinkUrl}
                           />
                           <div className="product-text">
-                            <span className="name">{r.productName}</span>
+                            <span className="name" title={r.productName}>{r.productName}</span>
                             {r.optionText ? <span className="opt">{r.optionText}</span> : null}
                           </div>
                         </div>

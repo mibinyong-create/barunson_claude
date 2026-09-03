@@ -344,7 +344,8 @@ SELECT
   p.icon_path                                     AS product_icon_path,
   p.link_url                                      AS product_link_url,
   -- 원본 productCode(): {주문연도}_{슬러그}_01
-  extract(year FROM o.order_date)::int || '_' || p.slug || '_01' AS product_code,
+  coalesce(p.erp_code,
+           extract(year FROM o.order_date)::int || '_' || p.slug || '_01') AS product_code,
   o.option_text,
   o.quantity,
   o.print_quantity,

@@ -358,10 +358,13 @@
   .orders-table .pill{font-size:10px;padding:2px 7px;}
   .orders-table .icon-btn{width:26px;height:26px;}
   /* 상품관리 목록은 행 간격을 좁게 */
-  .products-table tbody td{padding:7px 14px;}
+  .products-table thead th{padding:9px 8px;font-size:11px;}
+  .products-table tbody td{padding:7px 8px;font-size:12.5px;}
   .products-table .product{gap:9px;}
-  .products-table .product-thumb{width:36px;height:36px;border-radius:8px;}
-  .products-table .product-text .name{font-size:13px;}
+  .products-table .product-thumb{width:34px;height:34px;border-radius:8px;}
+  .products-table .product-text .name{font-size:12.5px;max-width:184px;}
+  .products-table .item-code{font-size:9.5px;}
+  .products-table .prod-vendor{font-size:10px;}
   td.col-l,th.col-l{text-align:left;}
   .clip-text{
     display:inline-block;max-width:190px;white-space:nowrap;
@@ -443,6 +446,16 @@
   .product-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
   .product-text .name{font-weight:600;}
   .product-text .opt{font-size:12px;color:var(--ink-muted);}
+  /* 목록 표(주문관리 제외)는 모든 셀을 한 줄로, 촘촘하게 (넘치면 말줄임) */
+  .table-wrap:not(.orders-table) thead th{padding:10px 8px;font-size:11px;}
+  .table-wrap:not(.orders-table) tbody td{padding:9px 8px;font-size:12px;white-space:nowrap;}
+  .table-scroll .product-text{min-width:0;}
+  .table-scroll .product-text .name,
+  .table-scroll .product-text .opt{
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;
+  }
+  .table-scroll .ro-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+  .table-scroll .clip-text{max-width:150px;}
   .subrow{font-size:12px;color:var(--ink-faint);}
   .wed-date.urgent{color:var(--urgent);font-weight:800;}
   .subrow.urgent{color:var(--urgent);font-weight:700;}
