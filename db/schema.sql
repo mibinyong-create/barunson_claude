@@ -127,6 +127,27 @@ CREATE INDEX products_name_trgm_idx ON products USING gin (name gin_trgm_ops);
 CREATE TRIGGER products_set_updated_at
   BEFORE UPDATE ON products FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- 상품 출시 준비 6단계 파이프라인
+-- (원본: '2026 스테이셔너리 카드/스티커/스탬프 내부 생산 준비 현황표')
+-- 디자인 → 인쇄 → 촬영 → 보정·연출 → 웹디자인 → 출시
+CREATE TABLE product_prep_steps (
+  id          serial      PRIMARY KEY,
+  product_id  integer     NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  step_code   text        NOT NULL
+                          CHECK (step_code IN ('design','print','photo','styling','webdesign','launch')),
+  step_order  smallint    NOT NULL,
+  done        boolean     NOT NULL DEFAULT false,
+  target_date date,                        -- 완료 목표일
+  done_date   date,                        -- 실제 완료일
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (product_id, step_code)
+);
+COMMENT ON TABLE product_prep_steps IS '상품별 출시 준비 6단계 진행 현황';
+CREATE INDEX product_prep_steps_product_idx ON product_prep_steps (product_id, step_order);
+
+CREATE TRIGGER product_prep_steps_set_updated_at
+  BEFORE UPDATE ON product_prep_steps FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 
 -- =============================================================================
 -- 3. 주문

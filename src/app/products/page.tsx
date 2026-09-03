@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { ProductThumb } from "@/components/icons";
+import { ProductPrepModal } from "@/components/products/ProductPrepModal";
 import { useToast } from "@/components/Toast";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { api } from "@/lib/client-api";
 import { TODAY } from "@/lib/constants";
 import { num, won } from "@/lib/format";
+import { PREP_STEPS, PREP_STEP_TOTAL } from "@/lib/prep-steps";
 import type { Product } from "@/lib/types";
 
 const YEAR = TODAY.slice(0, 4);
@@ -32,6 +34,16 @@ export default function ProductsPage() {
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const onError = useCallback((m: string) => toast(m, "error"), [toast]);
+
+  // 준비 단계 저장 결과는 로컬에 얹어 즉시 반영한다.
+  const [overrides, setOverrides] = useState<Record<number, Product>>({});
+  const rows = useMemo(
+    () => products.map((p) => overrides[p.id] ?? p),
+    [products, overrides],
+  );
+  const [prepId, setPrepId] = useState<number | null>(null);
+  const prepProduct = rows.find((p) => p.id === prepId) ?? null;
 
   useEffect(() => {
     if (error) toast(error, "error");
@@ -47,11 +59,11 @@ export default function ProductsPage() {
   }, [allChecked, someChecked]);
 
   async function copySelected() {
-    const rows = products.filter((p) => selectedSet.has(p.id));
-    if (rows.length === 0) return;
+    const picked = products.filter((p) => selectedSet.has(p.id));
+    if (picked.length === 0) return;
     const tsv = [
       COPY_HEADERS.join("\t"),
-      ...rows.map((p) =>
+      ...picked.map((p) =>
         [
           itemCode(p.slug),
           p.name,
@@ -66,7 +78,7 @@ export default function ProductsPage() {
     ].join("\n");
     try {
       await navigator.clipboard.writeText(tsv);
-      toast(`${rows.length}개 상품을 클립보드에 복사했어요`);
+      toast(`${picked.length}개 상품을 클립보드에 복사했어요`);
     } catch {
       toast("복사에 실패했어요. 브라우저 권한을 확인해 주세요.", "error");
     }
@@ -101,6 +113,7 @@ export default function ProductsPage() {
                 </th>
                 <th className="col-l">상품</th>
                 <th>품목코드</th>
+                <th className="col-l">출시 준비</th>
                 <th className="num">매입단가</th>
                 <th className="num">판매단가</th>
                 <th className="num">주문 건수</th>
@@ -112,12 +125,12 @@ export default function ProductsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={9}>
+                  <td colSpan={10}>
                     <div className="empty">불러오는 중…</div>
                   </td>
                 </tr>
               ) : (
-                products.map((p) => {
+                rows.map((p) => {
                   const checked = selectedSet.has(p.id);
                   return (
                     <tr key={p.id} className={checked ? "is-selected" : undefined}>
@@ -152,6 +165,30 @@ export default function ProductsPage() {
                       <td>
                         <span className="item-code">{itemCode(p.slug)}</span>
                       </td>
+                      <td className="col-l">
+                        <button
+                          type="button"
+                          className="prep-cell"
+                          onClick={() => setPrepId(p.id)}
+                          title="출시 준비 단계 보기"
+                        >
+                          <span className="prep-bar">
+                            {PREP_STEPS.map((m) => {
+                              const done = p.prepSteps.find((s) => s.code === m.code)?.done;
+                              return (
+                                <span
+                                  key={m.code}
+                                  className={`prep-seg${done ? " done" : ""}`}
+                                  title={m.label}
+                                />
+                              );
+                            })}
+                          </span>
+                          <span className="prep-count mono">
+                            {p.prepSteps.filter((s) => s.done).length}/{PREP_STEP_TOTAL}
+                          </span>
+                        </button>
+                      </td>
                       <td className="num mono">
                         {p.purchasePrice ? won(p.purchasePrice) : "-"}
                       </td>
@@ -168,6 +205,14 @@ export default function ProductsPage() {
           </table>
         </div>
       </div>
+
+      <ProductPrepModal
+        key={prepId ?? "none"}
+        product={prepProduct}
+        onClose={() => setPrepId(null)}
+        onSaved={(p) => setOverrides((o) => ({ ...o, [p.id]: p }))}
+        onError={onError}
+      />
     </AppShell>
   );
 }

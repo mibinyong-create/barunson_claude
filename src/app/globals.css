@@ -970,3 +970,48 @@
 
 /* 썸네일 없이 쓰는 행(대시보드 TOP 상품)은 첫 컬럼을 비우지 않는다 */
 .breakdown-row.static{grid-template-columns:1fr auto auto auto;}
+
+/* ── 상품 출시 준비 6단계 ─────────────────────────────────────────────────── */
+.prep-cell{
+  display:inline-flex;align-items:center;gap:8px;
+  background:none;border:none;padding:2px 0;cursor:pointer;font-family:inherit;
+}
+.prep-bar{display:inline-flex;gap:3px;}
+.prep-seg{
+  width:14px;height:8px;border-radius:2px;background:var(--line-strong);
+  transition:background .12s;
+}
+.prep-seg.done{background:#16A34A;}
+.prep-cell:hover .prep-seg:not(.done){background:var(--ink-faint);}
+.prep-count{font-size:11px;color:var(--ink-muted);font-weight:700;}
+.prep-bar-lg .prep-seg{width:100%;height:12px;border-radius:3px;}
+.prep-bar-lg{display:flex;gap:4px;flex:1;}
+
+.prep-progress{display:flex;align-items:center;gap:12px;margin:2px 0 16px;}
+.prep-progress-label{font-size:12.5px;font-weight:800;color:var(--ink-muted);white-space:nowrap;}
+
+.prep-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.prep-step{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);
+}
+.prep-step.done{background:#F0FAF3;border-color:#BFE6CC;}
+.prep-step-check{display:flex;align-items:center;gap:10px;cursor:pointer;min-width:0;}
+.prep-step-check input{width:17px;height:17px;accent-color:#16A34A;flex:none;}
+.prep-step-no{
+  flex:none;width:20px;height:20px;border-radius:50%;background:var(--surface-sunken);
+  color:var(--ink-muted);font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+}
+.prep-step.done .prep-step-no{background:#16A34A;color:#fff;}
+.prep-step-name{display:flex;flex-direction:column;font-size:13.5px;font-weight:700;color:var(--ink);}
+.prep-step-owner{font-size:11px;font-weight:600;color:var(--ink-faint);}
+.prep-step-dates{display:flex;gap:10px;}
+.prep-step-dates label{
+  display:flex;flex-direction:column;gap:3px;
+  font-size:10.5px;font-weight:700;color:var(--ink-faint);
+}
+.prep-step-dates input{
+  padding:5px 8px;border:1px solid var(--line-strong);border-radius:7px;
+  background:var(--surface);color:var(--ink);font-size:12px;
+}

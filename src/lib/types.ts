@@ -228,11 +228,39 @@ export type CustomerOrderBrief = {
   optionText: string | null;
 };
 
+// ── 상품 출시 준비 6단계 (디자인 → 인쇄 → 촬영 → 보정·연출 → 웹디자인 → 출시) ──
+export type PrepStepCode =
+  | "design"
+  | "print"
+  | "photo"
+  | "styling"
+  | "webdesign"
+  | "launch";
+
+export type ProductPrepStep = {
+  code: PrepStepCode;
+  order: number;
+  done: boolean;
+  /** 완료 목표일 */
+  targetDate: string | null;
+  /** 실제 완료일 */
+  doneDate: string | null;
+};
+
+export type ProductPrepInput = {
+  code: PrepStepCode;
+  done: boolean;
+  targetDate?: string | null;
+  doneDate?: string | null;
+};
+
 export type Product = ProductMeta & {
   orderCount: number;
   totalQuantity: number;
   totalAmount: number;
   activeOrderCount: number;
+  /** 출시 준비 6단계 현황 (order 순서, 항상 6개) */
+  prepSteps: ProductPrepStep[];
 };
 
 // ── 외주 발주 (발주관리) ──────────────────────────────────────────────────────

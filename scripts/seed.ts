@@ -264,6 +264,35 @@ async function main() {
       `SELECT id, name, slug, default_unit_price FROM products ORDER BY sort_order`,
     );
     const productByName = new Map(products.map((p) => [p.name, p]));
+
+    // ── 상품 출시 준비 6단계 ────────────────────────────────────────────────
+    console.log("▸ 상품 출시 준비 단계 생성…");
+    await client.query(`TRUNCATE product_prep_steps RESTART IDENTITY`);
+    const PREP_CODES = ["design", "print", "photo", "styling", "webdesign", "launch"];
+    // 상품마다 완료된 단계 수를 다르게 (앞 상품일수록 많이 진행)
+    const PREP_DONE_UPTO = [6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1];
+    for (let pi = 0; pi < products.length; pi++) {
+      const prod = products[pi];
+      const doneUpto = PREP_DONE_UPTO[pi % PREP_DONE_UPTO.length];
+      // 1단계 목표일 = 기준일 60일 전에서 시작, 단계마다 7~12일
+      let cursor = addDays(TODAY, -60);
+      const values: unknown[] = [];
+      const tuples = PREP_CODES.map((code, si) => {
+        const target = cursor;
+        cursor = addDays(cursor, randInt(7, 12));
+        const done = si < doneUpto;
+        const doneDate = done ? addDays(target, randInt(-2, 3)) : null;
+        const p = (v: unknown) => `$${values.push(v)}`;
+        return `(${p(prod.id)},${p(code)},${p(si + 1)},${p(done)},${p(target)},${p(doneDate)})`;
+      });
+      await client.query(
+        `INSERT INTO product_prep_steps
+           (product_id, step_code, step_order, done, target_date, done_date)
+         VALUES ${tuples.join(",")}`,
+        values,
+      );
+    }
+    console.log(`  준비 단계 ${products.length * 6}건`);
     const { rows: couriers } = await client.query<{ id: number; name: string }>(
       `SELECT id, name FROM couriers ORDER BY sort_order`,
     );

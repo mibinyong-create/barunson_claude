@@ -126,6 +126,13 @@ export const productUpdateSchema = z.object({
     .nullish(),
 });
 
+export const prepStepSchema = z.object({
+  code: z.enum(["design", "print", "photo", "styling", "webdesign", "launch"]),
+  done: z.coerce.boolean(),
+  targetDate: dateStr.nullish(),
+  doneDate: dateStr.nullish(),
+});
+
 export const orderListQuerySchema = z.object({
   search: z.string().trim().optional(),
   status: z.string().trim().optional(),

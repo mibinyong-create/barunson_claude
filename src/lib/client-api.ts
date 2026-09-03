@@ -9,6 +9,7 @@ import type {
   OrderListParams,
   Paged,
   Product,
+  ProductPrepInput,
   PurchaseOrder,
   PurchaseOrderInput,
   PurchasingRow,
@@ -200,4 +201,7 @@ export const api = {
 
   products: (signal?: AbortSignal) =>
     apiFetch("/api/products", { signal }).then(unwrap<Product[]>),
+
+  updatePrepStep: (productId: number, body: ProductPrepInput) =>
+    apiFetch(`/api/products/${productId}/prep`, jsonInit("PUT", body)).then(unwrap<Product>),
 };
