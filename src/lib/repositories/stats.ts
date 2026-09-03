@@ -1,6 +1,12 @@
 import { query, queryOne } from "@/lib/db";
 import { weekRange } from "@/lib/format";
-import type { BreakdownRow, StatusCountRow, SummaryStats } from "@/lib/types";
+import type {
+  BreakdownRow,
+  DashboardData,
+  DashboardDay,
+  StatusCountRow,
+  SummaryStats,
+} from "@/lib/types";
 
 /** 요약 탭 상단 통계 타일 3종 (+ 금액) */
 export async function getSummary(today: string): Promise<SummaryStats> {
@@ -178,6 +184,96 @@ export async function getStatusDetail(
     totalQuantity: r.total_quantity,
     totalAmount: r.total_amount,
   }));
+}
+
+/** 대시보드 한 화면에 필요한 통계 묶음 (선택된 달의 일별 매출 + 전체 현황) */
+export async function getDashboard(month: string, today: string): Promise<DashboardData> {
+  const first = `${month}-01`;
+
+  const dailyRows = await query<{
+    date: string;
+    order_count: number;
+    total_amount: number;
+    paid_amount: number;
+  }>(
+    `SELECT to_char(order_date, 'YYYY-MM-DD')                    AS date,
+            count(*)::int                                        AS order_count,
+            coalesce(sum(total_amount), 0)::bigint               AS total_amount,
+            coalesce(sum(total_amount)
+                     FILTER (WHERE payment_status = '결제완료'), 0)::bigint AS paid_amount
+     FROM orders
+     WHERE order_date >= $1::date
+       AND order_date <  ($1::date + INTERVAL '1 month')
+     GROUP BY 1
+     ORDER BY 1`,
+    [first],
+  );
+
+  const byDate = new Map(dailyRows.map((r) => [r.date, r]));
+  const daysInMonth = new Date(
+    Number(month.slice(0, 4)),
+    Number(month.slice(5, 7)),
+    0,
+  ).getDate();
+  const daily: DashboardDay[] = Array.from({ length: daysInMonth }, (_, i) => {
+    const date = `${month}-${String(i + 1).padStart(2, "0")}`;
+    const r = byDate.get(date);
+    return {
+      date,
+      orderCount: r?.order_count ?? 0,
+      totalAmount: Number(r?.total_amount ?? 0),
+      paidAmount: Number(r?.paid_amount ?? 0),
+    };
+  });
+
+  const monthOrders = daily.reduce((a, d) => a + d.orderCount, 0);
+  const monthAmount = daily.reduce((a, d) => a + d.totalAmount, 0);
+  const monthPaidAmount = daily.reduce((a, d) => a + d.paidAmount, 0);
+
+  const totals = await queryOne<{
+    total_orders: number;
+    active_orders: number;
+    done_orders: number;
+    cancelled_orders: number;
+  }>(
+    `SELECT
+       count(*)::int                                            AS total_orders,
+       count(*) FILTER (WHERE os.is_active_stage)::int           AS active_orders,
+       count(*) FILTER (WHERE o.order_status = '배송완료')::int   AS done_orders,
+       count(*) FILTER (WHERE o.order_status = '취소')::int       AS cancelled_orders
+     FROM orders o
+     JOIN order_statuses os ON os.code = o.order_status`,
+  );
+
+  const cust = await queryOne<{
+    total: number;
+    new_this_month: number;
+    active: number;
+  }>(
+    `SELECT
+       (SELECT count(*)::int FROM customers)                                       AS total,
+       (SELECT count(*)::int FROM customers
+         WHERE date_trunc('month', created_at) = date_trunc('month', $1::date))    AS new_this_month,
+       (SELECT count(DISTINCT o.customer_id)::int
+          FROM orders o JOIN order_statuses os ON os.code = o.order_status
+         WHERE os.is_active_stage)                                                 AS active`,
+    [today],
+  );
+
+  return {
+    month,
+    daily,
+    monthOrders,
+    monthAmount,
+    monthPaidAmount,
+    totalOrders: totals?.total_orders ?? 0,
+    activeOrders: totals?.active_orders ?? 0,
+    doneOrders: totals?.done_orders ?? 0,
+    cancelledOrders: totals?.cancelled_orders ?? 0,
+    totalCustomers: cust?.total ?? 0,
+    newCustomers: cust?.new_this_month ?? 0,
+    activeCustomers: cust?.active ?? 0,
+  };
 }
 
 /** 대시보드용 월별 추이 */

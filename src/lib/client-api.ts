@@ -2,6 +2,7 @@ import { apiFetch } from "./api";
 import type {
   BreakdownRow,
   Customer,
+  DashboardData,
   Meta,
   Order,
   OrderDetail,
@@ -191,6 +192,10 @@ export const api = {
   trend: (months = 12, signal?: AbortSignal) =>
     apiFetch(`/api/stats/trend${qs({ months })}`, { signal })
       .then(unwrap<{ month: string; orderCount: number; totalAmount: number }[]>),
+
+  dashboard: (month?: string, today?: string, signal?: AbortSignal) =>
+    apiFetch(`/api/stats/dashboard${qs({ month, today })}`, { signal })
+      .then(unwrap<DashboardData>),
 
   customers: (params: { search?: string; page?: number; pageSize?: number }, signal?: AbortSignal) =>
     apiFetch(`/api/customers${qs(params)}`, { signal }).then(unwrap<Paged<Customer>>),

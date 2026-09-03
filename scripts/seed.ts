@@ -556,6 +556,15 @@ async function main() {
     }
     console.log(`  주문 ${orderIds.length}건`);
 
+    // 고객 가입일 = 첫 주문일 (대시보드 '이번 달 신규 고객' 이 의미 있도록)
+    await client.query(
+      `UPDATE customers c
+         SET created_at = sub.first_order
+        FROM (SELECT customer_id, min(order_date)::timestamptz AS first_order
+                FROM orders GROUP BY customer_id) sub
+       WHERE sub.customer_id = c.id`,
+    );
+
     // ── 3. 첨부/초안 파일 ────────────────────────────────────────────────────
     console.log("▸ 첨부·초안 파일 생성…");
     // 이름이 이미지(.png/.jpg)인 초안에는 상품 대표 사진을 실제 바이너리로 넣어

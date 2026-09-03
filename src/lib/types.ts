@@ -182,6 +182,32 @@ export type OrderListParams = {
   pageSize?: number;
 };
 
+export type DashboardDay = {
+  date: string;
+  orderCount: number;
+  totalAmount: number;
+  paidAmount: number;
+};
+
+export type DashboardData = {
+  /** 선택된 달 "YYYY-MM" */
+  month: string;
+  daily: DashboardDay[];
+  monthOrders: number;
+  monthAmount: number;
+  monthPaidAmount: number;
+  /** 달과 무관한 전체 기준 */
+  totalOrders: number;
+  activeOrders: number;
+  doneOrders: number;
+  cancelledOrders: number;
+  totalCustomers: number;
+  /** 이번(현재) 달 신규 고객 */
+  newCustomers: number;
+  /** 진행중 주문을 보유한 고객 수 */
+  activeCustomers: number;
+};
+
 export type SummaryStats = {
   totalOrders: number;
   activeOrders: number;

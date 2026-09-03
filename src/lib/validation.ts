@@ -170,3 +170,12 @@ export const statsQuerySchema = z.object({
 export const trendQuerySchema = z.object({
   months: z.coerce.number().int().min(1).max(120).optional(),
 });
+
+/** GET /api/stats/dashboard 쿼리스트링 */
+export const dashboardQuerySchema = z.object({
+  month: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/, "YYYY-MM 형식이어야 합니다.")
+    .optional(),
+  today: dateStr.optional(),
+});
