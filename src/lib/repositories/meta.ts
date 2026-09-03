@@ -47,6 +47,9 @@ export async function getMeta(): Promise<Meta> {
       purchase_price: number;
       icon_path: string | null;
       link_url: string | null;
+      production_type: "내부" | "외부";
+      production_vendor: string | null;
+      erp_code: string | null;
       sort_order: number;
       is_active: boolean;
     }>(`SELECT * FROM products WHERE is_active ORDER BY sort_order, name`),
@@ -97,6 +100,9 @@ export async function getMeta(): Promise<Meta> {
       purchasePrice: p.purchase_price,
       iconPath: p.icon_path,
       linkUrl: p.link_url,
+      productionType: p.production_type,
+      productionVendor: p.production_vendor,
+      erpCode: p.erp_code,
       sortOrder: p.sort_order,
       isActive: p.is_active,
     })),

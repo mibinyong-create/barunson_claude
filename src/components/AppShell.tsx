@@ -25,8 +25,8 @@ const NAV = [
   { href: "/print", label: "인쇄작업", Icon: PrinterIcon },
   { href: "/shipping", label: "출고관리", Icon: TruckIcon },
   { href: "/purchasing", label: "발주관리", Icon: ClipboardIcon },
-  { href: "/customers", label: "고객관리", Icon: CustomersIcon },
   { href: "/products", label: "상품관리", Icon: ProductsIcon },
+  { href: "/customers", label: "고객관리", Icon: CustomersIcon },
   { href: "/settings", label: "설정", Icon: SettingsIcon },
 ];
 

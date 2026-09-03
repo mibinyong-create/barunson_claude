@@ -59,6 +59,12 @@ export type ProductMeta = {
   purchasePrice: number;
   iconPath: string | null;
   linkUrl: string | null;
+  /** 생산 구분: 내부 = 자체 생산, 외부 = 외주 생산 */
+  productionType: "내부" | "외부";
+  /** 외부생산일 때 생산처(외주 업체·인쇄소) 이름 */
+  productionVendor: string | null;
+  /** 제품 ERP 코드 (없으면 슬러그 기반 코드로 대체) */
+  erpCode: string | null;
   sortOrder: number;
   isActive: boolean;
 };

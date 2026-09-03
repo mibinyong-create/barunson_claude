@@ -13,11 +13,15 @@ import { PREP_STEPS, PREP_STEP_TOTAL } from "@/lib/prep-steps";
 import type { Product } from "@/lib/types";
 
 const YEAR = TODAY.slice(0, 4);
-const itemCode = (slug: string) => `${YEAR}_${slug}_01`;
+const itemCode = (p: Product) => p.erpCode ?? `${YEAR}_${p.slug}_01`;
+
+const PROD_FILTERS = ["전체", "내부생산", "외부생산"] as const;
 
 const COPY_HEADERS = [
   "품목코드",
   "상품명",
+  "생산",
+  "생산처",
   "매입단가",
   "판매단가",
   "주문 건수",
@@ -36,11 +40,21 @@ export default function ProductsPage() {
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const onError = useCallback((m: string) => toast(m, "error"), [toast]);
 
+  const [prodFilter, setProdFilter] = useState<(typeof PROD_FILTERS)[number]>("전체");
+
   // 준비 단계 저장 결과는 로컬에 얹어 즉시 반영한다.
   const [overrides, setOverrides] = useState<Record<number, Product>>({});
   const rows = useMemo(
-    () => products.map((p) => overrides[p.id] ?? p),
-    [products, overrides],
+    () =>
+      products
+        .map((p) => overrides[p.id] ?? p)
+        .filter(
+          (p) =>
+            prodFilter === "전체" ||
+            (prodFilter === "내부생산" && p.productionType === "내부") ||
+            (prodFilter === "외부생산" && p.productionType === "외부"),
+        ),
+    [products, overrides, prodFilter],
   );
   const [prepId, setPrepId] = useState<number | null>(null);
   const prepProduct = rows.find((p) => p.id === prepId) ?? null;
@@ -65,8 +79,10 @@ export default function ProductsPage() {
       COPY_HEADERS.join("\t"),
       ...picked.map((p) =>
         [
-          itemCode(p.slug),
+          itemCode(p),
           p.name,
+          `${p.productionType}생산`,
+          p.productionVendor ?? "",
           p.purchasePrice || "",
           p.defaultUnitPrice,
           p.orderCount,
@@ -95,6 +111,29 @@ export default function ProductsPage() {
         </div>
       ) : null}
 
+      <div className="toolbar">
+        <div className="chips">
+          {PROD_FILTERS.map((f) => {
+            const n =
+              f === "전체"
+                ? products.length
+                : products.filter(
+                    (p) => `${p.productionType}생산` === f,
+                  ).length;
+            return (
+              <button
+                key={f}
+                type="button"
+                className={`chip${prodFilter === f ? " active" : ""}`}
+                onClick={() => setProdFilter(f)}
+              >
+                {f} <span className="chip-count">{n}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="table-wrap products-table">
         <div className="table-scroll">
           <table>
@@ -113,6 +152,7 @@ export default function ProductsPage() {
                 </th>
                 <th className="col-l">상품</th>
                 <th>품목코드</th>
+                <th>생산</th>
                 <th className="col-l">출시 준비</th>
                 <th className="num">매입단가</th>
                 <th className="num">판매단가</th>
@@ -125,7 +165,7 @@ export default function ProductsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={10}>
+                  <td colSpan={11}>
                     <div className="empty">불러오는 중…</div>
                   </td>
                 </tr>
@@ -163,7 +203,18 @@ export default function ProductsPage() {
                         </div>
                       </td>
                       <td>
-                        <span className="item-code">{itemCode(p.slug)}</span>
+                        <span className="item-code">{itemCode(p)}</span>
+                      </td>
+                      <td>
+                        <span
+                          className={`pill pill-sm prod-${p.productionType}`}
+                          title={p.productionVendor ?? undefined}
+                        >
+                          {p.productionType}생산
+                        </span>
+                        {p.productionVendor ? (
+                          <span className="prod-vendor">{p.productionVendor}</span>
+                        ) : null}
                       </td>
                       <td className="col-l">
                         <button

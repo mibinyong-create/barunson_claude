@@ -79,6 +79,14 @@ export function ProductPrepModal({ product, onClose, onSaved, onError }: Props) 
         </button>
       }
     >
+      <div className="prep-meta">
+        <span className={`pill pill-sm prod-${prod.productionType}`}>
+          {prod.productionType}생산
+        </span>
+        {prod.productionVendor ? <span>생산처 · {prod.productionVendor}</span> : null}
+        <span className="mono">{prod.erpCode ?? prod.slug}</span>
+      </div>
+
       <div className="prep-progress">
         <span className="prep-progress-label">
           진행 {doneCount} / {PREP_STEPS.length}단계

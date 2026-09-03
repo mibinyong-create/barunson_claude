@@ -115,6 +115,12 @@ CREATE TABLE products (
   -- 원본 PRODUCT_ICONS 의 인라인 SVG path 문자열
   icon_path          text,
   link_url           text,
+  -- 생산 구분: 내부(자체) / 외부(외주 인쇄·제작)
+  production_type    text        NOT NULL DEFAULT '내부' CHECK (production_type IN ('내부', '외부')),
+  -- 외부생산일 때 생산처(외주 업체·인쇄소)
+  production_vendor  text,
+  -- 제품 ERP 코드 (스테이셔너리 카드 등). 없으면 슬러그 기반 코드 사용
+  erp_code           text,
   sort_order         smallint    NOT NULL DEFAULT 0,
   is_active          boolean     NOT NULL DEFAULT true,
   created_at         timestamptz NOT NULL DEFAULT now(),
@@ -414,6 +420,9 @@ SELECT
   p.purchase_price,
   p.icon_path,
   p.link_url,
+  p.production_type,
+  p.production_vendor,
+  p.erp_code,
   p.sort_order,
   p.is_active,
   count(o.id)                                   AS order_count,
