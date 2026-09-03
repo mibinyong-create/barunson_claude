@@ -42,8 +42,8 @@ export function resolveDateRange(preset: DatePreset, anchor: string): DateRange 
 
 /** 빠른 선택 체크박스 (라디오처럼 하나만 활성) */
 export const DATE_PRESET_CHECKS = [
+  ["all", "전체 주문건"],
   ["today", "오늘 주문건"],
   ["yesterday", "어제 주문건"],
   ["3days", "3일치 주문건"],
-  ["all", "전체 주문건"],
 ] as const;
