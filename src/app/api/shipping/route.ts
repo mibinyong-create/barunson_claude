@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     const page = Math.max(1, Number(sp.get("page")) || 1);
     const pageSizeRaw = Number(sp.get("pageSize")) || 20;
-    const pageSize = Math.min(Math.max(pageSizeRaw, 1), 100);
+    const pageSize = Math.min(Math.max(pageSizeRaw, 1), 5000);
     const search = sp.get("search")?.trim() || undefined;
 
     const isDate = (v: string | null): v is string => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);

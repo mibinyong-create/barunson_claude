@@ -51,7 +51,7 @@ export async function listCustomers(params: {
   );
   const total = countRow?.total ?? 0;
   const safePage = Math.max(page, 1);
-  const safeSize = Math.min(Math.max(pageSize, 1), 200);
+  const safeSize = Math.min(Math.max(pageSize, 1), 5000);
 
   const rows = await query<Row>(
     `SELECT v.*, coalesce(ol.orders, '[]'::json) AS orders

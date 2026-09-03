@@ -149,7 +149,7 @@ export async function listOrders(params: OrderListParams): Promise<Paged<Order>>
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const orderSql = SORT_SQL.get(sort) ?? DEFAULT_SORT_SQL;
 
-  const safePageSize = Math.min(Math.max(pageSize, 1), 200);
+  const safePageSize = Math.min(Math.max(pageSize, 1), 5000);
   const safePage = Math.max(page, 1);
   const offset = (safePage - 1) * safePageSize;
 

@@ -106,7 +106,7 @@ export default function PrintPage() {
           dateFrom: dateRange.all ? undefined : dateRange.from,
           dateTo: dateRange.all ? undefined : dateRange.to,
           page,
-          pageSize: 20,
+          pageSize: 2000,
         },
         signal,
       ),
@@ -123,7 +123,6 @@ export default function PrintPage() {
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
-  const totalPages = data?.totalPages ?? 1;
 
   const pageIds = items.map((o) => o.id);
   const selSet = useMemo(() => new Set(selected), [selected]);
@@ -394,25 +393,6 @@ export default function PrintPage() {
 
         <div className="table-foot">
           <span className="foot-info">전체 {num(total)}건</span>
-          <div className="pagination">
-            <button
-              type="button"
-              className="page-btn"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              ‹
-            </button>
-            <span className="page-btn active">{page}</span>
-            <button
-              type="button"
-              className="page-btn"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              ›
-            </button>
-          </div>
         </div>
       </div>
 

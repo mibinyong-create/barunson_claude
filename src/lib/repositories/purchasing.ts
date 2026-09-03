@@ -130,7 +130,7 @@ export async function listPurchasing(params: {
   if (dateTo) where.push(`o.order_date <= ${add(dateTo)}`);
 
   const whereSql = `WHERE ${where.join(" AND ")}`;
-  const safeSize = Math.min(Math.max(pageSize, 1), 100);
+  const safeSize = Math.min(Math.max(pageSize, 1), 5000);
   const safePage = Math.max(page, 1);
 
   const countRow = await queryOne<{ total: number }>(

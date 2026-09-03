@@ -29,7 +29,7 @@ export default function CustomersPage() {
 
   const fetcher = useCallback(
     (signal: AbortSignal) =>
-      api.customers({ search: search || undefined, page, pageSize: 25 }, signal),
+      api.customers({ search: search || undefined, page, pageSize: 2000 }, signal),
     [search, page],
   );
   const { data, error, loading } = useAsyncData<Paged<Customer>>(
@@ -173,25 +173,6 @@ export default function CustomersPage() {
 
         <div className="table-foot">
           <span className="foot-info">전체 {num(data?.total ?? 0)}명</span>
-          <div className="pagination">
-            <button
-              type="button"
-              className="page-btn"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              ‹
-            </button>
-            <span className="page-btn active">{page}</span>
-            <button
-              type="button"
-              className="page-btn"
-              disabled={page >= (data?.totalPages ?? 1)}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              ›
-            </button>
-          </div>
         </div>
       </div>
 

@@ -79,7 +79,7 @@ export default function ShippingPage() {
           dateFrom: dateRange.all ? undefined : dateRange.from,
           dateTo: dateRange.all ? undefined : dateRange.to,
           page,
-          pageSize: 20,
+          pageSize: 2000,
         },
         signal,
       ),
@@ -99,7 +99,6 @@ export default function ShippingPage() {
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
-  const totalPages = data?.totalPages ?? 1;
 
   async function handleAction(action: ShipAction): Promise<boolean> {
     if (!active) return false;
@@ -316,25 +315,6 @@ export default function ShippingPage() {
 
         <div className="table-foot">
           <span className="foot-info">전체 {num(total)}건</span>
-          <div className="pagination">
-            <button
-              type="button"
-              className="page-btn"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              ‹
-            </button>
-            <span className="page-btn active">{page}</span>
-            <button
-              type="button"
-              className="page-btn"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              ›
-            </button>
-          </div>
         </div>
       </div>
 

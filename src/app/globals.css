@@ -336,10 +336,27 @@
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
     box-shadow:var(--shadow);overflow:hidden;
   }
+  /* 좁은 화면에서만 가로 스크롤이 생기고, 넓은 화면에서는 화면 폭에 맞춘다 */
   .table-scroll{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;min-width:1200px;}
-  /* 주문관리 목록은 컬럼이 많아 더 넓게 (가로 스크롤) */
-  .orders-table table{min-width:1960px;}
+  table{width:100%;border-collapse:collapse;min-width:760px;}
+  /* 주문관리 목록은 컬럼이 많아 셀을 촘촘하게 눌러 담는다 */
+  .orders-table table{min-width:1080px;}
+  .orders-table thead th{padding:9px 5px;font-size:10.5px;}
+  .orders-table tbody td{padding:8px 5px;font-size:11.5px;}
+  .orders-table tbody td.mono{white-space:nowrap;}
+  .orders-table .product{gap:6px;}
+  .orders-table .product-thumb{width:30px;height:30px;border-radius:6px;}
+  .orders-table .product-text{min-width:0;}
+  .orders-table .product-text .name{
+    font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;
+  }
+  .orders-table .product-text .opt{
+    font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;
+  }
+  .orders-table .clip-text{max-width:104px;}
+  .orders-table .item-code{font-size:9.5px;}
+  .orders-table .pill{font-size:10px;padding:2px 7px;}
+  .orders-table .icon-btn{width:26px;height:26px;}
   /* 상품관리 목록은 행 간격을 좁게 */
   .products-table tbody td{padding:7px 14px;}
   .products-table .product{gap:9px;}

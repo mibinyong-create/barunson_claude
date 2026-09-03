@@ -142,14 +142,14 @@ export const orderListQuerySchema = z.object({
     .enum(["orderDateDesc", "orderDateAsc", "weddingDateAsc", "amountDesc"])
     .optional(),
   page: z.coerce.number().int().min(1).optional(),
-  pageSize: z.coerce.number().int().min(1).max(200).optional(),
+  pageSize: z.coerce.number().int().min(1).max(5000).optional(),
 });
 
 /** GET /api/customers 쿼리스트링 */
 export const customerListQuerySchema = z.object({
   search: z.string().trim().max(100).optional(),
   page: z.coerce.number().int().min(1).max(100_000).optional(),
-  pageSize: z.coerce.number().int().min(1).max(200).optional(),
+  pageSize: z.coerce.number().int().min(1).max(5000).optional(),
 });
 
 /** GET /api/stats/* 공통 쿼리스트링 */

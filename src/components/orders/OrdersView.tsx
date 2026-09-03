@@ -8,7 +8,7 @@ import { useToast } from "@/components/Toast";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { useDebounced } from "@/hooks/useDebounced";
 import { api } from "@/lib/client-api";
-import { PAGE_SIZES, SORT_OPTIONS, TODAY } from "@/lib/constants";
+import { SORT_OPTIONS, TODAY } from "@/lib/constants";
 import { resolveDateRange, type DatePreset } from "@/lib/date-range";
 import { fmtDate, num, won } from "@/lib/format";
 import type {
@@ -69,7 +69,8 @@ export function OrdersView() {
   const [dateAnchor, setDateAnchor] = useState(TODAY);
   const [sort, setSort] = useState<OrderSort>("orderDateDesc");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  // 페이지 분할 없이 조건에 맞는 전체 목록을 한 번에 불러와 세로로 쭉 본다.
+  const [pageSize] = useState<number>(2000);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   // ── 서버 데이터 ────────────────────────────────────────────────────────────
@@ -177,8 +178,6 @@ export function OrdersView() {
 
   const items = paged?.items ?? [];
   const total = paged?.total ?? 0;
-  const totalPages = paged?.totalPages ?? 1;
-  const startIdx = (page - 1) * pageSize;
 
   const pageIds = items.map((o) => o.id);
   // includes 반복은 O(page × selected) 라 Set 으로 조회한다.
@@ -450,22 +449,6 @@ export function OrdersView() {
           ) : null}
 
           <div className="table-wrap orders-table">
-            <div className="table-controls">
-              Show
-              <select
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                aria-label="페이지당 건수"
-              >
-                {PAGE_SIZES.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              entries
-            </div>
-
             <div className="table-scroll">
               <table>
                 <thead>
@@ -694,43 +677,8 @@ export function OrdersView() {
 
             <div className="table-foot">
               <span className="foot-info">
-                전체 {num(total)}건 중{" "}
-                {total === 0 ? 0 : startIdx + 1}–{startIdx + items.length}건 표시
+                전체 {num(total)}건{items.length < total ? ` 중 ${num(items.length)}건 표시` : ""}
               </span>
-              <div className="pagination">
-                <button
-                  type="button"
-                  className="page-btn"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  ‹
-                </button>
-                {pageNumbers(page, totalPages).map((p, i) =>
-                  p === "…" ? (
-                    <span key={`gap-${i}`} className="page-gap">
-                      …
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      key={p}
-                      className={`page-btn${p === page ? " active" : ""}`}
-                      onClick={() => setPage(p)}
-                    >
-                      {p}
-                    </button>
-                  ),
-                )}
-                <button
-                  type="button"
-                  className="page-btn"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  ›
-                </button>
-              </div>
             </div>
           </div>
         </>
@@ -819,19 +767,4 @@ export function OrdersView() {
       />
     </AppShell>
   );
-}
-
-/** 1 … 4 5 6 … 20 형태의 페이지 번호 목록 */
-function pageNumbers(current: number, totalPages: number): (number | "…")[] {
-  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
-
-  const out: (number | "…")[] = [1];
-  const from = Math.max(2, current - 1);
-  const to = Math.min(totalPages - 1, current + 1);
-
-  if (from > 2) out.push("…");
-  for (let p = from; p <= to; p++) out.push(p);
-  if (to < totalPages - 1) out.push("…");
-  out.push(totalPages);
-  return out;
 }

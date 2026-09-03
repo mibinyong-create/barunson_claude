@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       showAllDates: !isDate(dateFrom) && !isDate(dateTo),
       sort: "orderDateDesc",
       page: Math.max(1, Number(sp.get("page")) || 1),
-      pageSize: Math.min(Math.max(Number(sp.get("pageSize")) || 20, 1), 100),
+      pageSize: Math.min(Math.max(Number(sp.get("pageSize")) || 20, 1), 5000),
     };
 
     return ok(await listOrders(params));
