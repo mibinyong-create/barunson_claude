@@ -72,27 +72,31 @@
   /* shell + sidebar (아이콘 레일) */
   .shell{display:flex;min-height:100vh;background:var(--page-bg);}
   .sidebar{
-    width:76px;flex:none;background:var(--sidebar-bg);
+    width:108px;flex:none;background:var(--sidebar-bg);
     border-right:1px solid var(--line);
     display:flex;flex-direction:column;align-items:stretch;
-    position:sticky;top:0;height:100vh;padding:14px 0;
+    position:sticky;top:0;height:100vh;padding:16px 0;
   }
   .sidebar-brand{
-    display:flex;flex-direction:column;align-items:center;gap:0;
-    padding:6px 0 16px;text-decoration:none;
-    font-family:var(--font-sans);font-weight:900;font-size:15px;line-height:1.08;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:6px 0 18px;text-decoration:none;
+    font-family:var(--font-sans);font-weight:900;font-size:18px;line-height:1.08;
     letter-spacing:-0.01em;color:var(--sidebar-brand);
   }
-  .sidebar-nav{display:flex;flex-direction:column;padding:6px;gap:4px;}
-  .sidebar-foot{margin-top:auto;padding:6px;}
+  .sidebar-brand .brand-sub{
+    font-size:10.5px;font-weight:800;letter-spacing:0.14em;
+    color:var(--ink-faint);text-transform:uppercase;
+  }
+  .sidebar-nav{display:flex;flex-direction:column;padding:8px;gap:5px;}
+  .sidebar-foot{margin-top:auto;padding:8px;}
   .nav-item{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-    padding:10px 4px;border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    padding:12px 4px;border-radius:12px;
     color:var(--sidebar-ink);text-decoration:none;
     cursor:pointer;transition:background .12s,color .12s;
   }
   .nav-ico{display:flex;align-items:center;justify-content:center;}
-  .nav-label{font-size:10px;font-weight:700;letter-spacing:-0.02em;text-align:center;}
+  .nav-label{font-size:11px;font-weight:700;letter-spacing:-0.02em;text-align:center;}
   .nav-item:hover{background:var(--sidebar-bg-active);color:var(--sidebar-ink-active);}
   .nav-item.active{background:var(--sidebar-active-bg);color:#fff;}
 
@@ -915,9 +919,13 @@
 /* 토스트 에러 변형 */
 .toast.toast-error{background:var(--urgent);}
 
-/* 헤더·본문 모두 화면 폭을 꽉 채운다 (좌우 여백만 유지). */
+/* 헤더·본문은 넓은 화면에서 전체 폭의 2/3 로 좁히고 가운데 정렬 */
 .app-header,
 .app{max-width:none;}
+@media (min-width:1024px){
+  .app-header,
+  .app{max-width:66.6667vw;margin-inline:auto;}
+}
 
 /* 통계 타일을 4종(전체/진행중/오늘신규/총금액)으로 늘렸으므로 4열로 */
 .stats{grid-template-columns:repeat(4,minmax(0,1fr));}

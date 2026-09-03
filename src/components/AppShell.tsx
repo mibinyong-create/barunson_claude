@@ -57,8 +57,9 @@ export function AppShell({ title, breadcrumb, children, actions }: Props) {
   return (
     <div className="shell">
       <aside className="sidebar">
-        <Link href="/dashboard" className="sidebar-brand" aria-label="바른손 홈">
+        <Link href="/dashboard" className="sidebar-brand" aria-label="바른손 커스텀 홈">
           <span>바른손</span>
+          <span className="brand-sub">커스텀</span>
         </Link>
 
         <nav className="sidebar-nav">
