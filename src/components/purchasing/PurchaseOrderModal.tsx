@@ -257,7 +257,7 @@ export function PurchaseOrderModal({
           />
         </div>
         <div className="field">
-          <label htmlFor="po-courier">입고 택배사</label>
+          <label htmlFor="po-courier">택배사</label>
           <select
             id="po-courier"
             value={courierId}

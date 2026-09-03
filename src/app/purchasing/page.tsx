@@ -213,7 +213,7 @@ export default function PurchasingPage() {
                 <th>외주 업체</th>
                 <th>발주일</th>
                 <th>업체 출고일</th>
-                <th>입고 택배사</th>
+                <th>택배사</th>
                 <th>운송장번호</th>
                 <th className="num">발주 금액</th>
                 <th>발주 상태</th>
