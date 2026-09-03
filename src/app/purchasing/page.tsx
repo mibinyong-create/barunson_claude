@@ -27,7 +27,7 @@ type ListResp = Paged<PurchasingRow> & {
 
 export default function PurchasingPage() {
   const toast = useToast();
-  const [stage, setStage] = useState<string>("미등록");
+  const [stage, setStage] = useState<string>("발주");
   const [searchInput, setSearchInput] = useState("");
   const search = useDebounced(searchInput, 300);
   const [datePreset, setDatePreset] = useState<DatePreset>("all");

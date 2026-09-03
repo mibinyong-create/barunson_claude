@@ -267,18 +267,40 @@ export default function ShippingPage() {
                         </div>
                       </td>
                       <td className="num mono">{num(o.quantity)}</td>
-                      <td>{o.courierName || "-"}</td>
+                      <td>
+                        {o.deliveryMethod === "방문수령" ? (
+                          <span className="req-empty">방문수령</span>
+                        ) : (
+                          o.courierName || <span className="req-empty">미지정</span>
+                        )}
+                      </td>
                       <td className="mono">
                         {url ? (
                           <a href={url} target="_blank" rel="noopener noreferrer" className="order-link">
                             {o.trackingNumber}
                           </a>
+                        ) : o.trackingNumber ? (
+                          o.trackingNumber
                         ) : (
-                          o.trackingNumber || "-"
+                          <span className="req-empty">
+                            {o.deliveryMethod === "방문수령" ? "—" : "출고 전"}
+                          </span>
                         )}
                       </td>
-                      <td className="mono">{fmtDate(o.dispatchedDate)}</td>
-                      <td className="mono">{fmtDate(o.deliveredDate)}</td>
+                      <td className="mono">
+                        {o.dispatchedDate ? (
+                          fmtDate(o.dispatchedDate)
+                        ) : (
+                          <span className="req-empty">출고 전</span>
+                        )}
+                      </td>
+                      <td className="mono">
+                        {o.deliveredDate ? (
+                          fmtDate(o.deliveredDate)
+                        ) : (
+                          <span className="req-empty">—</span>
+                        )}
+                      </td>
                       <td>
                         <span className={`pill st-${o.orderStatus}`}>{o.orderStatus}</span>
                       </td>

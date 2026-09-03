@@ -315,8 +315,18 @@ async function main() {
       paymentStatus: o.paymentStatus,
       orderStatus: o.orderStatus,
       withInvitation: o.withInvitation,
-      courierName: o.courierCompany ?? null,
-      trackingNumber: o.trackingNumber ?? null,
+      // 원본에 택배사가 없어도 인쇄완료 이후 택배배송 건은 배정 택배사를 채운다.
+      courierName:
+        o.courierCompany ??
+        (o.deliveryMethod === "택배배송" &&
+        ["인쇄완료", "배송중", "배송완료"].includes(o.orderStatus)
+          ? pick(couriers).name
+          : null),
+      trackingNumber:
+        o.trackingNumber ??
+        (["배송중", "배송완료"].includes(o.orderStatus) && o.deliveryMethod === "택배배송"
+          ? String(randInt(100000000000, 999999999999))
+          : null),
       deliveredDate: o.deliveredDate ?? null,
       memo: o.memo ?? null,
       attachments: o.attachments ?? [],
@@ -364,9 +374,14 @@ async function main() {
       const address = deliveryMethod === "택배배송" ? makeAddress() : null;
 
       const shipped = orderStatus === "배송중" || orderStatus === "배송완료";
+      // 인쇄완료(출고 대기)부터 배정 택배사가 잡힌다. 운송장은 실제 출고 시점(배송중~)에 발급.
       const courierName =
-        shipped && deliveryMethod === "택배배송" ? pick(couriers).name : null;
-      const trackingNumber = courierName ? String(randInt(100000000000, 999999999999)) : null;
+        deliveryMethod === "택배배송" &&
+        ["인쇄완료", "배송중", "배송완료"].includes(orderStatus)
+          ? pick(couriers).name
+          : null;
+      const trackingNumber =
+        shipped && courierName ? String(randInt(100000000000, 999999999999)) : null;
 
       let deliveredDate: string | null = null;
       if (orderStatus === "배송완료") {
@@ -581,7 +596,8 @@ async function main() {
       // 인쇄팀전달 이후면 입고완료. 외주발주 중 15% 는 아직 미등록으로 남긴다.
       let status: string | null = null;
       if (o.orderStatus === "외주발주") {
-        status = chance(0.35) ? null : chance(0.45) ? "제작중" : "발주";
+        // 외주발주 상태면 반드시 발주 기록이 있다 (미등록으로 남기지 않음)
+        status = chance(0.45) ? "제작중" : "발주";
       } else if (
         o.orderStatus === "고객확정완료" &&
         VENDOR_BY_SLUG[slug] &&
