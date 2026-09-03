@@ -38,6 +38,7 @@ export function mapOrder(r: OrderRow): Order {
     dispatchedDate: (r.dispatched_date as string) ?? null,
     printMethod: (r.print_method as string) ?? null,
     sourceLinks: (r.source_links as string) ?? null,
+    revisionNote: (r.revision_note as string) ?? null,
     paymentStatus: r.payment_status as Order["paymentStatus"],
     orderStatus: r.order_status as Order["orderStatus"],
     isActiveStage: r.is_active_stage as boolean,
@@ -230,6 +231,7 @@ export type OrderInput = {
   trackingNumber?: string | null;
   deliveredDate?: string | null;
   memo?: string | null;
+  revisionNote?: string | null;
 };
 
 /** 고객은 이름+연락처로 upsert 한다. 원본은 주문마다 이름을 들고 있었다. */
@@ -303,8 +305,8 @@ export async function createOrder(input: OrderInput): Promise<OrderDetail> {
          order_no, customer_id, product_id, option_text, quantity, unit_price,
          order_date, wedding_date, delivery_method, shipping_address,
          payment_status, order_status, with_invitation,
-         courier_id, tracking_number, delivered_date, memo
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+         courier_id, tracking_number, delivered_date, memo, revision_note
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
        RETURNING id`,
       [
         noRows[0].order_no,
@@ -324,6 +326,7 @@ export async function createOrder(input: OrderInput): Promise<OrderDetail> {
         input.trackingNumber ?? null,
         input.deliveredDate ?? null,
         input.memo ?? null,
+        input.revisionNote ?? null,
       ],
     );
     return rows[0].id as number;
@@ -357,7 +360,7 @@ export async function updateOrder(
          unit_price = $6, order_date = $7, wedding_date = $8, delivery_method = $9,
          shipping_address = $10, payment_status = $11, order_status = $12,
          with_invitation = $13, courier_id = $14, tracking_number = $15,
-         delivered_date = $16, memo = $17
+         delivered_date = $16, memo = $17, revision_note = $18
        WHERE id = $1`,
       [
         id,
@@ -377,6 +380,7 @@ export async function updateOrder(
         input.trackingNumber ?? null,
         input.deliveredDate ?? null,
         input.memo ?? null,
+        input.revisionNote ?? null,
       ],
     );
   });

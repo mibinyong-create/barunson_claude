@@ -50,6 +50,7 @@ function toPayload(v: OrderFormValues) {
     trackingNumber: blankToNull(v.trackingNumber),
     deliveredDate: blankToNull(v.deliveredDate),
     memo: blankToNull(v.memo),
+    revisionNote: blankToNull(v.revisionNote),
   };
 }
 
@@ -64,7 +65,7 @@ export function OrdersView() {
   const [paymentStatus, setPaymentStatus] = useState("전체");
   const [productFilter, setProductFilter] = useState<number | null>(null);
   // 날짜 필터: 프리셋 + 기준일(anchor). "week" 는 anchor 가 속한 주(월~일), "day" 는 anchor 하루.
-  const [datePreset, setDatePreset] = useState<DatePreset>("today");
+  const [datePreset, setDatePreset] = useState<DatePreset>("all");
   const [dateAnchor, setDateAnchor] = useState(TODAY);
   const [sort, setSort] = useState<OrderSort>("orderDateDesc");
   const [page, setPage] = useState(1);

@@ -33,6 +33,7 @@ export const orderInputSchema = z.object({
   trackingNumber: z.string().trim().max(60).nullish(),
   deliveredDate: dateStr.nullish(),
   memo: z.string().trim().max(2000).nullish(),
+  revisionNote: z.string().trim().max(2000).nullish(),
 });
 
 export const orderStatusSchema = z.object({

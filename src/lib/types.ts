@@ -116,6 +116,8 @@ export type Order = {
   printMethod: string | null;
   /** 원본 작업 파일 링크 (구글 드라이브, 줄바꿈 구분). 미등록이면 null */
   sourceLinks: string | null;
+  /** 고객이 초안 검토 후 요청한 수정 내용 ('수정요청' 상태). 없으면 null */
+  revisionNote: string | null;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
   isActiveStage: boolean;

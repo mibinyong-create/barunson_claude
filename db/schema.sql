@@ -154,6 +154,8 @@ CREATE TABLE orders (
   print_method     text        CHECK (print_method IN ('내부디지털', '5층인쇄', '외부생산')),
   -- 원본 작업 파일 (구글 드라이브 링크, 줄바꿈으로 여러 개). 인쇄팀 전달 전 등록.
   source_links     text,
+  -- 고객이 초안 검토 후 요청한 수정 내용 (진행상태 '수정요청' 일 때 사용).
+  revision_note    text,
   payment_status   text        NOT NULL REFERENCES payment_statuses(code),
   order_status     text        NOT NULL REFERENCES order_statuses(code),
   with_invitation  boolean     NOT NULL DEFAULT false,
@@ -328,6 +330,7 @@ SELECT
   o.dispatched_date,
   o.print_method,
   o.source_links,
+  o.revision_note,
   o.payment_status,
   o.order_status,
   os.is_active_stage                              AS is_active_stage,

@@ -114,6 +114,20 @@ export function DraftDrawer({
             </div>
           </dl>
 
+          {order.orderStatus === "수정요청" || order.revisionNote ? (
+            <div className="revision-callout">
+              <div className="revision-callout-head">
+                <span className="pill st-수정요청">수정요청</span>
+                <span>고객이 요청한 수정 내용</span>
+              </div>
+              <p className="revision-callout-body">
+                {order.revisionNote?.trim()
+                  ? order.revisionNote
+                  : "수정 요청 내용이 아직 등록되지 않았습니다. 주문 수정에서 입력해주세요."}
+              </p>
+            </div>
+          ) : null}
+
           <h3 className="section-title">고객 요청사항</h3>
           <p className="note-text">{order.memo || "등록된 요청사항이 없습니다."}</p>
 

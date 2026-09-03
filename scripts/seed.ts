@@ -135,6 +135,19 @@ const CANCEL_MEMOS = [
   "중복 주문으로 취소 처리",
   "고객 카드 결제 취소로 재결제 안내 필요",
 ];
+// 초안 검토 후 고객이 요청한 수정 내용 ('수정요청' 상태에서 사용)
+const REVISION_NOTES = [
+  "신랑 이름 한자 '峻' → '晙' 으로 수정 부탁드립니다. 그리고 날짜 폰트를 조금 더 크게 해주세요.",
+  "배경 색을 아이보리에서 연한 그레이로 바꿔주시고, 하단 문구 줄간격을 넓혀주세요.",
+  "예식 시간이 오후 2시 → 오후 5시로 변경됐어요. 시안 전체 반영 부탁드립니다.",
+  "커플 캐릭터 위치를 중앙에서 살짝 왼쪽으로 옮겨주세요. 얼굴 표정도 웃는 모습으로요.",
+  "로고 크기를 20% 정도 키워주시고, 테두리 라운드를 더 둥글게 해주세요.",
+  "문구 중 '저희 두 사람' → '우리 두 사람' 으로 통일해주세요. 오탈자도 한 번 더 확인 부탁드려요.",
+  "골드 포일 대신 로즈골드 포일로 변경하고 싶어요. 견적 차이 있으면 알려주세요.",
+  "사진 톤이 너무 차가워요. 조금 따뜻하게 보정해서 다시 시안 주세요.",
+  "QR코드를 우측 하단으로 이동하고, 크기를 명함 기준 1.5cm 로 맞춰주세요.",
+  "폰트를 명조 계열에서 고딕 계열로 전체 교체 부탁드립니다.",
+];
 
 const ATTACHMENT_NAMES = [
   "시안_최종확인.jpg", "각인문구.txt", "스티커시안_v2.ai", "로고_벡터.svg",
@@ -308,7 +321,7 @@ async function main() {
       deliveryMethod: string; address: string | null; paymentStatus: string;
       orderStatus: string; withInvitation: boolean; courierName: string | null;
       trackingNumber: string | null; deliveredDate: string | null; memo: string | null;
-      attachments: string[]; drafts: string[];
+      revisionNote: string | null; attachments: string[]; drafts: string[];
     };
 
     const orderSeeds: OrderSeed[] = ORIGINAL.map((o, idx) => ({
@@ -347,6 +360,7 @@ async function main() {
             })()
           : null),
       memo: o.memo ?? null,
+      revisionNote: o.orderStatus === "수정요청" ? pick(REVISION_NOTES) : null,
       attachments: o.attachments ?? [],
       // 초안 등록 이후 단계인 원본 주문에는 초안 이미지 예시를 하나 붙인다.
       // (기준일 2026-08-24 주문 13~16 이 여기 해당 → 첫 화면에서 바로 미리보기가 보인다)
@@ -408,6 +422,7 @@ async function main() {
 
       const memo =
         orderStatus === "취소" ? pick(CANCEL_MEMOS) : chance(0.28) ? pick(MEMOS) : null;
+      const revisionNote = orderStatus === "수정요청" ? pick(REVISION_NOTES) : null;
 
       // 진행 단계가 올라갈수록 파일이 붙어 있을 확률이 높다
       const attachments: string[] = [];
@@ -439,6 +454,7 @@ async function main() {
         trackingNumber,
         deliveredDate,
         memo,
+        revisionNote,
         attachments: [...new Set(attachments)],
         drafts: [...new Set(drafts)],
       });
@@ -491,7 +507,9 @@ async function main() {
           o.orderStatus,
         )},${p(o.withInvitation)},${p(
           o.courierName ? (courierIdByName.get(o.courierName) ?? null) : null,
-        )},${p(o.trackingNumber)},${p(o.deliveredDate)},${p(o.memo)})`;
+        )},${p(o.trackingNumber)},${p(o.deliveredDate)},${p(o.memo)},${p(
+          o.revisionNote,
+        )})`;
       });
 
       const { rows } = await client.query<{ id: number }>(
@@ -500,7 +518,7 @@ async function main() {
            order_date, wedding_date, delivery_method, shipping_address, dispatched_date,
            print_method, source_links,
            payment_status, order_status, with_invitation,
-           courier_id, tracking_number, delivered_date, memo
+           courier_id, tracking_number, delivered_date, memo, revision_note
          ) VALUES ${tuples.join(",")}
          RETURNING id`,
         values,

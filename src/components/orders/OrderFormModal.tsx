@@ -23,6 +23,7 @@ export type OrderFormValues = {
   trackingNumber: string;
   deliveredDate: string;
   memo: string;
+  revisionNote: string;
 };
 
 function emptyValues(meta: Meta, today: string): OrderFormValues {
@@ -44,6 +45,7 @@ function emptyValues(meta: Meta, today: string): OrderFormValues {
     trackingNumber: "",
     deliveredDate: "",
     memo: "",
+    revisionNote: "",
   };
 }
 
@@ -66,6 +68,7 @@ function fromOrder(o: OrderDetail): OrderFormValues {
     trackingNumber: o.trackingNumber ?? "",
     deliveredDate: o.deliveredDate ?? "",
     memo: o.memo ?? "",
+    revisionNote: o.revisionNote ?? "",
   };
 }
 
@@ -313,6 +316,21 @@ export function OrderFormModal({
               ))}
             </select>
           </div>
+
+          {values.orderStatus === "수정요청" ? (
+            <div className="field full">
+              <label htmlFor="f-revisionNote">
+                수정요청 내용 <span className="req">*</span>
+              </label>
+              <textarea
+                id="f-revisionNote"
+                value={values.revisionNote}
+                onChange={(e) => set("revisionNote", e.target.value)}
+                placeholder="고객이 초안 검토 후 요청한 수정 사항을 구체적으로 적어주세요"
+                rows={3}
+              />
+            </div>
+          ) : null}
 
           <div className="field">
             <label htmlFor="f-courier">택배사</label>
