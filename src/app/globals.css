@@ -923,8 +923,10 @@
 .app-header,
 .app{max-width:none;}
 @media (min-width:1024px){
-  .app-header,
-  .app{max-width:66.6667vw;margin-inline:auto;}
+  /* .app-header 는 flex 아이템이라 width 를 명시해야 줄어들지 않고 space-between 이 먹는다
+     (제목은 왼쪽 끝, 알림은 오른쪽 끝) */
+  .app-header{width:66.6667vw;margin-inline:auto;}
+  .app{width:66.6667vw;max-width:66.6667vw;margin-inline:auto;}
 }
 
 /* 통계 타일을 4종(전체/진행중/오늘신규/총금액)으로 늘렸으므로 4열로 */
