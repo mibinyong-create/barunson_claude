@@ -486,7 +486,10 @@ SEED_ORDER_COUNT=2000 npm run db:seed
 | `NEXT_PUBLIC_BASE_PATH` | (비움) | `/c/프로젝트명` | 서브패스 배포 시 `apiFetch` 가 붙일 prefix |
 | `NEXT_PUBLIC_TODAY` | `2026-08-24` | (비움 권장) | 화면 기준일. 비우면 실제 오늘 날짜 |
 | `PORT` / `HOSTNAME` | `3000` / `0.0.0.0` | 동일 | standalone 서버 |
-| `SEED_ORDER_COUNT` | (선택) `500` | 사용 안 함 | 시드 생성 주문 건수 |
+| `DB_BOOTSTRAP` | (선택) `auto` | `auto` | 컨테이너 기동 시 DB 부트스트랩. `auto`/`off`/`force` |
+| `DB_BOOTSTRAP_SEED` | (선택) `true` | `false` 권장 | `false` 면 스키마만 만들고 샘플 데이터는 넣지 않음 |
+| `DB_BOOTSTRAP_TIMEOUT` | (선택) `60` | `60` | DB 접속 재시도 최대 대기 초 |
+| `SEED_ORDER_COUNT` | (선택) `500` | 부트스트랩 시 사용 | 시드 생성 주문 건수 |
 
 > **`NEXT_PUBLIC_*` 는 빌드 시점에 클라이언트 번들로 인라인됩니다.**
 > 컨테이너 런타임 환경변수만 바꿔도 브라우저 동작은 바뀌지 않으므로,
@@ -509,6 +512,44 @@ node .next/standalone/server.js
 
 `output: 'standalone'` 이므로 `.next/standalone` 만 배포하면 됩니다.
 정적 자산(`.next/static`, `public`)은 위처럼 함께 복사해야 합니다.
+
+---
+
+## 컨테이너 기동 시 DB 자동 초기화
+
+배포 이미지는 `scripts/docker-entrypoint.sh` 로 기동하며, 앱을 띄우기 전에
+`scripts/bootstrap.ts` 가 먼저 실행됩니다.
+
+```
+DB 접속 (최대 60초 재시도)
+  └ orders 테이블이 있는가?
+      ├ 있음  → 아무것도 하지 않고 앱 기동            (기존 데이터 보존)
+      └ 없음  → db/schema.sql + db/reference-data.sql
+                → 샘플 데이터 500건 → 앱 기동
+```
+
+`db/schema.sql` 은 `DROP SCHEMA public CASCADE` 로 시작하므로 **재기동마다 실행되면 안 됩니다.**
+그래서 판단 기준을 `orders` 테이블 존재 여부 하나로 두고, 이미 초기화된 DB 는 건드리지 않습니다.
+
+| 상황 | 설정 |
+|---|---|
+| 데모/샘플 데이터 포함 (기본) | `DB_BOOTSTRAP=auto` |
+| 빈 스키마만 만들고 실데이터를 넣을 예정 | `DB_BOOTSTRAP_SEED=false` |
+| 이미 스키마를 수동 관리 중 | `DB_BOOTSTRAP=off` |
+| 처음부터 다시 만들기 (**파괴적**) | `DB_BOOTSTRAP=force` |
+
+부트스트랩이 실패하면 앱을 띄우지 않고 컨테이너가 종료됩니다.
+스키마 없이 기동하면 모든 화면이 500 이라, 조용히 넘어가는 것보다 재시작하며
+로그로 원인이 드러나는 편이 낫기 때문입니다.
+
+로컬에서도 같은 로직을 쓸 수 있습니다. `db:reset` 과 달리 기존 DB 를 지우지 않습니다.
+
+```bash
+npm run db:bootstrap
+```
+
+standalone 출력에는 `db/`·`scripts/` 와 `tsx` 가 포함되지 않으므로,
+`Dockerfile` 이 `/db-bootstrap` 에 최소 실행 환경(`pg` + `tsx` + `dotenv`)을 따로 구성합니다.
 
 ---
 
@@ -551,6 +592,8 @@ node .next/standalone/server.js
   [로컬 PostgreSQL 실행 (Docker Desktop 없이)](#로컬-postgresql-실행-docker-desktop-없이) 참고.
 - **DB 스키마 재생성은 파괴적입니다.** `npm run db:migrate` 는 `DROP SCHEMA public CASCADE` 로
   시작합니다. `DATABASE_URL` 을 반드시 확인하세요 (미설정 시 실행되지 않고 종료됩니다).
+  같은 이유로 배포 환경의 `DB_BOOTSTRAP=force` 도 기존 데이터를 지웁니다.
+  평상시에는 `auto`(기본) 로 두세요.
 - **`NEXT_PUBLIC_TODAY`** 는 데모용 고정 기준일입니다. 실제 운영에서는 비워 두세요.
 
 ## 알려진 이슈

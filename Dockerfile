@@ -15,11 +15,24 @@ ENV DATABASE_URL=file:./placeholder.db
 RUN npm run build
 RUN mkdir -p /prisma-runtime && if [ -f prisma/schema.prisma ]; then cp -r prisma /prisma-runtime/ && cp package.json /prisma-runtime/ && cd /prisma-runtime && npm install prisma --no-save 2>/dev/null; fi
 
+# ── DB 부트스트랩 런타임 ──────────────────────────────────────────────────────
+# next standalone 출력에는 db/·scripts/ 도, tsx 도 포함되지 않는다.
+# 기동 시 스키마·샘플 데이터를 만들 최소 실행 환경(pg + tsx + dotenv)을 따로 만든다.
+# scripts/seed.ts 는 process.cwd() 기준으로 public/products/*.jpg 를 읽으므로 같이 복사한다.
+RUN mkdir -p /db-bootstrap/public \
+ && cp -r db scripts /db-bootstrap/ \
+ && { cp -r public/products /db-bootstrap/public/ 2>/dev/null || true; }
+RUN printf '{"name":"db-bootstrap","private":true}\n' > /db-bootstrap/package.json \
+ && cd /db-bootstrap \
+ && npm install --no-save --no-audit --no-fund pg@^8.23.0 tsx@^4.23.12 dotenv@^17.4.2
+
 FROM node:20-alpine
 WORKDIR /app
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /prisma-runtime /prisma-runtime
+COPY --from=builder /db-bootstrap /db-bootstrap
+RUN chmod +x /db-bootstrap/scripts/docker-entrypoint.sh
 EXPOSE 3000
-CMD if [ -f /prisma-runtime/prisma/schema.prisma ]; then if grep -qE 'provider[[:space:]]*=[[:space:]]*"mongodb"' /prisma-runtime/prisma/schema.prisma; then echo "[prisma] mongodb datasource detected - skipping db push (Prisma 6 CLI has no --url flag). Run prisma db push manually once to create indexes."; else cd /prisma-runtime; DB_URL="${DATABASE_URL:-file:/app/data/database.db}"; sed -i '/^\s*url\s*=/d' prisma/schema.prisma; npx prisma db push --url "$DB_URL" --accept-data-loss 2>/dev/null || true; if [ -f prisma/seed.sql ]; then apk add --no-cache sqlite 2>/dev/null; sqlite3 "$(echo $DB_URL | sed s/file://)" < prisma/seed.sql 2>/dev/null || true; fi; cd /app; fi; fi && node server.js
+CMD ["/db-bootstrap/scripts/docker-entrypoint.sh"]
