@@ -973,14 +973,14 @@
 /* 토스트 에러 변형 */
 .toast.toast-error{background:var(--urgent);}
 
-/* 헤더·본문은 넓은 화면에서 전체 폭의 2/3 로 좁히고 가운데 정렬 */
+/* 헤더·본문은 넓은 화면에서 폭을 조금 좁히고 가운데 정렬 (표가 가로 스크롤 없이 다 들어가도록 넉넉하게) */
 .app-header,
 .app{max-width:none;}
 @media (min-width:1024px){
   /* .app-header 는 flex 아이템이라 width 를 명시해야 줄어들지 않고 space-between 이 먹는다
      (제목은 왼쪽 끝, 알림은 오른쪽 끝) */
-  .app-header{width:66.6667vw;margin-inline:auto;}
-  .app{width:66.6667vw;max-width:66.6667vw;margin-inline:auto;}
+  .app-header{width:88vw;margin-inline:auto;}
+  .app{width:88vw;max-width:88vw;margin-inline:auto;}
 }
 
 /* 통계 타일을 4종(전체/진행중/오늘신규/총금액)으로 늘렸으므로 4열로 */
