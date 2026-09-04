@@ -970,6 +970,10 @@
 
 .toolbar-search.wide{flex:1;min-width:280px;}
 
+/* 목록 '더보기' 버튼 */
+.load-more{display:flex;justify-content:center;padding:14px 0 4px;border-top:1px solid var(--line);}
+.load-more .btn{min-width:200px;font-weight:800;}
+
 /* 토스트 에러 변형 */
 .toast.toast-error{background:var(--urgent);}
 

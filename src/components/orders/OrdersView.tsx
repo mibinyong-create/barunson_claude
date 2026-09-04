@@ -29,6 +29,9 @@ import { OrderFormModal, type OrderFormValues } from "./OrderFormModal";
 import { StatusDetailModal } from "./StatusDetailModal";
 import { SummaryView } from "./SummaryView";
 
+/** 목록을 한 번에 이만큼씩 늘려 보여준다 ('더보기') */
+const PAGE_STEP = 50;
+
 /** 폼 값 → API 페이로드 */
 function toPayload(v: OrderFormValues) {
   const blankToNull = (s: string) => (s.trim() === "" ? null : s.trim());
@@ -69,8 +72,9 @@ export function OrdersView() {
   const [dateAnchor, setDateAnchor] = useState(TODAY);
   const [sort, setSort] = useState<OrderSort>("orderDateDesc");
   const [page, setPage] = useState(1);
-  // 페이지 분할 없이 조건에 맞는 전체 목록을 한 번에 불러와 세로로 쭉 본다.
+  // 조건에 맞는 전체 목록을 한 번에 불러오되, 화면에는 50개씩 '더보기' 로 늘려 보여준다.
   const [pageSize] = useState<number>(2000);
+  const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   // ── 서버 데이터 ────────────────────────────────────────────────────────────
@@ -165,7 +169,7 @@ export function OrdersView() {
     return () => c.abort();
   }, [refreshKey]);
 
-  // 필터가 바뀌면 항상 1페이지로
+  // 필터가 바뀌면 항상 1페이지로, 표시 개수도 처음(50)으로
   const firstRender = useRef(true);
   useEffect(() => {
     if (firstRender.current) {
@@ -174,10 +178,13 @@ export function OrdersView() {
     }
     setPage(1);
     setSelectedIds([]);
+    setVisibleCount(PAGE_STEP);
   }, [search, status, paymentStatus, productFilter, datePreset, dateAnchor, sort, pageSize]);
 
-  const items = paged?.items ?? [];
+  const allItems = paged?.items ?? [];
   const total = paged?.total ?? 0;
+  const items = allItems.slice(0, visibleCount);
+  const hasMore = allItems.length > items.length;
 
   const pageIds = items.map((o) => o.id);
   // includes 반복은 O(page × selected) 라 Set 으로 조회한다.
@@ -681,9 +688,21 @@ export function OrdersView() {
               </table>
             </div>
 
+            {hasMore ? (
+              <div className="load-more">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => setVisibleCount((n) => n + PAGE_STEP)}
+                >
+                  더보기 (+{Math.min(PAGE_STEP, allItems.length - items.length)})
+                </button>
+              </div>
+            ) : null}
+
             <div className="table-foot">
               <span className="foot-info">
-                전체 {num(total)}건{items.length < total ? ` 중 ${num(items.length)}건 표시` : ""}
+                전체 {num(total)}건 중 {num(items.length)}건 표시
               </span>
             </div>
           </div>
